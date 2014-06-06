@@ -67,15 +67,36 @@ textarea {
 
 
 
+.wrapper{
+  text-align:center;
+}
 
+input[type="text"], input[type="submit"]{
+  border-radius:2px;
+  padding: 8px 10px;
+  font-size:16px;  
+  width: 230px;
+  margin: 10px;
+  box-sizing: border-box;
+}
 
+input[type="text"]{
+  border:1px solid #ddd;
+}
 
+input[type="submit"]{
+  background-color:#8c80e5;
+  color:#fff;
+  border:1px solid #6e65b0;
+}
 
-
-
-
-
-
+#logo{
+  background-image:url(../img/logo.png);
+  width:106px;
+  height:79px;
+  margin:70px auto;
+  opacity: 0.6;
+}
 
 
 

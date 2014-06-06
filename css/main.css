@@ -21,6 +21,7 @@ textarea {
 body {
     font-size: 1em;
     line-height: 1.4;
+    font-family:'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
 }
 
 a {
@@ -69,6 +70,7 @@ textarea {
 
 .wrapper{
   text-align:center;
+  color:#666;
 }
 
 input[type="text"], input[type="submit"]{
@@ -99,6 +101,42 @@ input[type="submit"]{
   opacity: 0.6;
 }
 
+#messages{
+  height:100px;
+  margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+}
+
+.strong{
+  font-weight:bold;
+  font-size:1.2em;
+  color:#6e65b0;
+}
+
+.light{
+  font-size:0.9em;
+}
+
+.bubble{
+    width:50px;
+    height:50px;
+    border-radius:50px;
+    -webkit-border-radius: 50px;
+    background-color: rgba(216, 0, 57, 0.7);
+    position:absolute;
+    top:0;
+    left:0;
+    -webkit-animation: pulsate 1s ease-out;
+    -webkit-animation-iteration-count: infinite; 
+    opacity: 0.0
+}
+
+@-webkit-keyframes pulsate {
+    0% {-webkit-transform: scale(1, 1); opacity: 0.0;}
+    50% {opacity: 1.0;}
+    100% {-webkit-transform: scale(2.5, 2.5); opacity: 0.0;}
+}
 
 
 

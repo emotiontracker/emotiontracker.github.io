@@ -45,15 +45,25 @@
     <body>
 
         <div class="wrapper">
-            <div id="logo"></div>
-            <div>
-                <input id="name" type="text" placeholder="Enter your name" />
+            <div id="startPage" style="display:none">
+                <div id="logo"></div>
+                <div>
+                    <input id="name" type="text" placeholder="Enter your name" />
+                </div>
+                <div>
+                    <input id="experiment" type="text" placeholder="Enter experiment name" />
+                </div>
+                <div>
+                    <input type="submit" value="Continue"/>
+                </div>
             </div>
-            <div>
-                <input id="experiment" type="text" placeholder="Enter experiment name" />
-            </div>
-            <div>
-                <input type="submit" value="Continue"/>
+
+            <div id="calibrationPage" style="">
+                <div id="messages"></div>
+                <div id="tracker">
+                    <div id="trackerBubbles"></div>
+                    <svg id="trackerLine"></svg>
+                </div>
             </div>
         </div>
 

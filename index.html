@@ -48,12 +48,27 @@
             <input type="text" placeholder="Enter your name" />
         </div>
 
-        <button id="goFS">Go fullscreen<button>
+        <button id="goFS">Go fullscreen</button>
         <script>
-           var goFS = document.getElementById("goFS");
-           goFS.addEventListener("click", function() {
-              document.documentElement.requestFullscreen();
-           }, false);
+            function toggleFullScreen() {
+              var doc = window.document;
+              var docEl = doc.documentElement;
+
+              var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+              var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+              if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                requestFullScreen.call(docEl);
+              }
+              else {
+                cancelFullScreen.call(doc);
+              }
+            }
+
+            var goFS = document.getElementById("goFS");
+            goFS.addEventListener("click", function() {
+                toggleFullScreen();
+            }, false);
         </script>
 
         <script src="js/vendor/jquery-2.1.0.min.js"></script>

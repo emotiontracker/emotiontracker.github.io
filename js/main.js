@@ -8,7 +8,8 @@
     var pixelRatio = window.devicePixelRatio || 1;
 
     var touches = {},
-        touchLine;
+        touchLine,
+    var paper = Raphael("tracker", windowWidth, windowHeight);
     var doubleTouchStart = new Event('doubletouchstart'),
         doubleTouchEnd = new Event('doubletouchend');
 
@@ -50,7 +51,7 @@
 
 
 
-        var paper = Raphael("tracker", windowWidth, windowHeight);
+       
 
         // var medianLine = paper.path("M0 " + windowHeight/2 + "L" + windowWidth + " " + windowHeight/2);
         // medianLine.attr("stroke", "#eee");
@@ -171,7 +172,7 @@
 
             }    
 
-            if(!bubbles[0].selected && !bubbles[1].selected){
+            if(doubleDetect && !bubbles[0].selected && !bubbles[1].selected){
 
                 console.log("double end");
                 doubleDetect = false;
@@ -333,8 +334,7 @@
             // Potrait Mode
         }
 
-        lineContainer.setAttribute("width", window.innerWidth);
-        lineContainer.setAttribute("height", window.innerHeight);
+        paper.setSize(windowWidth, windowHeight);
     }
 
     // window.addEventListener("touchstart", handleTouchStart);

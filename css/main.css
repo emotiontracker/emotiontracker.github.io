@@ -101,22 +101,26 @@ input[type="submit"]{
   opacity: 0.6;
 }
 
-#messages{
-  height:100px;
+#calibTitle, #calibInstr{
+  height:30px;
   margin: auto;
   position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
+  left: 0; right: 0;
 }
 
-.strong{
+#calibTitle{
+  top: 50px; 
   font-weight:bold;
   font-size:1.2em;
   color:#6e65b0;
 }
 
-.light{
+#calibInstr{
+  bottom:50px;
   font-size:0.9em;
+  color:#aaa;
 }
+
 
 .bubble{
     width:50px;

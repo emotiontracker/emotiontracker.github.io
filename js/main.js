@@ -1,7 +1,6 @@
 (function(){
 
-    var bubbleContainer = document.getElementById("trackerBubbles"),
-        lineContainer = document.getElementById("trackerLine");
+    var bubbleContainer = document.getElementById("trackerBubbles");
 
     var windowWidth = window.innerWidth;
     var windowHeight = window.innerHeight;
@@ -40,18 +39,15 @@
     function calibrate(){
 
         var trials = [{
-            title: 'Indicate Maximum Pleasure',
+            title: 'Indicate <span class="strong">Maximum</span> Pleasure',
             instr: 'Using two fingers, drag the circles as far apart as comfortably possible.',
             configVar: 'touchMaxDist'
         }, {
-            title: 'Indicate Minimum Pleasure',
+            title: 'Indicate <span class="strong">Minimum</span> Pleasure',
             instr: 'Using two fingers, drag the circles as close as comfortably possible.',
             configVar: 'touchMinDist'
         }];
 
-
-
-       
 
         // var medianLine = paper.path("M0 " + windowHeight/2 + "L" + windowWidth + " " + windowHeight/2);
         // medianLine.attr("stroke", "#eee");
@@ -91,8 +87,8 @@
         }
 
         var bubbles = [new bubble(), new bubble()];
-        bubbles[0].x = windowWidth/2 - 30;
-        bubbles[1].x = windowWidth/2 + 30;
+        bubbles[0].x = windowWidth/2 - 40;
+        bubbles[1].x = windowWidth/2 + 40;
 
         bubbles.forEach(function(b){
             b.circle = paper.circle(b.x, b.y, b.r);
@@ -231,6 +227,9 @@
                 else{
                     document.getElementById("tracker").innerHTML = "";
                     titleEl.innerHTML = 'Calibration Complete';
+                    titleEl.style.top = 0 + "px";
+                    titleEl.style.bottom = 0 + "px";
+
                     instrEl.innerHTML = '';
                 }   
 
@@ -265,79 +264,6 @@
         startTrial(0);
     }
 
-    function handleTouchStart(e){
-
-        e.preventDefault();
-
-        var changed = e.changedTouches;
-
-        for(var i = 0; i < 2 && i < changed.length ; i++){ // Track no more than two fingers
-
-            if(Object.keys(touches).length > 1) return;
-
-            var id = changed[i].identifier;
-            touches[id] = changed[i];
-
-            if(config.touchFeedback){
-                var el = document.createElement("div");
-                el.className = "bubble";
-                touches[id].el = bubbleContainer.appendChild(el);
-                
-                touches[id].el.style.left = touches[id].pageX - 25 + "px";
-                touches[id].el.style.top = touches[id].pageY - 25 + "px";               
-            }
-
-
-            if(Object.keys(touches).length == 2){
-
-                if(config.touchFeedback){
-                    var line = createLine(  getTouch(0).pageX, getTouch(0).pageY,
-                                            getTouch(1).pageX, getTouch(1).pageY );
-                    line.setAttribute("stroke", "#bbb");
-
-                    touchLine = lineContainer.appendChild(line);
-                }
-                window.dispatchEvent(doubleTouchStart);
-            }
-        }
-    }
-
-    function handleTouchMove(e){
-        e.preventDefault();
-        var changed = e.changedTouches;
-
-        for(var i = 0; i < changed.length; i++){
-            var id = changed[i].identifier;
-            if(config.touchFeedback){
-                touches[id].el.style.left = changed[i].pageX - 25 + "px";
-                touches[id].el.style.top = changed[i].pageY - 25 + "px";
-            }
-        }
-
-        if(config.touchFeedback){
-            touchLine.setAttribute("x1", getTouch(0).pageX);
-            touchLine.setAttribute("y1", getTouch(0).pageY);
-            touchLine.setAttribute("x2", getTouch(1).pageX);
-            touchLine.setAttribute("y2", getTouch(1).pageY);
-        }
-    }
-
-    function handleTouchEnd(e){
-        e.preventDefault();
-        var changed = e.changedTouches;
-
-        if(Object.keys(touches).length == 2){
-            lineContainer.removeChild(touchLine);
-            window.dispatchEvent(doubleTouchEnd);
-        }
-
-        for(var i = 0; i < changed.length; i++){
-            var id = changed[i].identifier;
-            bubbleContainer.removeChild(touches[id].el);
-            delete touches[id];
-        }
-    }
-
 
     function handleResize(){
         if(window.outerWidth > window.outerHeight){
@@ -350,11 +276,6 @@
         paper.setSize(windowWidth, windowHeight);
     }
 
-    // window.addEventListener("touchstart", handleTouchStart);
-    // window.addEventListener("touchmove", handleTouchMove);
-    // window.addEventListener("touchend", handleTouchEnd);
-    // window.addEventListener("touchcancel", handleTouchEnd);
-    // window.addEventListener("resize", handleResize);
-
     calibrate();
+
 })();

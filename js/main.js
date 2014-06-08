@@ -74,13 +74,17 @@
                 toggleSelected: function(){
 
                     if(this.selected){
-                        this.circle.attr("fill-opacity", "0.2");
-                        this.circle.attr("r", "40");     
+                        this.circle.animate({
+                            "fill-opacity": 0.2,
+                            "r": 40
+                        }, 200);  
                         this.selected = false;                      
                     }
                     else{
-                        this.circle.attr("fill-opacity", "0.6");
-                        this.circle.attr("r", "50");                       
+                        this.circle.animate({
+                            "fill-opacity": 0.6,
+                            "r": 60
+                        }, 200);                     
                     }
                 }
             };
@@ -93,7 +97,7 @@
         bubbles.forEach(function(b){
             b.circle = paper.circle(b.x, b.y, b.r);
             b.circle.attr("fill", "rgb(216, 0, 57)");
-            b.circle.attr("fill-opacity", "0.2");
+            b.circle.attr("fill-opacity", 0.2);
             b.circle.attr("stroke", "none");
 
             b.line = paper.path("");
@@ -174,9 +178,14 @@
 
             if(doubleDetect && !bubbles[0].selected && !bubbles[1].selected){
 
-                console.log("double end");
                 doubleDetect = false;
                 window.removeEventListener("touchstart", onTouchStart);
+
+                bubbles.forEach(function(b){
+                    b.circle.animate({
+                        "fill": "#888"
+                    }, 200);   
+                }); 
 
                 var sampleX1 = bubbles[0].x,
                     sampleX2 = bubbles[1].x,
@@ -245,6 +254,12 @@
 
             titleEl.innerHTML = trial.title;
             instrEl.innerHTML = trial.instr;
+
+            bubbles.forEach(function(b){
+                b.circle.animate({
+                    "fill": "rgb(216, 0, 57)"
+                }, 200);   
+            }); 
         }
 
         startTrial(0);

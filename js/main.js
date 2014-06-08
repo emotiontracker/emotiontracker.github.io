@@ -8,7 +8,7 @@
     var pixelRatio = window.devicePixelRatio || 1;
 
     var touches = {},
-        touchLine,
+        touchLine;
     var paper = Raphael("tracker", windowWidth, windowHeight);
     var doubleTouchStart = new Event('doubletouchstart'),
         doubleTouchEnd = new Event('doubletouchend');
@@ -242,8 +242,6 @@
             window.addEventListener("touchstart", onTouchStart);
 
             trial = trials[trialIndex];
-
-            console.log(trialIndex);
 
             titleEl.innerHTML = trial.title;
             instrEl.innerHTML = trial.instr;

@@ -322,35 +322,30 @@
         }
         
         var orient = false;
-        
         window.onresize = function(){
-            
             windowWidth = window.innerWidth;
             windowHeight = window.innerHeight;
 
-            if(window.outerWidth > window.outerHeight){
+            if (Math.abs(window.orientation) === 90) {
+                pages.calibrate.hide();
+                changeOrient.show();
+            } else {
+                changeOrient.hide();
                 if(!orient){
                     paper.setSize(window.innerWidth, window.innerHeight);
                     initialize();
+                    orient = true;
                 }
-                changeOrient.hide();
                 pages.calibrate.show(); 
-                orient = true;
-            }
-            else{
-                pages.calibrate.hide();
-                changeOrient.show();
-            }
-
+            }            
         }
 
-        if(window.outerHeight > window.outerWidth){
-            changeOrient.show();
-        }
-        else{
+        if (Math.abs(window.orientation) === 90) {
             paper.setSize(window.innerWidth, window.innerHeight);
             initialize();
-            orient = true;
+            orient = true;      
+        } else {
+            changeOrient.show();
         }
     }
 

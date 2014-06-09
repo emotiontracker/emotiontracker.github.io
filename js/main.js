@@ -109,6 +109,7 @@
             };
         }
 
+        window.onresize
         var bubbles = [new bubble(), new bubble()];
         bubbles[0].x = windowWidth/2 - 40;
         bubbles[1].x = windowWidth/2 + 40;
@@ -314,6 +315,8 @@
     }
 
     function experiment(){
+
+
         window.addEventListener("touchstart", onTouchStart);
         window.addEventListener("touchmove", onTouchMove);
         window.addEventListener("touchend", onTouchEnd);
@@ -322,7 +325,8 @@
     }
 
 
-    function handleResize(){
+    window.onresize = function(){
+
         if(window.outerWidth > window.outerHeight){
             // Landscape Mode
         }
@@ -330,7 +334,7 @@
             // Potrait Mode
         }
 
-        paper.setSize(windowWidth, windowHeight);
+        paper.setSize(window.innerWidth, window.innerHeight);
     }
 
     start();

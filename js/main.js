@@ -322,18 +322,11 @@
         }
         
         var orient = false;
-
-        if(window.outerHeight > window.outerWidth){
-            changeOrient.show();
-        }
-        else{
-            paper.setSize(window.innerWidth, window.innerHeight);
-            initialize();
-            orient = true;
-        }
-
         
         window.onresize = function(){
+            
+            windowWidth = window.innerWidth;
+            windowHeight = window.innerHeight;
 
             if(window.outerWidth > window.outerHeight){
                 if(!orient){
@@ -349,8 +342,15 @@
                 changeOrient.show();
             }
 
-            windowWidth = window.innerWidth;
-            windowHeight = window.innerHeight;
+        }
+
+        if(window.outerHeight > window.outerWidth){
+            changeOrient.show();
+        }
+        else{
+            paper.setSize(window.innerWidth, window.innerHeight);
+            initialize();
+            orient = true;
         }
     }
 

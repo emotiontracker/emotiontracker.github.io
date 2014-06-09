@@ -62,10 +62,17 @@
                 <div id="calibTitle" class="title"></div>
                 <div id="tracker"></div>
                 <div id="calibInstr"></div>
+                <div id="calibComplete" style="display:none">
+                    <div id="btnRetry" class="ico-retry"></div>
+                    <div class="title" style="height:100px;top:0;bottom:0">
+                        <div>Calibration Complete</div>
+                        <div><button id="btnExp" class="btn btn-primary">Continue</button></div>
+                    </div>
+                </div>
             </div>
 
-            <div id="experiment" style="display:none">
-                <div id="#expTitle" class="title">Place two fingers to begin the experiment.</div>
+            <div id="experimentPage" style="display:none">
+                <div id="expTitle" class="title">Place two fingers to begin the experiment.</div>
             </div>
 
             <div id="changeOrient" style="display:none">
@@ -76,7 +83,7 @@
         </div>
 
         <script src="js/vendor/jquery-2.1.0.min.js"></script>
-
+        <script src="http://jsconsole.com/remote.js?681CFADA-2A00-46D9-8FED-F90BBFDF06D5"></script>
         <script src="js/vendor/raphael-min.js"></script>
         <script src="js/helper.js"></script>
         <script src="js/plugins.js"></script>

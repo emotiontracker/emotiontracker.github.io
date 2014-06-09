@@ -18,7 +18,7 @@
         name: '',
         experiment: '',
         email: 'jugalm9@gmail.com',
-        duration: (1000 * 2 * 60),          // 2 mins
+        duration: (1000 * 20), //(1000 * 2 * 60),          // 2 mins
         touchMaxDist: 0,
         touchMinDist: 0,
         touchFeedback: true
@@ -158,7 +158,7 @@
             for(var i = 0; i < changed.length ; i++){ 
 
                 bubbles.forEach(function(b){
-                    if(b.selected && b.selected == changed[i].identifier){
+                    if(b.selected === changed[i].identifier){
                         b.x = changed[i].pageX;
                         b.y = changed[i].pageY;
                         b.update();
@@ -243,12 +243,18 @@
                     window.removeEventListener("touchcancel", onTouchEnd);   
 
                     $(instrEl).velocity({opacity: 0}, 500, function(){
-                        $(titleEl).velocity({opacity: 0}, { duration: 800, queue: false });
-                        $("#tracker").velocity({opacity: 0}, { duration: 800, queue: false, complete: function(){
-                            titleEl.innerHTML = 'Calibration Complete';
-                            $(titleEl).velocity({opacity:1}, 500);
-                            titleEl.style.top = 0 + "px";
-                            titleEl.style.bottom = 0 + "px";                           
+                        $(titleEl).velocity({opacity: 0}, { duration: 600, queue: false });
+                        $("#tracker").velocity({opacity: 0}, { duration: 600, queue: false, complete: function(){
+                            $("#calibComplete").show();
+                            $("#btnRetry").on("click", function(){
+
+                            }); 
+                            $("#btnExp").on("click", function(){
+                                pages.calibrate.velocity({opacity:0}, 300, function(){
+                                    pages.experiment.show();
+                                    experiment();                                    
+                                });
+                            });                    
                         }});
                     });
                 }   
@@ -351,6 +357,114 @@
 
     function experiment(){
 
+        var touches = [{x: 0, y: 0, id: false}, {x: 0, y: 0, id: false}];
+        var doubleDetect = false;
+        var cancelTimeout, endTimeout, sampleInterval = false;
+        var samples = [];
+
+        var ratingRange = config.touchMaxDist - config.touchMinDist,
+            ratingStep = ratingRange / 10;
+
+        function toRating(dist){
+            if(dist < config.touchMinDist) {
+                dist = config.touchMinDist;
+            }
+            else if(dist > config.touchMaxDist){
+                dist = config.touchMaxDist;
+            }
+
+            return (dist - config.touchMinDist) / ratingStep;
+        }
+
+        function sampleRating(){
+	    	var rating = toRating(getDist(touches[0].x, touches[0].y, touches[1].x, touches[1].y));
+	    	if(!touches[0].id || !touches[1].id && rating !== samples[samples.length-1]){
+	    		rating *= -1;
+	    	}
+	        samples.push(rating);        	
+        }
+
+        function stop(){
+            clearTimeout(endTimeout);
+            clearTimeout(cancelTimeout);
+            clearInterval(sampleInterval);
+
+	        window.removeEventListener("touchstart", onTouchStart);
+	        window.removeEventListener("touchmove", onTouchMove);
+	        window.removeEventListener("touchend", onTouchEnd);
+	        window.removeEventListener("touchcancel", onTouchEnd);
+
+	        sampleRating();
+	        console.log(samples, samples.length);
+
+            $("#expTitle").html("Thank you for your time.");
+        }
+
+        function onTouchStart(e){
+            e.preventDefault();
+            var changed = e.changedTouches;
+
+            for(var i = 0; i < changed.length ; i++){ 
+
+                for(var j = 0; j < touches.length; j++){
+                    if(!touches[j].id){
+                        touches[j].x = changed[i].pageX;
+                        touches[j].y = changed[i].pageY;
+                        touches[j].id = changed[i].identifier;    
+                        break;                    
+                    }
+                }
+            }      
+
+            if(touches[0].id && touches[1].id){
+
+                doubleDetect = true;
+                $("#expTitle").html("");
+                clearTimeout(cancelTimeout);
+
+                if(!sampleInterval){
+                    sampleInterval = setInterval(sampleRating, 1000);                    
+                }
+
+                endTimeout = setTimeout(stop, config.duration);
+            }      
+        }
+
+        function onTouchMove(e){
+            e.preventDefault();
+            var changed = e.changedTouches; 
+            
+            for(var i = 0; i < changed.length ; i++){ 
+
+                touches.forEach(function(t, j){
+                    if(t.id === changed[i].identifier){
+                        touches[j].x = changed[i].pageX;
+                        touches[j].y = changed[i].pageY;
+                    }
+                });
+
+            }            
+        }
+
+        function onTouchEnd(e){
+            e.preventDefault();
+            var changed = e.changedTouches; 
+            
+            for(var i = 0; i < changed.length ; i++){ 
+
+                touches.forEach(function(t, j){
+                    if(t.id === changed[i].identifier){
+                        touches[j].id = false;
+                    }
+                });
+
+            }         
+
+            if(doubleDetect && !touches[0].id && !touches[1].id){
+                doubleDetect = false;
+                cancelTimeout = setTimeout(stop, 5000);
+            }   
+        }
 
         window.addEventListener("touchstart", onTouchStart);
         window.addEventListener("touchmove", onTouchMove);

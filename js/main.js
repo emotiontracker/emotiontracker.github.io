@@ -14,10 +14,20 @@
 
 
     var config = {
+        name: '',
+        experiment: '',
+        email: 'jugalm9@gmail.com',
+        duration: (1000 * 2 * 60),          // 2 mins
         touchMaxDist: 0,
         touchMinDist: 0,
         touchFeedback: true
     };
+
+    var pages = {
+        start: $("#startPage"),
+        calibrate: $("#calibrationPage"),
+        experiment: $("#experimentPage")
+    }
 
     function createLine(x1, y1, x2, y2){
         var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -34,6 +44,19 @@
 
     function getDist(x1, y1, x2, y2){
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+    }
+
+    function start(){
+        $("#startSubmit").on("click", function(){
+            config.name = $("#name").val().trim(),
+            config.experiment = $("#experiment").val().trim();
+
+            pages.start.velocity({opacity: 0}, 300, function(){
+                pages.start.hide();
+                pages.calibrate.show();
+                calibrate();
+            })
+        });
     }
 
     function calibrate(){
@@ -73,14 +96,14 @@
                         this.circle.animate({
                             "fill-opacity": 0.2,
                             "r": 40
-                        }, 200);  
+                        }, 100, "bounce");  
                         this.selected = false;                      
                     }
                     else{
                         this.circle.animate({
                             "fill-opacity": 0.6,
                             "r": 60
-                        }, 200);                     
+                        }, 100, "bounce");                     
                     }
                 }
             };
@@ -90,20 +113,10 @@
         bubbles[0].x = windowWidth/2 - 40;
         bubbles[1].x = windowWidth/2 + 40;
 
-        bubbles.forEach(function(b){
-            b.circle = paper.circle(b.x, b.y, b.r);
-            b.circle.attr("fill", "rgb(216, 0, 57)");
-            b.circle.attr("fill-opacity", 0.2);
-            b.circle.attr("stroke", "none");
-
-            b.line = paper.path("");
-            b.line.attr("stroke", "#000");
-            b.line.attr("stroke-opacity", "0.1");
-            b.update();
-        });
-
         var joinLine = paper.path("M" + bubbles[0].x + " " + bubbles[0].y + "L" + bubbles[1].x + " " + bubbles[1].y);
         joinLine.attr("stroke", "#c6003b");
+        joinLine.attr("stroke-opacity", 0);
+
 
         var doubleDetect = false;
         var trialIndex = 0,
@@ -136,7 +149,11 @@
 
             if(bubbles[0].selected && bubbles[1].selected){
                 doubleDetect = true;
-                instrEl.innerHTML = 'Release both fingers to set.';
+                $(instrEl).velocity({opacity:0}, 200, function(){
+                    instrEl.innerHTML = 'Release both fingers to set.';
+                    $(instrEl).velocity({opacity:1}, 200);
+                });
+                
             }
         }
 
@@ -218,19 +235,23 @@
                 }
 
                 if(trialIndex !== undefined){
-                    instrEl.innerHTML = '';
-                    setTimeout(function(){
-                        startTrial(trialIndex);
-                    }, 1000);
+                    $(instrEl).velocity({opacity: 0}, 400, function(){
+                        $(titleEl).velocity({opacity: 0}, 400, function(){
+                            startTrial(trialIndex);
+                        });
+                    });
                     
                 }
                 else{
-                    document.getElementById("tracker").innerHTML = "";
-                    titleEl.innerHTML = 'Calibration Complete';
-                    titleEl.style.top = 0 + "px";
-                    titleEl.style.bottom = 0 + "px";
-
-                    instrEl.innerHTML = '';
+                    $(instrEl).velocity({opacity: 0}, 500, function(){
+                        $(titleEl).velocity({opacity: 0}, { duration: 800, queue: false });
+                        $("#tracker").velocity({opacity: 0}, { duration: 800, queue: false, complete: function(){
+                            titleEl.innerHTML = 'Calibration Complete';
+                            $(titleEl).velocity({opacity:1}, 500);
+                            titleEl.style.top = 0 + "px";
+                            titleEl.style.bottom = 0 + "px";                           
+                        }});
+                    });
                 }   
 
             }       
@@ -245,6 +266,9 @@
         var titleEl = document.getElementById("calibTitle"),
             instrEl = document.getElementById("calibInstr");
 
+        titleEl.style.opacity = 0;
+        instrEl.style.opacity = 0;
+
         var startTrial = function(trialIndex){
 
             window.addEventListener("touchstart", onTouchStart);
@@ -254,6 +278,10 @@
             titleEl.innerHTML = trial.title;
             instrEl.innerHTML = trial.instr;
 
+            $(titleEl).velocity({opacity: 1}, 400, function(){
+                $(instrEl).velocity({opacity: 1}, 400);
+            });
+            
             bubbles.forEach(function(b){
                 b.circle.animate({
                     "fill": "rgb(216, 0, 57)"
@@ -261,7 +289,36 @@
             }); 
         }
 
-        startTrial(0);
+        bubbles.forEach(function(b){
+            b.circle = paper.circle(b.x, b.y, b.r);
+            b.circle.attr("fill", "rgb(216, 0, 57)");
+            b.circle.attr("fill-opacity", 0);
+            b.circle.attr("stroke", "none");
+
+            b.line = paper.path("");
+            b.line.attr("stroke", "#000");
+            b.line.attr("stroke-opacity", 0.1);
+            b.update();
+
+            b.circle.animate({
+                "fill-opacity": 0.2
+            },1000);
+
+            joinLine.animate({
+                "stroke-opacity": 1
+            }, 1000, "linear", function(){
+                startTrial(0);
+            });                
+        });
+        
+    }
+
+    function experiment(){
+        window.addEventListener("touchstart", onTouchStart);
+        window.addEventListener("touchmove", onTouchMove);
+        window.addEventListener("touchend", onTouchEnd);
+        window.addEventListener("touchcancel", onTouchEnd);
+
     }
 
 
@@ -276,6 +333,6 @@
         paper.setSize(windowWidth, windowHeight);
     }
 
-    calibrate();
+    start();
 
 })();

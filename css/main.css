@@ -101,7 +101,7 @@ input[type="submit"]{
   opacity: 0.6;
 }
 
-#calibTitle, #calibInstr{
+.title, #calibInstr{
   height:30px;
   margin: auto;
   position: absolute;
@@ -111,6 +111,10 @@ input[type="submit"]{
 #calibTitle{
   top: 50px; 
   font-size:1.2em;
+}
+
+#expTitle{
+  top:0; bottom:0;
 }
 
 #calibInstr{

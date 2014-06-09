@@ -9,6 +9,7 @@
     var touches = {},
         touchLine;
     var paper = Raphael("tracker", windowWidth, windowHeight);
+    var changeOrient = $("#changeOrient");
     var doubleTouchStart = new Event('doubletouchstart'),
         doubleTouchEnd = new Event('doubletouchend');
 
@@ -76,6 +77,7 @@
         // medianLine.attr("stroke", "#eee");
         // medianLine.attr("stroke-dasharray", "--");
 
+
         var bubble = function(){
             return {
                 x: 0,
@@ -96,29 +98,20 @@
                         this.circle.animate({
                             "fill-opacity": 0.2,
                             "r": 40
-                        }, 100, "bounce");  
+                        }, 300, "bounce");  
                         this.selected = false;                      
                     }
                     else{
                         this.circle.animate({
                             "fill-opacity": 0.6,
                             "r": 60
-                        }, 100, "bounce");                     
+                        }, 300, "bounce");                     
                     }
                 }
             };
         }
 
-        window.onresize
-        var bubbles = [new bubble(), new bubble()];
-        bubbles[0].x = windowWidth/2 - 40;
-        bubbles[1].x = windowWidth/2 + 40;
-
-        var joinLine = paper.path("M" + bubbles[0].x + " " + bubbles[0].y + "L" + bubbles[1].x + " " + bubbles[1].y);
-        joinLine.attr("stroke", "#c6003b");
-        joinLine.attr("stroke-opacity", 0);
-
-
+        var bubbles, joinLine;
         var doubleDetect = false;
         var trialIndex = 0,
             trialCount = 1,
@@ -244,6 +237,11 @@
                     
                 }
                 else{
+
+                    window.removeEventListener("touchmove", onTouchMove);
+                    window.removeEventListener("touchend", onTouchEnd);
+                    window.removeEventListener("touchcancel", onTouchEnd);   
+
                     $(instrEl).velocity({opacity: 0}, 500, function(){
                         $(titleEl).velocity({opacity: 0}, { duration: 800, queue: false });
                         $("#tracker").velocity({opacity: 0}, { duration: 800, queue: false, complete: function(){
@@ -259,16 +257,9 @@
         }
 
 
-        window.addEventListener("touchmove", onTouchMove);
-        window.addEventListener("touchend", onTouchEnd);
-        window.addEventListener("touchcancel", onTouchEnd);
-
-
         var titleEl = document.getElementById("calibTitle"),
             instrEl = document.getElementById("calibInstr");
 
-        titleEl.style.opacity = 0;
-        instrEl.style.opacity = 0;
 
         var startTrial = function(trialIndex){
 
@@ -290,28 +281,77 @@
             }); 
         }
 
-        bubbles.forEach(function(b){
-            b.circle = paper.circle(b.x, b.y, b.r);
-            b.circle.attr("fill", "rgb(216, 0, 57)");
-            b.circle.attr("fill-opacity", 0);
-            b.circle.attr("stroke", "none");
+        var initialize = function(){
+            console.log("init");
+            bubbles = [new bubble(), new bubble()];
+            bubbles[0].x = windowWidth/2 - 40;
+            bubbles[1].x = windowWidth/2 + 40;  
+            
+            joinLine = paper.path("M" + bubbles[0].x + " " + bubbles[0].y + "L" + bubbles[1].x + " " + bubbles[1].y);
+            joinLine.attr("stroke", "#c6003b");
+            joinLine.attr("stroke-opacity", 0);   
 
-            b.line = paper.path("");
-            b.line.attr("stroke", "#000");
-            b.line.attr("stroke-opacity", 0.1);
-            b.update();
+            window.addEventListener("touchmove", onTouchMove);
+            window.addEventListener("touchend", onTouchEnd);
+            window.addEventListener("touchcancel", onTouchEnd);    
 
-            b.circle.animate({
-                "fill-opacity": 0.2
-            },1000);
+            titleEl.style.opacity = 0;
+            instrEl.style.opacity = 0;   
 
-            joinLine.animate({
-                "stroke-opacity": 1
-            }, 1000, "linear", function(){
-                startTrial(0);
-            });                
-        });
+            bubbles.forEach(function(b){
+                b.circle = paper.circle(b.x, b.y, b.r);
+                b.circle.attr("fill", "rgb(216, 0, 57)");
+                b.circle.attr("fill-opacity", 0);
+                b.circle.attr("stroke", "none");
+
+                b.line = paper.path("");
+                b.line.attr("stroke", "#000");
+                b.line.attr("stroke-opacity", 0.1);
+                b.update();
+
+                b.circle.animate({
+                    "fill-opacity": 0.2
+                },1000);
+
+                joinLine.animate({
+                    "stroke-opacity": 1
+                }, 1000, "linear", function(){
+                    startTrial(0);
+                });                
+            });
+        }
         
+        var orient = false;
+
+        if(window.outerHeight > window.outerWidth){
+            changeOrient.show();
+        }
+        else{
+            paper.setSize(window.innerWidth, window.innerHeight);
+            initialize();
+            orient = true;
+        }
+
+        
+        window.onresize = function(){
+
+            if(window.outerWidth > window.outerHeight){
+                if(!orient){
+                    paper.setSize(window.innerWidth, window.innerHeight);
+                    initialize();
+                }
+                changeOrient.hide();
+                pages.calibrate.show(); 
+                orient = true;
+            }
+            else{
+                pages.calibrate.hide();
+                changeOrient.show();
+            }
+
+            windowWidth = window.innerWidth;
+            windowHeight = window.innerHeight;
+        }
     }
 
     function experiment(){
@@ -322,19 +362,6 @@
         window.addEventListener("touchend", onTouchEnd);
         window.addEventListener("touchcancel", onTouchEnd);
 
-    }
-
-
-    window.onresize = function(){
-
-        if(window.outerWidth > window.outerHeight){
-            // Landscape Mode
-        }
-        else{
-            // Potrait Mode
-        }
-
-        paper.setSize(window.innerWidth, window.innerHeight);
     }
 
     start();

@@ -18,7 +18,7 @@
         name: '',
         experiment: '',
         experimentTime: '',
-        email: localStorage["pltrckr-email"] || 'jugalm9@gmail.com',
+        email: localStorage["pltrckr-email"] || 'your@email.com',
         duration: localStorage["pltrckr-dur"] || 20, //(1000 * 2 * 60),          // 2 mins
         durationActual: '',
         touchMaxDist: 0,

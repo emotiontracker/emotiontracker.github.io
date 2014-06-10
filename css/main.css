@@ -10,6 +10,7 @@
    Base styles: opinionated defaults
    ========================================================================== */
 
+
 html,
 button,
 input,
@@ -66,7 +67,21 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
+h2{
+  font-size:32px;
+  color:#8C80E5;
+  font-weight:normal;
+  margin: 30px 0 20px;
+  padding: 0 40px;
+  text-align: left;
+}
 
+#settingsPage{
+  position:absolute;
+  height:100%;
+  left:0;right:0;top:0;
+  background-color: #F3F2F8;
+}
 
 .wrapper{
   text-align:center;
@@ -75,10 +90,10 @@ textarea {
 
 input[type="text"], input[type="submit"]{
   border-radius: 3px;
-  padding: 10px;
+  padding: 8px 10px;
   font-size:18px;  
   width: 230px;
-  margin: 10px;
+  margin: 8px;
   box-sizing: border-box;
 }
 
@@ -88,29 +103,34 @@ input[type="text"]{
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
 }
 
+.field{
+  margin: 20px 0;
+}
 
 .btn{
-
   border-radius: 3px;
-  padding: 10px;
+  padding: 8px 12px;
   font-size:18px;  
-  width: 120px;
   margin: 15px 10px;
   box-sizing: border-box;
 
-  background-color:#E8E8E8;
-  background-image: -o-linear-gradient(bottom, #FAFAFA 0%, #E8E8E8 100%);
-  background-image: -moz-linear-gradient(bottom, #FAFAFA 0%, #E8E8E8 100%);
-  background-image: -webkit-linear-gradient(bottom, #FAFAFA 0%, #E8E8E8 100%);
-  background-image: -ms-linear-gradient(bottom, #FAFAFA 0%, #E8E8E8 100%);
-  background-image: linear-gradient(to bottom, #FAFAFA 0%, #E8E8E8 100%);
+  background-color:#EBEBEB;
+  background-image: -o-linear-gradient(bottom, #FAFAFA 0%, #EBEBEB 100%);
+  background-image: -moz-linear-gradient(bottom, #FAFAFA 0%, #EBEBEB 100%);
+  background-image: -webkit-linear-gradient(bottom, #FAFAFA 0%, #EBEBEB 100%);
+  background-image: -ms-linear-gradient(bottom, #FAFAFA 0%, #EBEBEB 100%);
+  background-image: linear-gradient(to bottom, #FAFAFA 0%, #EBEBEB 100%);
   color:#444;
   border:1px solid #ccc; 
   -webkit-appearance:none; 
   border-radius: 3px;
 }
 
-input[type="submit"], .btn-primary{
+.btn:focus, .btn:active{
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.btn-primary{
   background-color:#8c80e5;
   color:#fff;
   border:1px solid #6e65b0;
@@ -150,9 +170,27 @@ input[type="submit"], .btn-primary{
   width:32px;
   height:32px;
   background-size: 32px 32px;
+}
+
+.ico-settings{
+  background-image:url(../img/settings.png);  
+  width:24px;
+  height:24px;
+  background-size: 24px 24px;
+}
+
+#btnSettings{
+  padding: 3px;
+  border:0;
+  background:#fff;
   position: absolute;
-  top:15px;
-  left:15px;
+  bottom:12px;
+  right:12px;
+}
+
+#btnSettings:active{
+  background:#eee;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
 }
 
 #logo{
@@ -164,6 +202,11 @@ input[type="submit"], .btn-primary{
   opacity: 0.6;
 }
 
+.invalid{
+  border: 1px solid #ea385b !important;
+  background-color:#ffefef !important;
+}
+
 @media only screen and (-webkit-min-device-pixel-ratio: 2) {
   #landscape{
     background-image:url(../img/landscape@2x.png);
@@ -173,9 +216,14 @@ input[type="submit"], .btn-primary{
     background-image:url(../img/retry@2x.png);
   }
 
+  .ico-settings{
+    background-image:url(../img/settings@2x.png);
+  }
+
   #logo{
     background-image:url(../img/logo@2x.png);
   }
+
 }
 
 .landscapeText{
@@ -330,14 +378,18 @@ textarea[contenteditable] {
  * Used to contain floats: h5bp.com/q
  */
 
-.clearfix:before,
-.clearfix:after {
+.row:before,
+.row:after {
     content: "";
     display: table;
 }
 
-.clearfix:after {
+.row:after {
     clear: both;
+}
+
+.col{
+  float:left;
 }
 
 /* ==========================================================================

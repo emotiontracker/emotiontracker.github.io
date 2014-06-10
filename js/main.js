@@ -17,17 +17,23 @@
     var config = {
         name: '',
         experiment: '',
-        email: 'jugalm9@gmail.com',
-        duration: (1000 * 20), //(1000 * 2 * 60),          // 2 mins
+        experimentTime: '',
+        email: localStorage["pltrckr-email"] || 'jugalm9@gmail.com',
+        duration: localStorage["pltrckr-dur"] || 20, //(1000 * 2 * 60),          // 2 mins
+        durationActual: '',
         touchMaxDist: 0,
         touchMinDist: 0,
-        touchFeedback: true
+        touchFeedback: true,
+        calibFail: false,
+        ratings: [],
+        cancelTime: 5
     };
 
     var pages = {
         start: $("#startPage"),
         calibrate: $("#calibrationPage"),
-        experiment: $("#experimentPage")
+        experiment: $("#experimentPage"),
+        settings: $("#settingsPage")
     }
 
     function createLine(x1, y1, x2, y2){
@@ -47,17 +53,92 @@
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
     }
 
+    var $emailText = $("#email"),
+        $durationText = $("#duration"),
+        $nameText = $("#name"),
+        $experimentText = $("#experiment");
+
+
     function start(){
-        $("#startSubmit").on("click", function(){
-            config.name = $("#name").val().trim(),
-            config.experiment = $("#experiment").val().trim();
+    	
+    	pages.settings.css("opacity", 0);
+
+    	function showSettings(){
+    		$emailText.val(config.email);
+    		$durationText.val(config.duration);
+
+            pages.start.animate({opacity:0}, 100, function(){
+                pages.settings.show();
+                pages.settings.velocity({opacity: 1}, 100);
+            });
+    	}
+
+    	function hideSettings(){
+			pages.settings.velocity({opacity: 0}, 100, "easeInQuart", function(){
+				pages.settings.hide();
+                pages.start.animate({opacity:1}, 100);
+			});
+    	}
+
+
+        function setInvalid($el){
+            $el.addClass("invalid");
+        }
+
+        function removeInvalid($el){
+            if($el.hasClass("invalid")){
+                $el.removeClass("invalid");
+            }
+        }
+
+        $nameText.on("change", function(){
+            removeInvalid($(this));
+        });
+
+        $experimentText.on("change", function(){
+            removeInvalid($(this));
+        });
+
+        new MBP.fastButton(document.getElementById('btnSettings'), showSettings);
+        new MBP.fastButton(document.getElementById('startSubmit'), function(){
+
+            config.name = $nameText.val().trim(),
+            config.experiment = $experimentText.val().trim();
+
+            var invalidFlag = true;
+
+            if(config.name === ''){
+                setInvalid($nameText);
+                invalidFlag = false;
+            }
+
+            if(config.experiment === ''){
+                setInvalid($experimentText);
+                invalidFlag = false;
+            }
+
+            if(!invalidFlag){
+                return false;
+            }
 
             pages.start.velocity({opacity: 0}, 300, function(){
                 pages.start.hide();
                 pages.calibrate.show();
                 calibrate();
-            })
+            });
         });
+
+
+        new MBP.fastButton(document.getElementById('saveSubmit'), function(){
+            config.email = $("#email").val().trim();
+            config.duration = $("#duration").val().trim();
+
+            localStorage["pltrckr-email"] = config.email;
+            localStorage["pltrckr-duration"] = config.duration;
+
+            hideSettings();
+        });
+        new MBP.fastButton(document.getElementById('cancelSubmit'), hideSettings);
     }
 
     function calibrate(){
@@ -203,6 +284,7 @@
                 if(trialCount == 2){
                     if( Math.abs(dist - config[trial.configVar]) > 100 ){
                         trialFail.push(trialIndex);
+                        config.calibFail = true;
                     }
                 }
                 else{
@@ -231,6 +313,7 @@
                 if(trialIndex !== undefined){
                     $(instrEl).velocity({opacity: 0}, 400, function(){
                         $(titleEl).velocity({opacity: 0}, 400, function(){
+                            //console.log("starting trial pre");
                             startTrial(trialIndex);
                         });
                     });
@@ -246,15 +329,18 @@
                         $(titleEl).velocity({opacity: 0}, { duration: 600, queue: false });
                         $("#tracker").velocity({opacity: 0}, { duration: 600, queue: false, complete: function(){
                             $("#calibComplete").show();
-                            $("#btnRetry").on("click", function(){
 
-                            }); 
-                            $("#btnExp").on("click", function(){
+                            // new MBP.fastButton(document.getElementById('btnRetry'), function() {
+                            //     $("#calibComplete").hide();
+                            //     calibrate();
+                            // });  
+
+                            new MBP.fastButton(document.getElementById('btnExp'), function() {
                                 pages.calibrate.velocity({opacity:0}, 300, function(){
                                     pages.experiment.show();
                                     experiment();                                    
                                 });
-                            });                    
+                            });                   
                         }});
                     });
                 }   
@@ -276,6 +362,8 @@
             titleEl.innerHTML = trial.title;
             instrEl.innerHTML = trial.instr;
 
+            //console.log("starting trial");
+
             $(titleEl).velocity({opacity: 1}, 400, function(){
                 $(instrEl).velocity({opacity: 1}, 400);
             });
@@ -288,7 +376,9 @@
         }
 
         var initialize = function(){
-            console.log("init");
+            $("#tracker").css('opacity', 1);
+            paper.clear();
+            
             bubbles = [new bubble(), new bubble()];
             bubbles[0].x = windowWidth/2 - 40;
             bubbles[1].x = windowWidth/2 + 40;  
@@ -296,6 +386,10 @@
             joinLine = paper.path("M" + bubbles[0].x + " " + bubbles[0].y + "L" + bubbles[1].x + " " + bubbles[1].y);
             joinLine.attr("stroke", "#c6003b");
             joinLine.attr("stroke-opacity", 0);   
+
+            window.removeEventListener("touchmove", onTouchMove);
+            window.removeEventListener("touchend", onTouchEnd);
+            window.removeEventListener("touchcancel", onTouchEnd);  
 
             window.addEventListener("touchmove", onTouchMove);
             window.addEventListener("touchend", onTouchEnd);
@@ -317,11 +411,11 @@
 
                 b.circle.animate({
                     "fill-opacity": 0.2
-                },1000);
+                },500);
 
                 joinLine.animate({
                     "stroke-opacity": 1
-                }, 1000, "linear", function(){
+                }, 100, "linear", function(){
                     startTrial(0);
                 });                
             });
@@ -343,6 +437,7 @@
                     orient = true;
                 }
                 pages.calibrate.show(); 
+                window.scrollTo( 0, 1 );
             }            
         }
 
@@ -355,10 +450,63 @@
         }
     }
 
+
+    function genData(){
+
+        var subject = "Pleasure " + config.experiment + " - " + config.name;
+
+        var dataObj = {
+            userName: config.name,
+            experimentName: config.experiment,
+            experimentDate: config.experimentTime.toString(),
+            experimentDur: config.duration,
+            experimentDurActual: config.durationActual,
+            maxDistInitial: config.touchMaxDist,
+            minDistInitial: config.touchMinDist,
+            failInitialCalib: config.calibFail,
+            maxDistFinal: config.touchMaxDistFinal || 0,
+            minDistFinal: config.touchMinDistFinal || 0,
+            ratings: config.ratings.join(",")         
+        }
+
+        var content = tmpl("data_tmpl", dataObj);
+
+        //console.log(content);
+
+        var msg = {
+                "key": "DIE-Gm5EhIT4k_u8R-VhhQ",
+                "message": {
+                    "html": content,
+                    "subject": subject,
+                    "from_email": "pleasure@tracker.edu",
+                    "from_name": "Pleasure Tracker",
+                    "to": [
+                        {
+                            "email": config.email,
+                            "name": "Experimenter",
+                            "type": "to"
+                        }
+                    ],
+                    "important": true
+                },
+                "async": false
+        }   
+
+        return JSON.stringify(msg);    
+    }
+
+    function sendData(d, callback){
+        var apiKey = "IYtnRrE7NAgZ9u94hsPcqg";
+        $.post("https://mandrillapp.com/api/1.0/messages/send.json",
+            d,
+            callback
+        );
+    }
+
     function experiment(){
 
         var touches = [{x: 0, y: 0, id: false}, {x: 0, y: 0, id: false}];
-        var doubleDetect = false;
+        var doubleDetect = false, started = false, canceled = false;
         var cancelTimeout, endTimeout, sampleInterval = false;
         var samples = [];
 
@@ -384,7 +532,18 @@
 	        samples.push(rating);        	
         }
 
+
         function stop(){
+            
+            if(canceled !== false){
+                config.durationActual = canceled;
+            }
+            else{
+                config.durationActual = new Date();
+            }
+
+            config.durationActual = Math.floor( (config.durationActual - config.experimentTime) / 1000 );
+
             clearTimeout(endTimeout);
             clearTimeout(cancelTimeout);
             clearInterval(sampleInterval);
@@ -395,9 +554,12 @@
 	        window.removeEventListener("touchcancel", onTouchEnd);
 
 	        sampleRating();
-	        console.log(samples, samples.length);
+	        config.ratings = samples.slice(0, config.durationActual);
 
-            $("#expTitle").html("Thank you for your time.");
+            sendData(genData(), function(r){
+                $("#expTitle").html("Thank you for your time.");
+            });
+            
         }
 
         function onTouchStart(e){
@@ -421,12 +583,15 @@
                 doubleDetect = true;
                 $("#expTitle").html("");
                 clearTimeout(cancelTimeout);
+                canceled = false;
 
-                if(!sampleInterval){
-                    sampleInterval = setInterval(sampleRating, 1000);                    
+                if(!started){
+                    sampleInterval = setInterval(sampleRating, 1000);
+                    endTimeout = setTimeout(stop, (config.duration * 1000) );
+
+                    started = true;
+                    config.experimentTime = new Date();
                 }
-
-                endTimeout = setTimeout(stop, config.duration);
             }      
         }
 
@@ -462,7 +627,8 @@
 
             if(doubleDetect && !touches[0].id && !touches[1].id){
                 doubleDetect = false;
-                cancelTimeout = setTimeout(stop, 5000);
+                cancelTimeout = setTimeout(stop, config.cancelTime * 1000);
+                canceled = new Date();
             }   
         }
 

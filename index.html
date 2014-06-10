@@ -54,8 +54,25 @@
                     <input id="experiment" type="text" placeholder="Enter experiment name" />
                 </div>
                 <div>
-                    <input id="startSubmit" type="submit" value="Continue"/>
+                    <input class="btn btn-primary" id="startSubmit" type="submit" value="Continue"/>
                 </div>
+                <button id="btnSettings" class=""><div class="ico-settings"></div></button>
+            </div>
+
+            <div id="settingsPage" style="display:none">
+                <h2>Settings</h2>
+                <div class="field">
+                    <label for="email">Enter email of the experimenter</label>
+                    <input id="email" type="text" placeholder="" />
+                </div>
+                <div class="field">
+                    <label for="email">Enter duration of the experiment</label>
+                    <input id="duration" type="text" value="120" style="width:200px"/><span>secs</span>
+                </div>
+                <div class="field">
+                    <input class="btn btn-primary" id="saveSubmit" type="submit" value="Save"/>
+                    <input class="btn" id="cancelSubmit" type="submit" value="Cancel"/>
+                </div>                                
             </div>
 
             <div id="calibrationPage" style="display:none">
@@ -63,10 +80,12 @@
                 <div id="tracker"></div>
                 <div id="calibInstr"></div>
                 <div id="calibComplete" style="display:none">
-                    <div id="btnRetry" class="ico-retry"></div>
                     <div class="title" style="height:100px;top:0;bottom:0">
-                        <div>Calibration Complete</div>
-                        <div><button id="btnExp" class="btn btn-primary">Continue</button></div>
+                        <div class="" style="margin-bottom:10px">Calibration Complete</div>
+                        <div class="row" style="width:98px;margin:0 auto">
+                            <!-- <div class="col"><button id="btnRetry" class="btn" style="padding: 6px 12px"><div class="ico-retry"></div></button></div> -->
+                            <div class="col"><button id="btnExp" class="btn btn-primary">Continue</button></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -83,10 +102,32 @@
         </div>
 
         <script src="js/vendor/jquery-2.1.0.min.js"></script>
-        <script src="http://jsconsole.com/remote.js?681CFADA-2A00-46D9-8FED-F90BBFDF06D5"></script>
         <script src="js/vendor/raphael-min.js"></script>
         <script src="js/helper.js"></script>
         <script src="js/plugins.js"></script>
         <script src="js/main.js"></script>
+
+        <script type="text/html" id="data_tmpl">
+            <h2>Experiment Report</h2>
+            <table>
+                <tr><td>Name of User: </td><td><%=userName%></td></tr>
+                <tr><td>Name of Experiment: </td><td><%=experimentName%></td></tr>
+                <tr><td>Time of Experiment: </td><td><%=experimentDate%></td></tr>
+                <tr><td>Duration of Experiment (<i>Intended</i>): </td><td><%=experimentDur%></td></tr>
+                <tr><td>Duration of Experiment (<i>Recorded</i>): </td><td><%=experimentDurActual%></td></tr>
+            </table>
+
+            <h3>Calibration</h3>
+            <table>
+                <tr><td>Maximum Pleasure Distance (<i>Inital</i>): </td><td><%=maxDistInitial%></td></tr>
+                <tr><td>Minimum Pleasure Distance (<i>Inital</i>): </td><td><%=minDistInitial%></td></tr>
+                <tr><td>Failed Initial Calibration: </td><td><%=failInitialCalib%></td></tr>
+                <tr><td>Maximum Pleasure Distance (<i>Final</i>): </td><td><%=maxDistFinal%></td></tr>
+                <tr><td>Minimum Pleasure Distance (<i>Final</i>): </td><td><%=minDistFinal%></td></tr>
+            </table>
+
+            <h3>Ratings</h3>
+            <p><%=ratings%></p>
+        </script>
     </body>
 </html>

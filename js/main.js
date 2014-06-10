@@ -314,7 +314,7 @@
                 }
 
                 if(trialIndex !== undefined){
-                    $(instrEl).velocity({opacity: 0}, 400, function(){
+                    $(instrEl).velocity({opacity: 0}, 200, function(){
                         $(titleEl).velocity({opacity: 0}, 400, function(){
                             //console.log("starting trial pre");
                             startTrial(trialIndex);
@@ -328,9 +328,9 @@
                     window.removeEventListener("touchend", onTouchEnd);
                     window.removeEventListener("touchcancel", onTouchEnd);   
 
-                    $(instrEl).velocity({opacity: 0}, 500, function(){
-                        $(titleEl).velocity({opacity: 0}, { duration: 600, queue: false });
-                        $("#tracker").velocity({opacity: 0}, { duration: 600, queue: false, complete: function(){
+                    $(instrEl).velocity({opacity: 0}, 400, function(){
+                        $(titleEl).velocity({opacity: 0}, { duration: 400, queue: false });
+                        $("#tracker").velocity({opacity: 0}, { duration: 200, queue: false, complete: function(){
                             $("#calibComplete").show();
 
                             // new MBP.fastButton(document.getElementById('btnRetry'), function() {
@@ -368,7 +368,7 @@
             //console.log("starting trial");
 
             $(titleEl).velocity({opacity: 1}, 400, function(){
-                $(instrEl).velocity({opacity: 1}, 400);
+                $(instrEl).velocity({opacity: 1}, 200);
             });
             
             bubbles.forEach(function(b){

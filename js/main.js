@@ -453,7 +453,7 @@
 
     function genData(){
 
-        var subject = "Pleasure " + config.experiment + " - " + config.name;
+        var subject = "[Pleasure Data] " + config.experiment + " - " + config.name;
 
         var dataObj = {
             userName: config.name,
@@ -461,8 +461,8 @@
             experimentDate: config.experimentTime.toString(),
             experimentDur: config.duration,
             experimentDurActual: config.durationActual,
-            maxDistInitial: config.touchMaxDist,
-            minDistInitial: config.touchMinDist,
+            maxDistInitial: config.touchMaxDist + "pixels",
+            minDistInitial: config.touchMinDist + "pixels",
             failInitialCalib: config.calibFail,
             maxDistFinal: config.touchMaxDistFinal || 0,
             minDistFinal: config.touchMinDistFinal || 0,

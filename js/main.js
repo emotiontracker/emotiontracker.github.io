@@ -286,6 +286,9 @@
                         trialFail.push(trialIndex);
                         config.calibFail = true;
                     }
+                    else{
+                        config[trial.configVar] = Math.floor((config[trial.configVar] + dist)/2);
+                    }
                 }
                 else{
                     config[trial.configVar] = dist;
@@ -461,8 +464,8 @@
             experimentDate: config.experimentTime.toString(),
             experimentDur: config.duration,
             experimentDurActual: config.durationActual,
-            maxDistInitial: config.touchMaxDist + "pixels",
-            minDistInitial: config.touchMinDist + "pixels",
+            maxDistInitial: config.touchMaxDist + " pixels",
+            minDistInitial: config.touchMinDist + " pixels",
             failInitialCalib: config.calibFail,
             maxDistFinal: config.touchMaxDistFinal || 0,
             minDistFinal: config.touchMinDistFinal || 0,

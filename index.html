@@ -82,9 +82,9 @@
                 <div id="calibComplete" style="display:none">
                     <div class="title" style="height:100px;top:0;bottom:0">
                         <div class="" style="margin-bottom:10px">Calibration Complete</div>
-                        <div class="row" style="width:98px;margin:0 auto">
+                        <div class="row" style="width:150px;margin:0 auto">
                             <!-- <div class="col"><button id="btnRetry" class="btn" style="padding: 6px 12px"><div class="ico-retry"></div></button></div> -->
-                            <div class="col"><button id="btnExp" class="btn btn-primary">Continue</button></div>
+                            <div class="col"><button id="btnExp" class="btn btn-primary" style="width:150px">Continue</button></div>
                         </div>
                     </div>
                 </div>
@@ -107,27 +107,25 @@
         <script src="js/plugins.js"></script>
         <script src="js/main.js"></script>
 
-        <script type="text/html" id="data_tmpl">
-            <h2>Experiment Report</h2>
-            <table>
-                <tr><td>Name of User: </td><td><%=userName%></td></tr>
-                <tr><td>Name of Experiment: </td><td><%=experimentName%></td></tr>
-                <tr><td>Time of Experiment: </td><td><%=experimentDate%></td></tr>
-                <tr><td>Duration of Experiment (<i>Intended</i>): </td><td><%=experimentDur%></td></tr>
-                <tr><td>Duration of Experiment (<i>Recorded</i>): </td><td><%=experimentDurActual%></td></tr>
-            </table>
+<script type="text/html" id="data_tmpl">
+<h3>Data</h3>          
+<div>
+User Name:&#9;<%=userName%><br/>
+Experiment name:&#9;<%=experimentName%><br/>
+Time and date of first rating:&#9;<%=experimentDate%><br/>
+Absolute time of first rating (s):&#9;<%=firstRatingTimeAbsolute%><br/>
+Interval between ratings (s):&#9;<%=sampleInterval%><br/>
+Nominal duration (s):&#9;<%=experimentDur%><br/>
+Recorded duration (s):&#9;<%=experimentDurActual%><br/>
+Initial max distance (pix):&#9;<%=maxDistInitial%><br/>
+Initial min distance (pix):&#9;<%=minDistInitial%><br/>
+Initial calibration repetitions:&#9;<%=failInitialCalib%><br/>
+Final max distance (pix):&#9;<%=maxDistFinal%><br/>
+Final min distance (pix):&#9;<%=minDistFinal%><br/><br/>
+Ratings<br/>
+<%=ratings%>
+</div>
+</script>
 
-            <h3>Calibration</h3>
-            <table>
-                <tr><td>Maximum Pleasure Distance (<i>Inital</i>): </td><td><%=maxDistInitial%></td></tr>
-                <tr><td>Minimum Pleasure Distance (<i>Inital</i>): </td><td><%=minDistInitial%></td></tr>
-                <tr><td>Failed Initial Calibration: </td><td><%=failInitialCalib%></td></tr>
-                <tr><td>Maximum Pleasure Distance (<i>Final</i>): </td><td><%=maxDistFinal%></td></tr>
-                <tr><td>Minimum Pleasure Distance (<i>Final</i>): </td><td><%=minDistFinal%></td></tr>
-            </table>
-
-            <h3>Ratings</h3>
-            <p><%=ratings%></p>
-        </script>
     </body>
 </html>

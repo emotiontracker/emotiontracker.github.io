@@ -10,8 +10,32 @@
         touchLine;
     var paper = Raphael("tracker", windowWidth, windowHeight);
     var changeOrient = $("#changeOrient");
-    var doubleTouchStart = new Event('doubletouchstart'),
-        doubleTouchEnd = new Event('doubletouchend');
+
+    var notifier = {
+        
+        currentPlaying: null,
+
+        sounds: {
+            contactLoss: new Audio("alerts/contact_loss.mp3")
+        },
+
+        init: function(){
+            // for(s in this.sounds){
+            //     this.sounds[s].load();
+            // }
+        },
+
+        play: function(sound){
+            this.sounds[sound].load();
+            this.sounds[sound].play();
+        },
+
+        pause: function(sound){
+            sound = sound || this.currentPlaying;
+            this.sounds[sound].pause();
+        }
+
+    }
 
 
     var config = {
@@ -21,6 +45,7 @@
         email: localStorage["pltrckr-email"] || 'your@email.com',
         duration: localStorage["pltrckr-dur"] || 20, //(1000 * 2 * 60),          // 2 mins
         durationActual: '',
+        sampleInterval: 1000,
         touchMaxDist: 0,
         touchMinDist: 0,
         touchFeedback: true,
@@ -462,14 +487,16 @@
             userName: config.name,
             experimentName: config.experiment,
             experimentDate: config.experimentTime.toString(),
-            experimentDur: config.duration + " seconds",
-            experimentDurActual: config.durationActual + " seconds",
-            maxDistInitial: config.touchMaxDist + " pixels",
-            minDistInitial: config.touchMinDist + " pixels",
-            failInitialCalib: config.calibFail,
+            firstRatingTimeAbsolute: 0,
+            sampleInterval: config.sampleInterval/1000,
+            experimentDur: config.duration,
+            experimentDurActual: config.durationActual,
+            maxDistInitial: config.touchMaxDist,
+            minDistInitial: config.touchMinDist,
+            failInitialCalib: ( (config.calibFail) ? 3 : 2 ),
             maxDistFinal: config.touchMaxDistFinal || 0,
             minDistFinal: config.touchMinDistFinal || 0,
-            ratings: config.ratings.join(",")         
+            ratings: config.ratings.join("\t")         
         }
 
         var content = tmpl("data_tmpl", dataObj);
@@ -494,6 +521,8 @@
                 },
                 "async": false
         }   
+
+        //console.log(content);
 
         return JSON.stringify(msg);    
     }
@@ -528,7 +557,7 @@
         }
 
         function sampleRating(){
-	    	var rating = toRating(getDist(touches[0].x, touches[0].y, touches[1].x, touches[1].y));
+	    	var rating = toRating(getDist(touches[0].x, touches[0].y, touches[1].x, touches[1].y)).toFixed(1);
 	    	if(!touches[0].id || !touches[1].id && rating !== samples[samples.length-1]){
 	    		rating *= -1;
 	    	}
@@ -558,8 +587,9 @@
 
 	        sampleRating();
 	        config.ratings = samples.slice(0, config.durationActual);
-
+            genData();
             sendData(genData(), function(r){
+                //console.log(r);
                 $("#expTitle").html("Thank you for your time.");
             });
             
@@ -589,7 +619,7 @@
                 canceled = false;
 
                 if(!started){
-                    sampleInterval = setInterval(sampleRating, 1000);
+                    sampleInterval = setInterval(sampleRating, config.sampleInterval);
                     endTimeout = setTimeout(stop, (config.duration * 1000) );
 
                     started = true;
@@ -623,6 +653,7 @@
                 touches.forEach(function(t, j){
                     if(t.id === changed[i].identifier){
                         touches[j].id = false;
+                        notifier.play("contactLoss");
                     }
                 });
 

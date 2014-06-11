@@ -234,7 +234,7 @@ input[type="text"]{
 }
 
 #calibTitle{
-  top: 50px; 
+  top: 20px; 
   font-size:1.2em;
 }
 
@@ -243,7 +243,7 @@ input[type="text"]{
 }
 
 #calibInstr{
-  bottom:50px;
+  bottom:20px;
   color:#888;
   padding: 0 30px;
 }

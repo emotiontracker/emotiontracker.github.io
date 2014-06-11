@@ -16,7 +16,9 @@
         currentPlaying: null,
 
         sounds: {
-            contactLoss: new Audio("alerts/contact_loss.mp3")
+            contactLoss: new Howl({urls:['alerts/contact_loss.mp3'], volume: 0.9}),
+            contact: new Howl({urls:['alerts/contact.mp3']}),
+
         },
 
         init: function(){
@@ -26,12 +28,10 @@
         },
 
         play: function(sound){
-            this.sounds[sound].load();
             this.sounds[sound].play();
         },
 
         pause: function(sound){
-            sound = sound || this.currentPlaying;
             this.sounds[sound].pause();
         }
 
@@ -481,8 +481,6 @@
 
     function genData(){
 
-        var subject = "[Pleasure Data] " + config.experiment + " - " + config.name;
-
         var dataObj = {
             userName: config.name,
             experimentName: config.experiment,
@@ -499,14 +497,29 @@
             ratings: config.ratings.join("\t")         
         }
 
-        var content = tmpl("data_tmpl", dataObj);
+        var data = tmpl("data_tmpl", dataObj);
 
-        //console.log(content);
+        return data;
+    }
 
+    function mailtoDataString(data){
+        var subject = "[Pleasure Data] " + config.experiment + " - " + config.name;
+        var body = data;
+        body = body.replace(/<br\/>/g, "%0D%0A");
+        body = body.replace(/&#9;/g, "%09");
+        body = body.replace(/\t/g, "%09");
+
+        var string = 'mailto:' + config.email + '?subject=' + subject + '&body=' + body;
+
+        return string;
+    }
+
+    function genMessage(data){
+        var subject = "[Pleasure Data] " + config.experiment + " - " + config.name;
         var msg = {
                 "key": "DIE-Gm5EhIT4k_u8R-VhhQ",
                 "message": {
-                    "html": content,
+                    "html": data,
                     "subject": subject,
                     "from_email": "pleasure@tracker.edu",
                     "from_name": "Pleasure Tracker",
@@ -522,9 +535,7 @@
                 "async": false
         }   
 
-        //console.log(content);
-
-        return JSON.stringify(msg);    
+        return JSON.stringify(msg);           
     }
 
     function sendData(d, callback){
@@ -587,10 +598,23 @@
 
 	        sampleRating();
 	        config.ratings = samples.slice(0, config.durationActual);
-            genData();
-            sendData(genData(), function(r){
-                //console.log(r);
-                $("#expTitle").html("Thank you for your time.");
+
+            var data = genData();
+
+            sendData(genMessage(data), function(r){
+                $("#expTitle").html('Thank you for your time.');
+                setTimeout(function(){
+                    $("#expTitle").velocity({opacity:0}, 300, function(){
+                        if(r[0].status === "sent"){
+                            $("#expTitle").html('Data sent successfully.');
+                        }
+                        else{
+                            $("#expTitle").html('Unable to send data. <a class="btn btn-primary" href="' + mailtoDataString(data) +'">Mail Data</a>');
+                        }
+
+                        $("#expTitle").velocity({opacity:1}, 300);
+                    });
+                },2000);
             });
             
         }
@@ -605,7 +629,8 @@
                     if(!touches[j].id){
                         touches[j].x = changed[i].pageX;
                         touches[j].y = changed[i].pageY;
-                        touches[j].id = changed[i].identifier;    
+                        touches[j].id = changed[i].identifier; 
+                        notifier.play("contact");   
                         break;                    
                     }
                 }

@@ -46,7 +46,6 @@
         sounds: {
             contactLoss: new Howl({urls:['alerts/contact_loss.mp3'], volume: 0.9}),
             contact: new Howl({urls:['alerts/contact.mp3']}),
-
         },
 
         init: function(){
@@ -120,21 +119,26 @@
             this._super();
             _bindAll(this, 'handleSave', 'showStart');
 
-            $(this.el).find('#email').val(config.email);
-            $(this.el).find('#duration').val(config.duration);
+            this.name = this.el.find('#email');
+            this.duration = this.el.find('#duration');
+
+            $(this.name).val(config.email);
+            $(this.duration).val(config.duration);
 
             new MBP.fastButton(this.el.find('#saveSubmit'), this.handleSave);
             new MBP.fastButton(this.el.find('#cancelSubmit'), this.showStart);
         },
 
         handleSave: function(){
-            localStorage["pltrckr-email"] = config.email = $(this.el).find('#email').val().trim();
-            localStorage["pltrckr-duration"] = config.duration = $(this.el).find('#duration').val().trim();
+            localStorage["pltrckr-email"] = config.email = $(this.name).val().trim();
+            localStorage["pltrckr-duration"] = config.duration = $(this.duration).val().trim();
 
             this.showStart();
         },
 
         showStart: function(){
+            $(this.el).focus();
+
             this.hide(PageController.pages["start"].show);
         }
 
@@ -184,6 +188,9 @@
 
             config.name = $(this.name).val().trim();
             config.experiment = $(this.experiment).val().trim(); 
+
+            $(this.name).blur();
+            $(this.experiment).blur();
 
             PageController.transition("calibration", function(){
                 this.begin("Initial");

@@ -59,7 +59,7 @@
                 <button id="btnSettings" class=""><div class="ico-settings"></div></button>
             </div>
 
-            <div id="settingsPage" style="display:none;opacity:0">
+            <div id="settingsPage" class="page" style="display:none;opacity:0">
                 <h2>Settings</h2>
                 <div class="field">
                     <label for="email">Enter email of the experimenter</label>
@@ -92,6 +92,14 @@
 
             <div id="experimentPage" style="display:none;opacity:0">
                 <div id="expTitle" class="title">Place two fingers to begin the experiment.</div>
+            </div>
+
+            <div id="completePage" class="page page-center" style="display:none; opacity:0">
+                <div id="completeMessage" style="height:40px">Thank you for your time</div>
+                <div id="completeButtons" style="height:90px">
+                    <a id="btnReSend" class="btn" href="#">Resend Data</a>
+                    <!-- <button class="btn btn-primary">New Experiment<</button> -->
+                </div>
             </div>
 
             <div id="changeOrient" style="display:none">

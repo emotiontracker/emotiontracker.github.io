@@ -131,6 +131,7 @@ var View = Class.extend({
 		_extend(this, options);
 		if(!this.el) this.el = _el(this.id);
 		this.bind();
+    //_bindAll(this, 'render', 'post_render', 'show', 'hide');
 	},
 
 	render: function(){},
@@ -139,7 +140,7 @@ var View = Class.extend({
 	show: function(){ this.render(); this.el.show(); },
 	hide: function() { this.post_render(); this.el.hide() } ,
 	on: function(event, callback) { this.el.on(event, callback) },
-    off: function(event, callback) { this.el.off(event, callback) },
+  off: function(event, callback) { this.el.off(event, callback) },
 
 	bind: function(){
     	var eventSplitter = /^(\S+)\s*(.*)$/;

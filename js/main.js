@@ -15,10 +15,16 @@
         },
 
         show: function(callback){
+            callback = callback || function(){};
             if(!this.shown){
                 this.shown = true;
+
+                this.render();
                 $(this.el).css('display', 'block');
-                $(this.el).animate({opacity:1}, 300, callback);              
+                $(this.el).animate({opacity:1}, 300, _bind(function(){
+                    this.post_render();
+                    callback();
+                }, this));              
             }
 
         },
@@ -27,14 +33,14 @@
             if(this.shown){
                 this.shown = false;
                 $(this.el).animate({opacity:0}, 100, _bind(function(){
-                    this.onHide();
+                    this.conceal();
                     callback();
                     $(this.el).css('display', 'none');
                 }, this));                
             }
         },
 
-        onHide: function(){ },
+        conceal: function(){},
         handleResize: function(){ }
 
     });
@@ -71,6 +77,7 @@
         name: '',
         experiment: '',
         experimentTime: '',
+        absoluteTime: '',
         email: localStorage["pltrckr-email"] || 'your@email.com',
         duration: localStorage["pltrckr-dur"] || 20, //(1000 * 2 * 60),          // 2 mins
         durationActual: '',
@@ -90,7 +97,7 @@
                     userName: t.name,
                     experimentName: t.experiment,
                     experimentDate: t.experimentTime.toString(),
-                    firstRatingTimeAbsolute: 0,
+                    firstRatingTimeAbsolute: (t.absoluteTime / 1000).toFixed(2),
                     sampleInterval: t.sampleInterval/1000,
                     experimentDur: t.duration,
                     experimentDurActual: t.durationActual,
@@ -107,7 +114,7 @@
     };
 
     var getDistance = function(x1, y1, x2, y2){
-        return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+        return Math.floor(Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)));
     }
 
     var settingsPage = new (Page.extend({
@@ -253,7 +260,7 @@
 
         init: function(){
             this._super();
-            _bindAll(this, 'handleTouchStart', 'handleTouchMove', 'handleTouchEnd');
+            _bindAll(this, 'handleTouchStart', 'handleTouchMove', 'handleTouchEnd', 'handleInitialEnd');
 
             this.tracker = this.el.find('#calibTracker');
             this.titleText = this.el.find('#calibTitle');
@@ -262,6 +269,8 @@
 
             this.paper = Raphael(this.tracker, window.innerWidth, window.innerHeight);
             this.begun = false;
+
+            new MBP.fastButton(this.completePage.find('#btnExp'), this.handleInitialEnd);
         },
 
 
@@ -327,14 +336,20 @@
         },
 
         handleResize: function(){
-            this.paper.setSize(window.innerWidth, window.innerHeight);
             if (Math.abs(window.orientation) !== 90) {
                 if(!this.orient){
+                    this.paper.setSize(window.innerWidth, window.innerHeight);
                     this.initPaper();
                     this.orient = true;
                     window.scrollTo( 0, 1 );                    
                 }
             }
+        },
+
+        handleInitialEnd: function(){
+            PageController.transition("experiment", function(){
+                this.begin();
+            }); 
         },
 
         begin: function(phase){
@@ -368,21 +383,22 @@
                 $(self.tracker).velocity({opacity: 0}, { duration: 200, queue: false, 
                     complete: function(){
                         self.paper.clear();
-                        self.paper = null;  
                         
-                        $(self.completePage).show();
-
-                        new MBP.fastButton(self.completePage.find('#btnExp'), function() {
-                            PageController.transition("experiment", function(){
-                                this.begin();
-                            });                                 
-                        });                      
+                        if(self.trialParams.phase === 'Initial'){
+                            $(self.completePage).show();                               
+                        }
+                        else{
+                            console.log("1");
+                            PageController.transition("complete");
+                            console.log("after");
+                        }
+                   
                     }
                 });
             });
         },
 
-        onHide: function(){
+        conceal: function(){
             $(this.completePage).hide();
         },
 
@@ -647,10 +663,14 @@
             this.sampleRating();
             config.ratings = this.samples.slice(0, config.durationActual);
 
-            console.log(config.ratings);
 
-            var title = this.titleText;
-            mailDataMandrill(function(res){
+            this.titleText.innerHTML = 'The experiment concluded in <b>' + config.durationActual +'</b>s. Prepare to calibrate again.';
+            setTimeout(function(){
+                PageController.transition("calibration", function(){
+                    this.begin("Final");
+                });
+            },3000);
+/*            mailDataMandrill(function(res){
                 title.innerHTML = 'Thank you for your time.';
                 setTimeout(function(){
                     $(title).velocity({opacity:0}, 300, function(){
@@ -664,7 +684,7 @@
                         $(title).velocity({opacity:1}, 300);
                     });
                 },2000);
-            });
+            });*/
         },
 
         handleTouchStart: function(e){
@@ -695,7 +715,8 @@
                     this.timers.end = setTimeout(this.stop, (config.duration * 1000) );
 
                     this.status.started = true;
-                    config.experimentTime = new Date();
+                    config.absoluteTime = Date.now();
+                    config.experimentTime = new Date(config.absoluteTime);
                 }
             }  
         },
@@ -740,12 +761,50 @@
         }
     });
 
+    var completePage = Page.extend({
+        id: 'completePage',
+        limitOrient: false,
+
+        init: function(){
+            this._super();
+
+            this.message = this.el.find("#completeMessage");
+            this.buttons = this.el.find("#completeButtons");
+            this.sendButton = this.buttons.find("#btnReSend");
+        },
+
+        render: function(){
+            $(this.message).html("Thank you for your time.")
+            $(this.sendButton).attr("href", generateMailLink());
+        },
+
+        post_render: function(){
+            var self = this;
+            mailDataMandrill(function(res){
+                setTimeout(_bind(function(){
+                    $(self.message).velocity({opacity:0}, 300, function(){
+                        if(res[0].status === "sent"){
+                            $(self.message).html('Data sent successfully.');
+                        }
+                        else{
+                            $(self.message).html('Unable to send data.');
+                        }
+
+                        $(self.message).velocity({opacity:1}, 300);
+                    });
+                }, this), 2000);
+            });
+
+        }
+    });
+
     var PageController = new (Class.extend({
 
         pages: {
             "start" : new startPage(),
             "calibration": new calibrationPage(),
-            "experiment": new experimentPage()
+            "experiment": new experimentPage(),
+            "complete": new completePage()
         },
 
         init: function(){
@@ -757,6 +816,7 @@
 
         transition: function(pageName, callback){
             var page = this.pages[pageName];
+            callback = callback || function(){}
 
             if(page){
                 this.curPage.hide(_bind(function(){

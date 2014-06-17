@@ -1,5 +1,9 @@
 (function(){
 
+    function utf8_to_b64( str ) {
+        return window.btoa(unescape(encodeURIComponent( str )));
+    }
+
     var Page = View.extend({
         shown: true,
         limitOrient: true,
@@ -106,7 +110,8 @@
                     failInitialCalib: ( (t.calibFail) ? 3 : 2 ),
                     maxDistFinal: t.touchMaxDistFinal || 0,
                     minDistFinal: t.touchMinDistFinal || 0,
-                    ratings: t.ratings.join("\t")         
+                    ratings: t.ratings.join(","),
+                    timeline: Array.apply(null, {length: t.durationActual + 1}).map(Number.call, Number).slice(1).join(",")         
                 };
 
             return tmpl("data_tmpl", dataObj);           
@@ -388,9 +393,7 @@
                             $(self.completePage).show();                               
                         }
                         else{
-                            console.log("1");
                             PageController.transition("complete");
-                            console.log("after");
                         }
                    
                     }
@@ -543,13 +546,29 @@
 
     });
 
+    var generateExperimentString = function(){
+        var time = config.experimentTime;
+        var subjectParams = [config.name, config.experiment, time.getFullYear(), time.getMonth(), time.getDate(), time.getHours(), time.getMinutes()];
+        return subjectParams.join('.');        
+    }
+
+    var generateMailBody = function(){
+        var html = ' \
+            <h2> Experiment Report </h2> \
+            <table> \
+                <tr> <td>Username:</td> <td>' + config.name + '</td> </tr> \
+                <tr> <td>Experiment:</td> <td>' + config.experiment + '</td> </tr> \
+                <tr> <td>Date and Time:</td> <td>' + config.experimentTime.toString() + '</td> </tr> \
+            </table>';
+        return html;
+    }
+
     var mailDataMandrill = function(callback){
-        var subject = "[Pleasure Data] " + config.experiment + " - " + config.name,
-            msg = {
+        var msg = {
                 "key": "DIE-Gm5EhIT4k_u8R-VhhQ",
                 "message": {
-                    "html": config.generateData(),
-                    "subject": subject,
+                    "html": generateMailBody(),
+                    "subject": '[Pleasure Data] ' + generateExperimentString(),
                     "from_email": "pleasure@tracker.edu",
                     "from_name": "Pleasure Tracker",
                     "to": [
@@ -557,6 +576,14 @@
                             "email": config.email,
                             "name": "Experimenter",
                             "type": "to"
+                        }
+                    ],
+                    "attachments": [
+                        {
+                            "name": generateExperimentString() + '.csv',
+                            "type": "text/csv",
+                            "binary": false,
+                            "content": utf8_to_b64(config.generateData())
                         }
                     ],
                     "important": true
@@ -571,12 +598,10 @@
     }
 
     var generateMailLink = function(){
-        var subject = "[Pleasure Data] " + config.experiment + " - " + config.name,
+        var subject = '[Pleasure] ' + generateExperimentString(),
             body = config.generateData();
         
-        body = body.replace(/<br\/>/g, "%0D%0A");
-        body = body.replace(/&#9;/g, "%09");
-        body = body.replace(/\t/g, "%09");
+        body = body.replace(/\n/g, "%0D%0A");
 
         return ('mailto:' + config.email + '?subject=' + subject + '&body=' + body);    
     }
@@ -715,8 +740,8 @@
                     this.timers.end = setTimeout(this.stop, (config.duration * 1000) );
 
                     this.status.started = true;
-                    config.absoluteTime = Date.now();
-                    config.experimentTime = new Date(config.absoluteTime);
+                    config.experimentTime = new Date();
+                    config.absoluteTime = config.experimentTime.getTime();
                 }
             }  
         },
@@ -776,6 +801,7 @@
         render: function(){
             $(this.message).html("Thank you for your time.")
             $(this.sendButton).attr("href", generateMailLink());
+            this.buttons.style.opacity = 0;
         },
 
         post_render: function(){
@@ -783,14 +809,15 @@
             mailDataMandrill(function(res){
                 setTimeout(_bind(function(){
                     $(self.message).velocity({opacity:0}, 300, function(){
-                        if(res[0].status === "sent"){
-                            $(self.message).html('Data sent successfully.');
+                        if(res[0].status === "rejected" || res[0].status === "invalid"){
+                            $(self.message).html('Unable to send data.');
                         }
                         else{
-                            $(self.message).html('Unable to send data.');
+                            $(self.message).html('Data sent successfully.');
                         }
 
                         $(self.message).velocity({opacity:1}, 300);
+                        $(self.buttons).velocity({opacity:1}, 300);
                     });
                 }, this), 2000);
             });

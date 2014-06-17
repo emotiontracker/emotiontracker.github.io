@@ -1,17 +1,45 @@
 (function(){
 
-    var bubbleContainer = document.getElementById("trackerBubbles");
+    var Page = View.extend({
+        shown: true,
+        limitOrient: true,
 
-    var windowWidth = window.innerWidth;
-    var windowHeight = window.innerHeight;
-    var pixelRatio = window.devicePixelRatio || 1;
+        init: function(start){
+            this._super();
+            _bindAll(this, 'show', 'hide');
+           if(!start){
+                // $(this.el).css('opacity', '0');
+                // $(this.el).css('display', 'none');
+                this.shown = false;                
+            }
+        },
 
-    var touches = {},
-        touchLine;
-    var paper = Raphael("tracker", windowWidth, windowHeight);
-    var changeOrient = $("#changeOrient");
+        show: function(callback){
+            if(!this.shown){
+                this.shown = true;
+                $(this.el).css('display', 'block');
+                $(this.el).animate({opacity:1}, 300, callback);              
+            }
 
-    var notifier = {
+        },
+
+        hide: function(callback){
+            if(this.shown){
+                this.shown = false;
+                $(this.el).animate({opacity:0}, 100, _bind(function(){
+                    this.onHide();
+                    callback();
+                    $(this.el).css('display', 'none');
+                }, this));                
+            }
+        },
+
+        onHide: function(){ },
+        handleResize: function(){ }
+
+    });
+
+/*    var notifier = {
         
         currentPlaying: null,
 
@@ -22,9 +50,6 @@
         },
 
         init: function(){
-            // for(s in this.sounds){
-            //     this.sounds[s].load();
-            // }
         },
 
         play: function(sound){
@@ -38,6 +63,12 @@
     }
 
 
+*/
+
+    var windowWidth = window.innerWidth;
+    var windowHeight = window.innerHeight;
+    var pixelRatio = window.devicePixelRatio || 1;
+
     var config = {
         name: '',
         experiment: '',
@@ -46,129 +77,142 @@
         duration: localStorage["pltrckr-dur"] || 20, //(1000 * 2 * 60),          // 2 mins
         durationActual: '',
         sampleInterval: 1000,
-        touchMaxDist: 0,
-        touchMinDist: 0,
+        touchMaxDistInitial: 0,
+        touchMinDistInitial: 0,
+        touchMaxDistFinal: 0,
+        touchMinDistFinal: 0,
         touchFeedback: true,
         calibFail: false,
         ratings: [],
         cancelTime: 5
     };
 
-    var pages = {
-        start: $("#startPage"),
-        calibrate: $("#calibrationPage"),
-        experiment: $("#experimentPage"),
-        settings: $("#settingsPage")
-    }
-
-    function createLine(x1, y1, x2, y2){
-        var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        line.setAttribute("x1", x1);
-        line.setAttribute("y1", y1);
-        line.setAttribute("x2", x2);
-        line.setAttribute("y2", y2);
-        return line;
-    }
-
-    function getTouch(index){
-        return touches[Object.keys(touches)[index]];
-    }
-
-    function getDist(x1, y1, x2, y2){
+    var getDistance = function(x1, y1, x2, y2){
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
     }
 
-    var $emailText = $("#email"),
-        $durationText = $("#duration"),
-        $nameText = $("#name"),
-        $experimentText = $("#experiment");
+    var settingsPage = new (Page.extend({
+        id: 'settingsPage',
 
+        limitOrient: false,
 
-    function start(){
-    	
-    	pages.settings.css("opacity", 0);
+        init: function(){
+            this._super();
+            _bindAll(this, 'handleSave', 'showStart');
 
-    	function showSettings(){
-    		$emailText.val(config.email);
-    		$durationText.val(config.duration);
+            new MBP.fastButton(this.el.find('#saveSubmit'), this.handleSave);
+            new MBP.fastButton(this.el.find('#cancelSubmit'), this.showStart);
+        },
 
-            pages.start.animate({opacity:0}, 100, function(){
-                pages.settings.show();
-                pages.settings.velocity({opacity: 1}, 100);
-            });
-    	}
+        handleSave: function(){
+            localStorage["pltrckr-email"] = config.email = $(this.el).find('#email').val().trim();
+            localStorage["pltrckr-duration"] = config.duration = $(this.el).find('#duration').val().trim();
 
-    	function hideSettings(){
-			pages.settings.velocity({opacity: 0}, 100, "easeInQuart", function(){
-				pages.settings.hide();
-                pages.start.animate({opacity:1}, 100);
-			});
-    	}
+            this.showStart();
+        },
 
-
-        function setInvalid($el){
-            $el.addClass("invalid");
+        showStart: function(){
+            this.hide(PageController.pages["start"].show);
         }
 
-        function removeInvalid($el){
-            if($el.hasClass("invalid")){
-                $el.removeClass("invalid");
+    }))();
+
+    var startPage = Page.extend({
+
+        id: 'startPage',
+        limitOrient: false,
+
+        init: function(){
+            this._super(true);
+            _bindAll(this, 'handleSubmit', 'showSettings');
+
+            this.name = this.el.find('#name');
+            this.experiment = this.el.find('#experiment');
+
+            this.name.on("change", this.removeInvalidHighlight);
+            this.experiment.on("change", this.removeInvalidHighlight);
+
+            new MBP.fastButton(this.el.find('#startSubmit'), this.handleSubmit);
+            new MBP.fastButton(this.el.find('#btnSettings'), this.showSettings);
+        },
+
+        setInvalidHighlight: function(el){
+            var els = [this.name, this.experiment];
+            var flag = false;
+            for(var i = 0; i < els.length; i++){
+                var el = els[i];
+                if($(el).val().trim() === ''){
+                    $(el).addClass('invalid');
+                    flag = true;
+                }
             }
+            return flag;
+        },
+
+        removeInvalidHighlight: function(e){
+            var el = e.target;
+            $(el).removeClass('invalid');
+
+        },
+
+        handleSubmit: function(){
+
+            if(this.setInvalidHighlight()){ return false; }       
+
+            config.name = $(this.name).val().trim();
+            config.experiment = $(this.experiment).val().trim(); 
+
+            PageController.transition("calibration", function(){
+                this.begin("Initial");
+            });
+        },
+
+        showSettings: function(){
+            this.hide(settingsPage.show);
         }
 
-        $nameText.on("change", function(){
-            removeInvalid($(this));
-        });
+    });
 
-        $experimentText.on("change", function(){
-            removeInvalid($(this));
-        });
 
-        new MBP.fastButton(document.getElementById('btnSettings'), showSettings);
-        new MBP.fastButton(document.getElementById('startSubmit'), function(){
+    var bubble = function(){
+        return {
+            x: 0,
+            y: windowHeight/2,
+            r: 40,
+            circle: null,
+            line: null,
+            selected: false,
+            update: function(){
+                this.circle.attr("cx", this.x);
+                this.circle.attr("cy", this.y);
+                this.line.attr("path", "M" + windowWidth/2 + " " + windowHeight/2 + "L" + this.x + " " + this.y);
+            },
 
-            config.name = $nameText.val().trim(),
-            config.experiment = $experimentText.val().trim();
-
-            var invalidFlag = true;
-
-            if(config.name === ''){
-                setInvalid($nameText);
-                invalidFlag = false;
+            toggleSelected: function(){
+                console.log("toggling", this.selected);
+                if(this.selected){
+                    this.circle.animate({
+                        "fill-opacity": 0.2,
+                        "r": 40
+                    }, 300, "bounce");  
+                    this.selected = false;                      
+                }
+                else{
+                    this.circle.animate({
+                        "fill-opacity": 0.6,
+                        "r": 60
+                    }, 300, "bounce");                     
+                }
             }
-
-            if(config.experiment === ''){
-                setInvalid($experimentText);
-                invalidFlag = false;
-            }
-
-            if(!invalidFlag){
-                return false;
-            }
-
-            pages.start.velocity({opacity: 0}, 300, function(){
-                pages.start.hide();
-                pages.calibrate.show();
-                calibrate();
-            });
-        });
-
-
-        new MBP.fastButton(document.getElementById('saveSubmit'), function(){
-            config.email = $("#email").val().trim();
-            config.duration = $("#duration").val().trim();
-
-            localStorage["pltrckr-email"] = config.email;
-            localStorage["pltrckr-duration"] = config.duration;
-
-            hideSettings();
-        });
-        new MBP.fastButton(document.getElementById('cancelSubmit'), hideSettings);
+        };
     }
 
-    function calibrate(){
 
-        var trials = [{
+    var calibrationPage = Page.extend({
+
+        id: 'calibrationPage',
+
+        trials: [{
             title: 'Indicate <span class="strong">Maximum</span> Pleasure',
             instr: 'Using two fingers, drag the circles as far apart as comfortably possible.',
             configVar: 'touchMaxDist'
@@ -176,528 +220,330 @@
             title: 'Indicate <span class="strong">Minimum</span> Pleasure',
             instr: 'Using two fingers, drag the circles as close as comfortably possible.',
             configVar: 'touchMinDist'
-        }];
+        }],
+
+        init: function(){
+            this._super();
+            _bindAll(this, 'handleTouchStart', 'handleTouchMove', 'handleTouchEnd');
+
+            this.tracker = this.el.find('#calibTracker');
+            this.titleText = this.el.find('#calibTitle');
+            this.instrText = this.el.find('#calibInstr');
+            this.completePage = this.el.find('#calibComplete');
+
+            this.paper = Raphael(this.tracker, window.innerWidth, window.innerHeight);
+            this.begun = false;
+        },
 
 
-        // var medianLine = paper.path("M0 " + windowHeight/2 + "L" + windowWidth + " " + windowHeight/2);
-        // medianLine.attr("stroke", "#eee");
-        // medianLine.attr("stroke-dasharray", "--");
+        initPaper: function(callback){
 
-
-        var bubble = function(){
-            return {
-                x: 0,
-                y: windowHeight/2,
-                r: 40,
-                circle: null,
-                line: null,
-                selected: false,
-                update: function(){
-                    this.circle.attr("cx", this.x);
-                    this.circle.attr("cy", this.y);
-                    this.line.attr("path", "M" + windowWidth/2 + " " + windowHeight/2 + "L" + this.x + " " + this.y);
-                },
-
-                toggleSelected: function(){
-
-                    if(this.selected){
-                        this.circle.animate({
-                            "fill-opacity": 0.2,
-                            "r": 40
-                        }, 300, "bounce");  
-                        this.selected = false;                      
-                    }
-                    else{
-                        this.circle.animate({
-                            "fill-opacity": 0.6,
-                            "r": 60
-                        }, 300, "bounce");                     
-                    }
-                }
-            };
-        }
-
-        var bubbles, joinLine;
-        var doubleDetect = false;
-        var trialIndex = 0,
-            trialCount = 1,
-            trialFail = [],
-            trial;
-
-        function onTouchStart(e){
-            e.preventDefault();
-            var changed = e.changedTouches;
-
-            for(var i = 0; i < changed.length ; i++){ 
-
-                bubbles.forEach(function(b){
-                    if(b.selected) return;
-
-                    if(b.circle.isPointInside(changed[i].pageX, changed[i].pageY)){
-
-                        b.x = changed[i].pageX;
-                        b.y = changed[i].pageY;
-                        b.update();
-                        joinLine.attr("path", "M" + bubbles[0].x + " " + bubbles[0].y + "L" + bubbles[1].x + " " + bubbles[1].y);
-                        b.toggleSelected();
-
-                        b.selected = changed[i].identifier;
-                    }
-                });
-
+            if (window.innerWidth < window.innerHeight) {
+                this.orient = false;
+                return;
+            }
+            else{
+                this.orient = true;
             }
 
-            if(bubbles[0].selected && bubbles[1].selected){
-                doubleDetect = true;
-                $(instrEl).velocity({opacity:0}, 200, function(){
-                    instrEl.innerHTML = 'Release both fingers to set.';
-                    $(instrEl).velocity({opacity:1}, 200);
-                });
-                
+            this.tracker.style.opacity = 1;
+            var shapes = this.paper.shapes = {};
+
+            shapes.bubbles = [new bubble(), new bubble()];
+            shapes.bubbles[0].x = windowWidth/2 - 40;
+            shapes.bubbles[1].x = windowWidth/2 + 40;
+            shapes.bubbles.selected = function(){
+                return (this[0].selected && this[1].selected);
+            } 
+            shapes.bubbles.distance = function(){
+                return getDistance(this[0].x, this[0].y, this[1].x, this[1].y);
+            } 
+
+            shapes.joinLine = this.paper.path('');
+            shapes.joinLine.attr('stroke', '#c6003b');
+            shapes.joinLine.attr('stroke-opacity', 0);
+            shapes.joinLine.bubbles = shapes.bubbles;
+            shapes.joinLine.updatePos = function(){
+                this.attr("path", "M" + this.bubbles[0].x + " " + this.bubbles[0].y + "L" + this.bubbles[1].x + " " + this.bubbles[1].y);
             }
-        }
+            shapes.joinLine.updatePos(); 
 
-        function onTouchMove(e){
-            e.preventDefault();
-            var changed = e.changedTouches; 
-            
-            for(var i = 0; i < changed.length ; i++){ 
+            this.titleText.style.opacity = 0;
+            this.instrText.style.opacity = 0;
 
-                bubbles.forEach(function(b){
-                    if(b.selected === changed[i].identifier){
-                        b.x = changed[i].pageX;
-                        b.y = changed[i].pageY;
-                        b.update();
-                        joinLine.attr("path", "M" + bubbles[0].x + " " + bubbles[0].y + "L" + bubbles[1].x + " " + bubbles[1].y);
-                    }
-                });
+            var self = this;
+            shapes.bubbles.forEach(function(b){
+                b.circle = self.paper.circle(b.x, b.y, b.r);
+                b.circle.attr('fill', 'rgb(216, 0, 57)');
+                b.circle.attr('fill-opacity', 0);
+                b.circle.attr('stroke', 'none');
 
-            }            
-        }
+                b.line = self.paper.path('');
+                b.line.attr('stroke', '#000');
+                b.line.attr('stroke-opacity', 0.1);
+                b.update();
 
-        function onTouchEnd(e){
-            e.preventDefault();
-            var changed = e.changedTouches; 
-            
-            for(var i = 0; i < changed.length ; i++){ 
-
-                bubbles.forEach(function(b){
-                    if(b.selected === changed[i].identifier){
-                        b.toggleSelected();
-                    }
-                });
-
-            }    
-
-            if(doubleDetect && !bubbles[0].selected && !bubbles[1].selected){
-
-                doubleDetect = false;
-                window.removeEventListener("touchstart", onTouchStart);
-
-                bubbles.forEach(function(b){
-                    b.circle.animate({
-                        "fill": "#888"
-                    }, 200);   
-                }); 
-
-                var sampleX1 = bubbles[0].x,
-                    sampleX2 = bubbles[1].x,
-                    sampleY1 = bubbles[0].y,
-                    sampleY2 = bubbles[1].y;
-
-                var dist = getDist(sampleX1, sampleY1, sampleX2, sampleY2);
-                if(trialCount == 2){
-                    if( Math.abs(dist - config[trial.configVar]) > 100 ){
-                        trialFail.push(trialIndex);
-                        config.calibFail = true;
-                    }
-                    else{
-                        config[trial.configVar] = Math.floor((config[trial.configVar] + dist)/2);
-                    }
-                }
-                else{
-                    config[trial.configVar] = dist;
-                }
-
-                if(trialIndex == 0){
-                    if(trialCount == 3){
-                        trialIndex = trialFail.splice(0,1)[0];
-                    }
-                    else{
-                        trialIndex++;
-                    }
-                    
-                }
-                else{
-                    if(trialCount == 1){
-                        trialIndex = 0;
-                    }
-                    else{
-                        trialIndex = trialFail.splice(0,1)[0];
-                    }
-                    trialCount++;
-                }
-
-                if(trialIndex !== undefined){
-                    $(instrEl).velocity({opacity: 0}, 200, function(){
-                        $(titleEl).velocity({opacity: 0}, 400, function(){
-                            //console.log("starting trial pre");
-                            startTrial(trialIndex);
-                        });
-                    });
-                    
-                }
-                else{
-
-                    window.removeEventListener("touchmove", onTouchMove);
-                    window.removeEventListener("touchend", onTouchEnd);
-                    window.removeEventListener("touchcancel", onTouchEnd);   
-
-                    $(instrEl).velocity({opacity: 0}, 400, function(){
-                        $(titleEl).velocity({opacity: 0}, { duration: 400, queue: false });
-                        $("#tracker").velocity({opacity: 0}, { duration: 200, queue: false, complete: function(){
-                            $("#calibComplete").show();
-
-                            // new MBP.fastButton(document.getElementById('btnRetry'), function() {
-                            //     $("#calibComplete").hide();
-                            //     calibrate();
-                            // });  
-
-                            new MBP.fastButton(document.getElementById('btnExp'), function() {
-                                pages.calibrate.velocity({opacity:0}, 300, function(){
-                                    pages.experiment.show();
-                                    experiment();                                    
-                                });
-                            });                   
-                        }});
-                    });
-                }   
-
-            }       
-        }
-
-
-        var titleEl = document.getElementById("calibTitle"),
-            instrEl = document.getElementById("calibInstr");
-
-
-        var startTrial = function(trialIndex){
-
-            window.addEventListener("touchstart", onTouchStart);
-
-            trial = trials[trialIndex];
-
-            titleEl.innerHTML = trial.title;
-            instrEl.innerHTML = trial.instr;
-
-            //console.log("starting trial");
-
-            $(titleEl).velocity({opacity: 1}, 400, function(){
-                $(instrEl).velocity({opacity: 1}, 200);
+                b.circle.animate({
+                    'fill-opacity': 0.2
+                },300);
             });
+
+            shapes.joinLine.animate({
+                'stroke-opacity': 1
+            }, 200, 'linear', callback); 
+
+            if(this.begun){
+                this.startTrial(0);
+            }
+        },
+
+        handleResize: function(){
+            this.paper.setSize(window.innerWidth, window.innerHeight);
+            if (Math.abs(window.orientation) !== 90) {
+                if(!this.orient){
+                    this.initPaper();
+                    this.orient = true;
+                    window.scrollTo( 0, 1 );                    
+                }
+            }
+        },
+
+        begin: function(phase){
+
+            this.trialParams = {
+                queue: (phase == 'Initial') ? [1,0,1] : [1],
+                cur: -1,
+                step: 1,
+                index: 1,
+                maxSteps: (phase == 'Initial') ? 2 : 1,
+                phase: phase,
+                verify: (phase == 'Initial') ? true : false,
+            }
+
+            this.begun = true;
+            this.initPaper();
+
+            this.tracker.on('touchmove', this.handleTouchMove);
+            this.tracker.on('touchend', this.handleTouchEnd);
+            this.tracker.on('touchcancel', this.handleTouchEnd);  
+        },
+
+        end: function(){
+            this.tracker.off('touchmove', this.handleTouchMove);
+            this.tracker.off('touchend', this.handleTouchEnd);
+            this.tracker.off('touchcancel', this.handleTouchEnd);  
+
+            var self = this;
+            $(this.instrText).velocity({opacity: 0}, 50, function(){
+                $(self.titleText).velocity({opacity: 0}, { duration: 200, queue: false });
+                $(self.tracker).velocity({opacity: 0}, { duration: 200, queue: false, 
+                    complete: function(){
+                        self.paper.clear();
+                        self.paper = null;  
+                        
+                        $(self.completePage).show();
+
+                        new MBP.fastButton(self.completePage.find('#btnExp'), function() {
+                            PageController.transition("experiment");                                 
+                        });                      
+                    }
+                });
+            });
+        },
+
+        onHide: function(){
+            $(this.completePage).hide();
+        },
+
+        startTrial: function(trialIndex){
             
-            bubbles.forEach(function(b){
+            var trial = this.trials[trialIndex];
+
+            this.trialParams.cur = trialIndex;
+
+            this.titleText.innerHTML = trial.title;
+            this.instrText.innerHTML = trial.instr;
+
+            this.paper.shapes.bubbles.forEach(function(b){
                 b.circle.animate({
                     "fill": "rgb(216, 0, 57)"
                 }, 200);   
             }); 
-        }
+            this.tracker.on('touchstart', this.handleTouchStart);
 
-        var initialize = function(){
-            $("#tracker").css('opacity', 1);
-            paper.clear();
-            
-            bubbles = [new bubble(), new bubble()];
-            bubbles[0].x = windowWidth/2 - 40;
-            bubbles[1].x = windowWidth/2 + 40;  
-            
-            joinLine = paper.path("M" + bubbles[0].x + " " + bubbles[0].y + "L" + bubbles[1].x + " " + bubbles[1].y);
-            joinLine.attr("stroke", "#c6003b");
-            joinLine.attr("stroke-opacity", 0);   
+            $(this.titleText).velocity({opacity: 1}, 300, _bind(function(){
+                $(this.instrText).velocity({opacity: 1}, 200);
+            }, this));
+        },
 
-            window.removeEventListener("touchmove", onTouchMove);
-            window.removeEventListener("touchend", onTouchEnd);
-            window.removeEventListener("touchcancel", onTouchEnd);  
+        endTrial: function(){
+            var bubbles = this.paper.shapes.bubbles;
 
-            window.addEventListener("touchmove", onTouchMove);
-            window.addEventListener("touchend", onTouchEnd);
-            window.addEventListener("touchcancel", onTouchEnd);    
-
-            titleEl.style.opacity = 0;
-            instrEl.style.opacity = 0;   
-
+            this.tracker.off('touchstart', this.handleTouchStart);
             bubbles.forEach(function(b){
-                b.circle = paper.circle(b.x, b.y, b.r);
-                b.circle.attr("fill", "rgb(216, 0, 57)");
-                b.circle.attr("fill-opacity", 0);
-                b.circle.attr("stroke", "none");
-
-                b.line = paper.path("");
-                b.line.attr("stroke", "#000");
-                b.line.attr("stroke-opacity", 0.1);
-                b.update();
-
                 b.circle.animate({
-                    "fill-opacity": 0.2
-                },500);
-
-                joinLine.animate({
-                    "stroke-opacity": 1
-                }, 100, "linear", function(){
-                    startTrial(0);
-                });                
+                    "fill": "#888"
+                }, 200);   
             });
+
+            var distance = bubbles.distance(),
+                tp = this.trialParams,
+                trial = this.trials[tp.cur];
+
+            if(tp.step == tp.maxSteps && tp.verify){
+                if( Math.abs(distance - config[trial.configVar + tp.phase]) > 100 ){
+                    tp.queue.push(tp.cur);
+                    config.calibFail = true;
+                }
+                else{
+                    config[trial.configVar + tp.phase] = Math.floor((config[trial.configVar + tp.phase] + distance) / 2);
+                }                
+            }
+            else{
+                config[trial.configVar + tp.phase] = distance;
+            }
+
+            if(tp.index % this.trials.length == 0){
+                tp.step++;
+            }
+            tp.index++;
+
+            if(tp.queue.length == 0){
+                this.end();
+            }
+            else{
+                var self = this;
+                $(self.instrText).velocity({opacity: 0}, 50, function(){
+                    $(self.titleText).velocity({opacity: 0}, 100, function(){
+                        self.startTrial(tp.queue.splice(0,1)[0]);
+                    });
+                });                
+            }
+        },
+
+
+        handleTouchStart: function(e){
+            e.preventDefault();
+            var changed = e.changedTouches,
+                shapes = this.paper.shapes;
+
+            for(var i = 0; i < changed.length ; i++){ 
+                for(var j = 0; j < 2 /*shapes.bubbles.length*/; j++){
+                    var b = shapes.bubbles[j];
+                    if(!b.selected && b.circle.isPointInside(changed[i].pageX, changed[i].pageY)){
+                        b.x = changed[i].pageX;
+                        b.y = changed[i].pageY;
+                        b.update();
+                        b.toggleSelected();
+                        b.selected = changed[i].identifier;
+                        shapes.joinLine.updatePos();
+                        break;
+                    }                    
+                }
+            }
+
+            if(shapes.bubbles.selected()){
+                this.detectedDoubleTouch = true;
+                $(this.instrText).velocity({opacity:0}, 50, _bind(function(){
+                    this.instrText.innerHTML = 'Release both fingers to set.';
+                    $(this.instrText).velocity({opacity:1}, 100);
+                }, this));
+            }
+
+        },
+
+        handleTouchMove: function(e){
+            e.preventDefault();
+            var changed = e.changedTouches,
+                shapes = this.paper.shapes;
+            
+            for(var i = 0; i < changed.length ; i++){ 
+
+                for(var j = 0; j < 2 /*shapes.bubbles.length*/; j++){
+                    var b = shapes.bubbles[j];
+                    if(b.selected === changed[i].identifier){
+                        b.x = changed[i].pageX;
+                        b.y = changed[i].pageY;
+                        b.update();
+                        shapes.joinLine.updatePos();
+                        break;
+                    }
+                }
+
+            }  
+        },
+
+        handleTouchEnd: function(e){
+            e.preventDefault();
+            var changed = e.changedTouches,
+                shapes = this.paper.shapes;
+            
+            for(var i = 0; i < changed.length ; i++){ 
+
+                for(var j = 0; j < 2 /*shapes.bubbles.length*/; j++){
+                    var b = shapes.bubbles[j];
+                    if(b.selected === changed[i].identifier){
+                        b.toggleSelected();
+                        break;
+                    }
+                }
+            } 
+
+            if(this.detectedDoubleTouch && !shapes.bubbles[0].selected && !shapes.bubbles[1].selected) {
+                this.detectedDoubleTouch = false;
+                this.endTrial();
+            }
         }
-        
-        var orient = false;
-        window.onresize = function(){
+
+    });
+
+    var PageController = new (Class.extend({
+
+        pages: {
+            "start" : new startPage(),
+            "calibration": new calibrationPage(),
+            "experiment": null
+        },
+
+        init: function(){
+            this.curPage = this.pages["start"];
+            this.orientPage = _el('changeOrient');
+
+            window.onresize = _bind(this.handleResize, this);
+        },
+
+        transition: function(pageName, callback){
+            var page = this.pages[pageName];
+
+            if(page){
+                this.curPage.hide(_bind(function(){
+                    this.curPage = page;
+                    this.handleResize();
+                    page.show(_bind(callback, page));
+                }, this));
+            }
+        },
+
+        handleResize: function(){
             windowWidth = window.innerWidth;
             windowHeight = window.innerHeight;
 
-            if (Math.abs(window.orientation) === 90) {
-                pages.calibrate.hide();
-                changeOrient.show();
-            } else {
-                changeOrient.hide();
-                if(!orient){
-                    paper.setSize(window.innerWidth, window.innerHeight);
-                    initialize();
-                    orient = true;
+            if(this.curPage.limitOrient){ 
+                if (window.innerWidth > window.innerHeight) { // Landscape
+                    this.orientPage.hide();
+                    this.curPage.el.show();
                 }
-                pages.calibrate.show(); 
-                window.scrollTo( 0, 1 );
-            }            
-        }
-
-        if (Math.abs(window.orientation) === 90) {
-            paper.setSize(window.innerWidth, window.innerHeight);
-            initialize();
-            orient = true;      
-        } else {
-            changeOrient.show();
-        }
-    }
-
-
-    function genData(){
-
-        var dataObj = {
-            userName: config.name,
-            experimentName: config.experiment,
-            experimentDate: config.experimentTime.toString(),
-            firstRatingTimeAbsolute: 0,
-            sampleInterval: config.sampleInterval/1000,
-            experimentDur: config.duration,
-            experimentDurActual: config.durationActual,
-            maxDistInitial: config.touchMaxDist,
-            minDistInitial: config.touchMinDist,
-            failInitialCalib: ( (config.calibFail) ? 3 : 2 ),
-            maxDistFinal: config.touchMaxDistFinal || 0,
-            minDistFinal: config.touchMinDistFinal || 0,
-            ratings: config.ratings.join("\t")         
-        }
-
-        var data = tmpl("data_tmpl", dataObj);
-
-        return data;
-    }
-
-    function mailtoDataString(data){
-        var subject = "[Pleasure Data] " + config.experiment + " - " + config.name;
-        var body = data;
-        body = body.replace(/<br\/>/g, "%0D%0A");
-        body = body.replace(/&#9;/g, "%09");
-        body = body.replace(/\t/g, "%09");
-
-        var string = 'mailto:' + config.email + '?subject=' + subject + '&body=' + body;
-
-        return string;
-    }
-
-    function genMessage(data){
-        var subject = "[Pleasure Data] " + config.experiment + " - " + config.name;
-        var msg = {
-                "key": "DIE-Gm5EhIT4k_u8R-VhhQ",
-                "message": {
-                    "html": data,
-                    "subject": subject,
-                    "from_email": "pleasure@tracker.edu",
-                    "from_name": "Pleasure Tracker",
-                    "to": [
-                        {
-                            "email": config.email,
-                            "name": "Experimenter",
-                            "type": "to"
-                        }
-                    ],
-                    "important": true
-                },
-                "async": false
-        }   
-
-        return JSON.stringify(msg);           
-    }
-
-    function sendData(d, callback){
-        var apiKey = "IYtnRrE7NAgZ9u94hsPcqg";
-        $.post("https://mandrillapp.com/api/1.0/messages/send.json",
-            d,
-            callback
-        );
-    }
-
-    function experiment(){
-
-        var touches = [{x: 0, y: 0, id: false}, {x: 0, y: 0, id: false}];
-        var doubleDetect = false, started = false, canceled = false;
-        var cancelTimeout, endTimeout, sampleInterval = false;
-        var samples = [];
-
-        var ratingRange = config.touchMaxDist - config.touchMinDist,
-            ratingStep = ratingRange / 10;
-
-        function toRating(dist){
-            if(dist < config.touchMinDist) {
-                dist = config.touchMinDist;
-            }
-            else if(dist > config.touchMaxDist){
-                dist = config.touchMaxDist;
+                else{ // Portrait
+                    this.curPage.el.hide();
+                    this.orientPage.show();
+                }                
             }
 
-            return (dist - config.touchMinDist) / ratingStep;
+            this.curPage.handleResize();           
         }
 
-        function sampleRating(){
-	    	var rating = toRating(getDist(touches[0].x, touches[0].y, touches[1].x, touches[1].y)).toFixed(1);
-	    	if(!touches[0].id || !touches[1].id && rating !== samples[samples.length-1]){
-	    		rating *= -1;
-	    	}
-	        samples.push(rating);        	
-        }
+    }))();
 
-
-        function stop(){
-            
-            if(canceled !== false){
-                config.durationActual = canceled;
-            }
-            else{
-                config.durationActual = new Date();
-            }
-
-            config.durationActual = Math.floor( (config.durationActual - config.experimentTime) / 1000 );
-
-            clearTimeout(endTimeout);
-            clearTimeout(cancelTimeout);
-            clearInterval(sampleInterval);
-
-	        window.removeEventListener("touchstart", onTouchStart);
-	        window.removeEventListener("touchmove", onTouchMove);
-	        window.removeEventListener("touchend", onTouchEnd);
-	        window.removeEventListener("touchcancel", onTouchEnd);
-
-	        sampleRating();
-	        config.ratings = samples.slice(0, config.durationActual);
-
-            var data = genData();
-
-            sendData(genMessage(data), function(r){
-                $("#expTitle").html('Thank you for your time.');
-                setTimeout(function(){
-                    $("#expTitle").velocity({opacity:0}, 300, function(){
-                        if(r[0].status === "sent"){
-                            $("#expTitle").html('Data sent successfully.');
-                        }
-                        else{
-                            $("#expTitle").html('Unable to send data. <a class="btn btn-primary" href="' + mailtoDataString(data) +'">Mail Data</a>');
-                        }
-
-                        $("#expTitle").velocity({opacity:1}, 300);
-                    });
-                },2000);
-            });
-            
-        }
-
-        function onTouchStart(e){
-            e.preventDefault();
-            var changed = e.changedTouches;
-
-            for(var i = 0; i < changed.length ; i++){ 
-
-                for(var j = 0; j < touches.length; j++){
-                    if(!touches[j].id){
-                        touches[j].x = changed[i].pageX;
-                        touches[j].y = changed[i].pageY;
-                        touches[j].id = changed[i].identifier; 
-                        notifier.play("contact");   
-                        break;                    
-                    }
-                }
-            }      
-
-            if(touches[0].id && touches[1].id){
-
-                doubleDetect = true;
-                $("#expTitle").html("");
-                clearTimeout(cancelTimeout);
-                canceled = false;
-
-                if(!started){
-                    sampleInterval = setInterval(sampleRating, config.sampleInterval);
-                    endTimeout = setTimeout(stop, (config.duration * 1000) );
-
-                    started = true;
-                    config.experimentTime = new Date();
-                }
-            }      
-        }
-
-        function onTouchMove(e){
-            e.preventDefault();
-            var changed = e.changedTouches; 
-            
-            for(var i = 0; i < changed.length ; i++){ 
-
-                touches.forEach(function(t, j){
-                    if(t.id === changed[i].identifier){
-                        touches[j].x = changed[i].pageX;
-                        touches[j].y = changed[i].pageY;
-                    }
-                });
-
-            }            
-        }
-
-        function onTouchEnd(e){
-            e.preventDefault();
-            var changed = e.changedTouches; 
-            
-            for(var i = 0; i < changed.length ; i++){ 
-
-                touches.forEach(function(t, j){
-                    if(t.id === changed[i].identifier){
-                        touches[j].id = false;
-                        notifier.play("contactLoss");
-                    }
-                });
-
-            }         
-
-            if(doubleDetect && !touches[0].id && !touches[1].id){
-                doubleDetect = false;
-                cancelTimeout = setTimeout(stop, config.cancelTime * 1000);
-                canceled = new Date();
-            }   
-        }
-
-        window.addEventListener("touchstart", onTouchStart);
-        window.addEventListener("touchmove", onTouchMove);
-        window.addEventListener("touchend", onTouchEnd);
-        window.addEventListener("touchcancel", onTouchEnd);
-
-    }
-
-    start();
+    PageController.init();
 
 })();

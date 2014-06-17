@@ -59,7 +59,7 @@
                 <button id="btnSettings" class=""><div class="ico-settings"></div></button>
             </div>
 
-            <div id="settingsPage" style="display:none">
+            <div id="settingsPage" style="display:none;opacity:0">
                 <h2>Settings</h2>
                 <div class="field">
                     <label for="email">Enter email of the experimenter</label>
@@ -75,9 +75,9 @@
                 </div>                                
             </div>
 
-            <div id="calibrationPage" style="display:none">
+            <div id="calibrationPage" style="display:none;opacity:0">
                 <div id="calibTitle" class="title"></div>
-                <div id="tracker"></div>
+                <div id="calibTracker"></div>
                 <div id="calibInstr"></div>
                 <div id="calibComplete" style="display:none">
                     <div class="title" style="height:100px;top:0;bottom:0">
@@ -90,7 +90,7 @@
                 </div>
             </div>
 
-            <div id="experimentPage" style="display:none">
+            <div id="experimentPage" style="display:none;opacity:0">
                 <div id="expTitle" class="title">Place two fingers to begin the experiment.</div>
             </div>
 
@@ -105,6 +105,7 @@
         <script src="js/vendor/raphael-min.js"></script>
         <script src="js/helper.js"></script>
         <script src="js/plugins.js"></script>
+        <script src="js/util.js"></script>
         <script src="js/main.js"></script>
         
 <script type="text/html" id="data_tmpl">

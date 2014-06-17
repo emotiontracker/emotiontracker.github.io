@@ -250,12 +250,18 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   font-size:1.2em;
 }
 
+#calibTracker{
+  width:100%:
+  height:100%;
+  overflow:hidden;
+}
+
 #expTitle{
   top:0; bottom:0;
 }
 
 #calibInstr{
-  bottom:20px;
+  bottom:30px;
   color:#888;
   padding: 0 30px;
 }

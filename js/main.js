@@ -39,7 +39,7 @@
 
     });
 
-/*    var notifier = {
+    var notifier = {
         
         currentPlaying: null,
 
@@ -63,7 +63,6 @@
     }
 
 
-*/
 
     var windowWidth = window.innerWidth;
     var windowHeight = window.innerHeight;
@@ -84,7 +83,28 @@
         touchFeedback: true,
         calibFail: false,
         ratings: [],
-        cancelTime: 5
+        cancelTime: 5,
+
+        generateData: function(){
+            var t = this,
+                dataObj = {
+                    userName: t.name,
+                    experimentName: t.experiment,
+                    experimentDate: t.experimentTime.toString(),
+                    firstRatingTimeAbsolute: 0,
+                    sampleInterval: t.sampleInterval/1000,
+                    experimentDur: t.duration,
+                    experimentDurActual: t.durationActual,
+                    maxDistInitial: t.touchMaxDistInitial,
+                    minDistInitial: t.touchMinDistInitial,
+                    failInitialCalib: ( (t.calibFail) ? 3 : 2 ),
+                    maxDistFinal: t.touchMaxDistFinal || 0,
+                    minDistFinal: t.touchMinDistFinal || 0,
+                    ratings: t.ratings.join("\t")         
+                };
+
+            return tmpl("data_tmpl", dataObj);           
+        }
     };
 
     var getDistance = function(x1, y1, x2, y2){
@@ -99,6 +119,9 @@
         init: function(){
             this._super();
             _bindAll(this, 'handleSave', 'showStart');
+
+            $(this.el).find('#email').val(config.email);
+            $(this.el).find('#duration').val(config.duration);
 
             new MBP.fastButton(this.el.find('#saveSubmit'), this.handleSave);
             new MBP.fastButton(this.el.find('#cancelSubmit'), this.showStart);
@@ -189,7 +212,6 @@
             },
 
             toggleSelected: function(){
-                console.log("toggling", this.selected);
                 if(this.selected){
                     this.circle.animate({
                         "fill-opacity": 0.2,
@@ -344,7 +366,9 @@
                         $(self.completePage).show();
 
                         new MBP.fastButton(self.completePage.find('#btnExp'), function() {
-                            PageController.transition("experiment");                                 
+                            PageController.transition("experiment", function(){
+                                this.begin();
+                            });                                 
                         });                      
                     }
                 });
@@ -371,9 +395,8 @@
             }); 
             this.tracker.on('touchstart', this.handleTouchStart);
 
-            $(this.titleText).velocity({opacity: 1}, 300, _bind(function(){
-                $(this.instrText).velocity({opacity: 1}, 200);
-            }, this));
+            $(this.titleText).velocity({opacity: 1}, 200);
+            $(this.instrText).velocity({opacity: 1}, 200);
         },
 
         endTrial: function(){
@@ -497,12 +520,225 @@
 
     });
 
+    var mailDataMandrill = function(callback){
+        var subject = "[Pleasure Data] " + config.experiment + " - " + config.name,
+            msg = {
+                "key": "DIE-Gm5EhIT4k_u8R-VhhQ",
+                "message": {
+                    "html": config.generateData(),
+                    "subject": subject,
+                    "from_email": "pleasure@tracker.edu",
+                    "from_name": "Pleasure Tracker",
+                    "to": [
+                        {
+                            "email": config.email,
+                            "name": "Experimenter",
+                            "type": "to"
+                        }
+                    ],
+                    "important": true
+                },
+                "async": false
+        }   
+
+        $.post("https://mandrillapp.com/api/1.0/messages/send.json",
+            JSON.stringify(msg),
+            callback
+        );     
+    }
+
+    var generateMailLink = function(){
+        var subject = "[Pleasure Data] " + config.experiment + " - " + config.name,
+            body = config.generateData();
+        
+        body = body.replace(/<br\/>/g, "%0D%0A");
+        body = body.replace(/&#9;/g, "%09");
+        body = body.replace(/\t/g, "%09");
+
+        return ('mailto:' + config.email + '?subject=' + subject + '&body=' + body);    
+    }
+
+    var experimentPage = Page.extend({
+        id: 'experimentPage',
+
+        init: function(){
+            this._super();
+            _bindAll(this, 'begin', 'stop', 'handleTouchStart', 'handleTouchMove', 'handleTouchEnd', 'sampleRating');
+            
+            this.titleText = this.el.find('#expTitle');
+            this.touches = [{x: 0, y: 0, id: false}, {x: 0, y: 0, id: false}];
+            this.status = {
+                doubleTouch: false,
+                started: false,
+                canceled: false
+            };
+            this.samples = [];
+            this.timers = {
+                end: null,
+                cancel: null,
+                sample: null,
+                clearAll: function(){
+                    clearTimeout(this.end);
+                    clearTimeout(this.cancel);
+                    clearTimeout(this.sample);
+                }
+            };
+
+        },
+
+        begin: function(){
+
+            this.rater = (function(){
+                var ratingRange = config.touchMaxDistInitial - config.touchMinDistInitial,
+                    ratingStep = ratingRange / 10;
+                    console.log(ratingRange, ratingStep);
+                return {
+                    getRating: function(distance){
+                        if(distance < config.touchMinDistInitial) {
+                            distance = config.touchMinDistInitial;
+                        }
+                        else if(distance > config.touchMaxDistInitial){
+                            distance = config.touchMaxDistInitial;
+                        }
+
+                        return (distance - config.touchMinDistInitial) / ratingStep;                 
+                    }
+                };
+            })();
+
+            window.addEventListener('touchstart', this.handleTouchStart);
+            window.addEventListener('touchmove', this.handleTouchMove);
+            window.addEventListener('touchend', this.handleTouchEnd);
+            window.addEventListener('touchcancel', this.handleTouchEnd);            
+        },
+
+        sampleRating: function(){
+            var touches = this.touches,
+                rating = this.rater.getRating(getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y)).toFixed(1);
+            
+            if(!touches[0].id || !touches[1].id && rating !== this.samples[this.samples.length-1]){
+                rating *= -1;
+            }
+            this.samples.push(rating);  
+        },
+
+        stop: function(){
+            this.timers.clearAll();
+            window.removeEventListener('touchstart', this.handleTouchStart);
+            window.removeEventListener('touchmove', this.handleTouchMove);
+            window.removeEventListener('touchend', this.handleTouchEnd);
+            window.removeEventListener('touchcancel', this.handleTouchEnd); 
+
+            if(this.status.canceled !== false){
+                config.durationActual = this.status.canceled;
+            }
+            else{
+                config.durationActual = new Date();
+            }
+            config.durationActual = Math.floor( (config.durationActual - config.experimentTime) / 1000 );
+
+            this.sampleRating();
+            config.ratings = this.samples.slice(0, config.durationActual);
+
+            console.log(config.ratings);
+
+            var title = this.titleText;
+            mailDataMandrill(function(res){
+                title.innerHTML = 'Thank you for your time.';
+                setTimeout(function(){
+                    $(title).velocity({opacity:0}, 300, function(){
+                        if(res[0].status === "sent"){
+                            title.innerHTML = 'Data sent successfully.';
+                        }
+                        else{
+                            title.innerHTML = 'Unable to send data. <a class="btn btn-primary" href="' + generateMailLink(data) +'">Mail Data</a>';
+                        }
+
+                        $(title).velocity({opacity:1}, 300);
+                    });
+                },2000);
+            });
+        },
+
+        handleTouchStart: function(e){
+            e.preventDefault();
+            var changed = e.changedTouches,
+                touches = this.touches;
+
+            for(var i = 0; i < changed.length ; i++){ 
+                for(var j = 0; j < touches.length; j++){
+                    if(!touches[j].id){
+                        touches[j].x = changed[i].pageX;
+                        touches[j].y = changed[i].pageY;
+                        touches[j].id = changed[i].identifier; 
+                        notifier.play("contact");   
+                        break;                    
+                    }
+                }
+            }      
+
+            if(touches[0].id && touches[1].id){
+                this.status.doubleTouch = true;
+                this.titleText.innerHTML = '';
+                clearTimeout(this.timers.cancel);
+                this.status.canceled = false;
+
+                if(!this.status.started){
+                    this.timers.sample = setInterval(this.sampleRating, config.sampleInterval);
+                    this.timers.end = setTimeout(this.stop, (config.duration * 1000) );
+
+                    this.status.started = true;
+                    config.experimentTime = new Date();
+                }
+            }  
+        },
+
+        handleTouchMove: function(e){
+            e.preventDefault();
+            var changed = e.changedTouches,
+                touches = this.touches;
+            
+            for(var i = 0; i < changed.length ; i++){ 
+                for(var j = 0; j < touches.length; j++){
+                    if(touches[j].id === changed[i].identifier){
+                        touches[j].x = changed[i].pageX;
+                        touches[j].y = changed[i].pageY;
+                        break;
+                    }
+                }
+            }  
+        },
+
+        handleTouchEnd: function(e){
+            e.preventDefault();
+            var changed = e.changedTouches,
+                touches = this.touches;
+            
+            for(var i = 0; i < changed.length ; i++){ 
+                for(var j = 0; j < touches.length; j++){
+                    if(touches[j].id === changed[i].identifier){
+                        touches[j].id = false;
+                        notifier.play("contactLoss");
+                        break;
+                    }
+                }
+
+            }         
+
+            if(this.status.doubleTouch && !this.touches[0].id && !this.touches[1].id){
+                this.status.doubleTouch = false;
+                this.timers.cancel = setTimeout(this.stop, config.cancelTime * 1000);
+                this.status.canceled = new Date();
+            }  
+        }
+    });
+
     var PageController = new (Class.extend({
 
         pages: {
             "start" : new startPage(),
             "calibration": new calibrationPage(),
-            "experiment": null
+            "experiment": new experimentPage()
         },
 
         init: function(){

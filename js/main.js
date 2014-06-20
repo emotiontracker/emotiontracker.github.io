@@ -36,6 +36,8 @@
         hide: function(callback){
             if(this.shown){
                 this.shown = false;
+
+                this.pre_conceal();
                 $(this.el).animate({opacity:0}, 100, _bind(function(){
                     this.conceal();
                     callback();
@@ -45,6 +47,7 @@
         },
 
         conceal: function(){},
+        pre_conceal: function(){},
         handleResize: function(){ }
 
     });
@@ -71,52 +74,76 @@
 
     }
 
+    function getDevice(){
+        var ua = navigator.userAgent,
+            devices = ['iPhone', 'iPad', 'iPod', 'Android', 'IEMobile'];
 
+        for(var i=0; i<devices.length; i++){
+            if(ua.match(devices[i])){
+                return devices[i];
+            }
+        }
+        return ua;
+    }
 
     var windowWidth = window.innerWidth;
     var windowHeight = window.innerHeight;
     var pixelRatio = window.devicePixelRatio || 1;
+    var rater = {};
 
     var config = {
         name: '',
         experiment: '',
         experimentTime: '',
         absoluteTime: '',
-        email: localStorage["pltrckr-email"] || 'your@email.com',
-        duration: localStorage["pltrckr-dur"] || 20, //(1000 * 2 * 60),          // 2 mins
+        email: localStorage["pltrckr-email"] || 'lauren.vale@nyu.edu',
+        duration: localStorage["pltrckr-duration"] || 20, //(1000 * 2 * 60),          // 2 mins
         durationActual: '',
         sampleInterval: 1000,
-        touchMaxDistInitial: 0,
-        touchMinDistInitial: 0,
-        touchMaxDistFinal: 0,
-        touchMinDistFinal: 0,
+        preMaxDist: [],
+        preMinDist: [],
+        postMaxDist: [],
+        postMinDist: [],
+        medianMaxDist: 0,
+        medianMinDist: 0,
         touchFeedback: true,
         calibFail: false,
         ratings: [],
         cancelTime: 5,
+        url: window.location.href,
+        device: getDevice(),
+        location: {
+            long: null,
+            lat: null,
+            accuracy: null
+        },
+
+        preSteps: localStorage["pltrckr-preSteps"] || 2,
+        postSteps: localStorage["pltrckr-postSteps"] || 1,
+        feedback:{
+            barbell: JSON.parse(localStorage["pltrckr-feedBarbell"] || "false"),
+            range: JSON.parse(localStorage["pltrckr-feedRange"] || "false"),
+            numeric: JSON.parse(localStorage["pltrckr-feedNumeric"] || "false"),
+            auditory: JSON.parse(localStorage["pltrckr-feedAuditory"] || "false"),
+            tactile: JSON.parse(localStorage["pltrckr-feedTactile"] || "false")
+        },
+        postInMedian: JSON.parse(localStorage["pltrckr-postInMedian"] || "false") ,
 
         generateData: function(){
-            var t = this,
-                dataObj = {
-                    userName: t.name,
-                    experimentName: t.experiment,
-                    experimentDate: t.experimentTime.toString(),
-                    firstRatingTimeAbsolute: (t.absoluteTime / 1000).toFixed(2),
-                    sampleInterval: t.sampleInterval/1000,
-                    experimentDur: t.duration,
-                    experimentDurActual: t.durationActual,
-                    maxDistInitial: t.touchMaxDistInitial,
-                    minDistInitial: t.touchMinDistInitial,
-                    failInitialCalib: ( (t.calibFail) ? 3 : 2 ),
-                    maxDistFinal: t.touchMaxDistFinal || 0,
-                    minDistFinal: t.touchMinDistFinal || 0,
-                    ratings: t.ratings.join(","),
-                    timeline: Array.apply(null, {length: t.durationActual + 1}).map(Number.call, Number).slice(1).join(",")         
-                };
 
-            return tmpl("data_tmpl", dataObj);           
+            this.medianMaxDist = (this.postInMedian) ? findMedian(this.preMaxDist.concat(this.postMaxDist)) : findMedian(this.preMaxDist); 
+            this.medianMinDist = (this.postInMedian) ? findMedian(this.preMinDist.concat(this.postMinDist)) : findMedian(this.preMinDist); 
+            
+            return tmpl("data_tmpl", this);       
         }
     };
+
+
+    function saveLocation(location) {
+        config.location.lat = location.coords.latitude;
+        config.location.long = location.coords.longitude;
+        config.location.accuracy = location.coords.accuracy;
+    }
 
     var getDistance = function(x1, y1, x2, y2){
         return Math.floor(Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)));
@@ -131,26 +158,54 @@
             this._super();
             _bindAll(this, 'handleSave', 'showStart');
 
-            this.name = this.el.find('#email');
-            this.duration = this.el.find('#duration');
+            this.email = $(this.el.find('#email')).val(config.email);
+            this.duration = $(this.el.find('#duration')).val(config.duration);
+            this.preSteps = $(this.el.find('#preSteps')).val(config.preSteps);
+            this.postSteps = $(this.el.find('#postSteps')).val(config.postSteps);
 
-            $(this.name).val(config.email);
-            $(this.duration).val(config.duration);
+            this.feedBarbell = $(this.el).find('#feedBarbell').prop('checked', config.feedback.barbell);
+            this.feedRange = $(this.el.find('#feedRange')).prop('checked', config.feedback.range);
+            this.feedNumeric = $(this.el.find('#feedNumeric')).prop('checked', config.feedback.numeric);
+            this.feedAuditory = $(this.el.find('#feedAuditory')).prop('checked', config.feedback.auditory);
+            this.feedTactile = $(this.el.find('#feedTactile')).prop('checked', config.feedback.tactile);
+
+            this.postInMedian = $(this.el.find('#postInMedian')).prop('checked', config.postInMedian);
+
+            this.buttons = this.el.find('.fixed-wrapper');
 
             new MBP.fastButton(this.el.find('#saveSubmit'), this.handleSave);
             new MBP.fastButton(this.el.find('#cancelSubmit'), this.showStart);
         },
 
         handleSave: function(){
-            localStorage["pltrckr-email"] = config.email = $(this.name).val().trim();
+            localStorage["pltrckr-email"] = config.email = $(this.email).val().trim();
             localStorage["pltrckr-duration"] = config.duration = $(this.duration).val().trim();
+
+            localStorage["pltrckr-preSteps"] = config.preSteps = $(this.preSteps).val().trim();
+            localStorage["pltrckr-postSteps"] = config.postSteps = $(this.postSteps).val().trim();
+
+            localStorage["pltrckr-feedBarbell"] = config.feedback.barbell = $(this.feedBarbell).prop('checked');
+            localStorage["pltrckr-feedRange"] = config.feedback.range = $(this.feedRange).prop('checked');
+            localStorage["pltrckr-feedNumeric"] = config.feedback.numeric = $(this.feedNumeric).prop('checked');
+            localStorage["pltrckr-feedAuditory"] = config.feedback.auditory = $(this.feedAuditory).prop('checked');
+            localStorage["pltrckr-feedTactile"] = config.feedback.tactile = $(this.feedTactile).prop('checked');
+
+            localStorage["pltrckr-postInMedian"] = config.postInMedian = $(this.postInMedian).prop('checked');
 
             this.showStart();
         },
 
-        showStart: function(){
-            $(this.el).focus();
+        render: function(){
+            this.buttons.style.position = 'fixed';
+        },
 
+        pre_conceal: function(){
+            this.buttons.style.position = 'relative';
+        },
+
+        showStart: function(){
+            console.log("cancelling");
+            $(this.el).focus();
             this.hide(PageController.pages["start"].show);
         }
 
@@ -195,7 +250,7 @@
         },
 
         handleSubmit: function(){
-
+            console.log("show submit");
             if(this.setInvalidHighlight()){ return false; }       
 
             config.name = $(this.name).val().trim();
@@ -205,11 +260,12 @@
             $(this.experiment).blur();
 
             PageController.transition("calibration", function(){
-                this.begin("Initial");
+                this.begin("pre");
             });
         },
 
         showSettings: function(){
+            console.log("show settings");
             this.hide(settingsPage.show);
         }
 
@@ -256,16 +312,16 @@
         trials: [{
             title: 'Indicate <span class="strong">Maximum</span> Pleasure',
             instr: 'Using two fingers, drag the circles as far apart as comfortably possible.',
-            configVar: 'touchMaxDist'
+            configVar: 'MaxDist'
         }, {
             title: 'Indicate <span class="strong">Minimum</span> Pleasure',
             instr: 'Using two fingers, drag the circles as close as comfortably possible.',
-            configVar: 'touchMinDist'
+            configVar: 'MinDist'
         }],
 
         init: function(){
             this._super();
-            _bindAll(this, 'handleTouchStart', 'handleTouchMove', 'handleTouchEnd', 'handleInitialEnd');
+            _bindAll(this, 'handleTouchStart', 'handleTouchMove', 'handleTouchEnd', 'handlePreEnd');
 
             this.tracker = this.el.find('#calibTracker');
             this.titleText = this.el.find('#calibTitle');
@@ -275,12 +331,12 @@
             this.paper = Raphael(this.tracker, window.innerWidth, window.innerHeight);
             this.begun = false;
 
-            new MBP.fastButton(this.completePage.find('#btnExp'), this.handleInitialEnd);
+            new MBP.fastButton(this.completePage.find('#btnExp'), this.handlePreEnd);
         },
 
 
         initPaper: function(callback){
-
+            window.scrollTo( 0, 1 ); 
             if (window.innerWidth < window.innerHeight) {
                 this.orient = false;
                 return;
@@ -342,32 +398,49 @@
 
         handleResize: function(){
             if (Math.abs(window.orientation) !== 90) {
+                window.scrollTo( 0, 1 ); 
                 if(!this.orient){
                     this.paper.setSize(window.innerWidth, window.innerHeight);
                     this.initPaper();
-                    this.orient = true;
-                    window.scrollTo( 0, 1 );                    
+                    this.orient = true;                   
                 }
             }
         },
 
-        handleInitialEnd: function(){
+        handlePreEnd: function(){
             PageController.transition("experiment", function(){
                 this.begin();
             }); 
         },
 
+        generateQueue: function(steps){
+            var queue = [];
+            for(var i = 0; i<2*steps; i++){
+                if(i%2 == 0){
+                    queue.push(1);
+                } 
+                else{
+                    queue.push(0);
+                } 
+            }
+            queue.pop();
+            return queue;
+        },
+
         begin: function(phase){
+            var self = this;
 
             this.trialParams = {
-                queue: (phase == 'Initial') ? [1,0,1] : [1],
+                queue: self.generateQueue(config[phase + 'Steps']),
                 cur: -1,
                 step: 1,
                 index: 1,
-                maxSteps: (phase == 'Initial') ? 2 : 1,
+                maxSteps: config[phase + 'Steps'],
                 phase: phase,
-                verify: (phase == 'Initial') ? true : false,
+                verify: (phase == 'pre') ? true : false,
             }
+
+            //console.log(this.trialParams);
 
             this.begun = true;
             this.initPaper();
@@ -389,7 +462,7 @@
                     complete: function(){
                         self.paper.clear();
                         
-                        if(self.trialParams.phase === 'Initial'){
+                        if(self.trialParams.phase === 'pre'){
                             $(self.completePage).show();                               
                         }
                         else{
@@ -437,20 +510,15 @@
 
             var distance = bubbles.distance(),
                 tp = this.trialParams,
-                trial = this.trials[tp.cur];
+                trial = this.trials[tp.cur],
+                phaseVar = tp.phase + trial.configVar;
 
             if(tp.step == tp.maxSteps && tp.verify){
-                if( Math.abs(distance - config[trial.configVar + tp.phase]) > 100 ){
+                if( Math.abs(distance - config[phaseVar].slice(-1)[0]) > 100 ){
                     tp.queue.push(tp.cur);
-                    config.calibFail = true;
-                }
-                else{
-                    config[trial.configVar + tp.phase] = Math.floor((config[trial.configVar + tp.phase] + distance) / 2);
-                }                
+                }             
             }
-            else{
-                config[trial.configVar + tp.phase] = distance;
-            }
+            config[phaseVar].push(distance);
 
             if(tp.index % this.trials.length == 0){
                 tp.step++;
@@ -606,6 +674,100 @@
         return ('mailto:' + config.email + '?subject=' + subject + '&body=' + body);    
     }
 
+
+    var Feedbacks = View.extend({
+        id: 'feedbacks',
+        enabled: [],
+
+        init: function(){
+            this._super();
+        },
+
+        enable: function(){
+            this.enabled = [];
+            if(config.feedback.numeric){
+                this.enabled.push(new NumericFeedback());
+            }
+            if(config.feedback.range){
+                this.enabled.push(new RangeFeedback());
+            }
+            this.numEnabled = this.enabled.length;
+        },
+
+        onStart: function(touches){
+            var rating = rater.getRating(touches);
+            for(var i = 0; i<this.numEnabled; i++){
+                this.enabled[i].onStart(touches, rating);
+            }
+        },
+
+        onMove: function(touches){
+            var rating = rater.getRating(touches);
+            for(var i = 0; i<this.numEnabled; i++){
+                this.enabled[i].onMove(touches, rating);
+            }
+        },
+
+        onEnd: function(touches){
+            var rating = rater.getRating(touches);
+            for(var i = 0; i<this.numEnabled; i++){
+                this.enabled[i].onEnd(touches, rating);
+            }
+        }
+    });
+
+
+    var NumericFeedback = View.extend({
+        id: 'numericFeedback',
+
+        init: function(){
+            this._super();
+        },
+
+        onStart: function(t, rating){
+        },
+
+        onMove: function(t, rating){
+            this.el.innerHTML = Math.round(rating);
+        },
+
+        onEnd: function(t, rating){
+            this.el.innerHTML = '';
+        }
+    });
+
+    var RangeFeedback = View.extend({
+        id: 'rangeFeedback',
+
+        init: function(){
+            this._super();
+            this.colors = [
+                '#e70000',
+                '#e76700',
+                '#f1bb00',
+                '#add800',
+                '#00c40e'  
+            ];
+        },
+
+        colorFromRating: function(rating){
+            return this.colors[Math.round(rating/2)];
+        },
+
+        onStart: function(t, rating){
+        },
+
+        onMove: function(t, rating){
+            var height = windowHeight * (rating/10);
+            $(this.el).css('height', height + 'px');
+            $(this.el).css('backgroundColor', this.colorFromRating(rating));
+        },
+
+        onEnd: function(t, rating){
+            $(this.el).css('height', 0);
+        }
+    });
+
     var experimentPage = Page.extend({
         id: 'experimentPage',
 
@@ -631,28 +793,35 @@
                     clearTimeout(this.sample);
                 }
             };
+            this.feedbacks = new Feedbacks();
 
         },
 
         begin: function(){
 
-            this.rater = (function(){
-                var ratingRange = config.touchMaxDistInitial - config.touchMinDistInitial,
+            rater = (function(){
+                var minDist = findMedian(config.preMinDist),
+                    maxDist = findMedian(config.preMaxDist);
+
+                var ratingRange = maxDist - minDist,
                     ratingStep = ratingRange / 10;
-                    console.log(ratingRange, ratingStep);
+
                 return {
-                    getRating: function(distance){
-                        if(distance < config.touchMinDistInitial) {
-                            distance = config.touchMinDistInitial;
+                    getRating: function(touches){
+                        var distance = getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
+                        if(distance < minDist) {
+                            distance = minDist;
                         }
-                        else if(distance > config.touchMaxDistInitial){
-                            distance = config.touchMaxDistInitial;
+                        else if(distance > maxDist){
+                            distance = maxDist;
                         }
 
-                        return (distance - config.touchMinDistInitial) / ratingStep;                 
+                        return (distance - minDist) / ratingStep;                 
                     }
                 };
             })();
+
+            this.feedbacks.enable();
 
             window.addEventListener('touchstart', this.handleTouchStart);
             window.addEventListener('touchmove', this.handleTouchMove);
@@ -662,7 +831,7 @@
 
         sampleRating: function(){
             var touches = this.touches,
-                rating = this.rater.getRating(getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y)).toFixed(1);
+                rating = rater.getRating(touches).toFixed(1);
             
             if(!touches[0].id || !touches[1].id && rating !== this.samples[this.samples.length-1]){
                 rating *= -1;
@@ -682,17 +851,19 @@
             }
             else{
                 config.durationActual = new Date();
+                this.feedbacks.onEnd(this.touches);
             }
             config.durationActual = Math.floor( (config.durationActual - config.experimentTime) / 1000 );
 
             this.sampleRating();
+            console.log(this.samples);
             config.ratings = this.samples.slice(0, config.durationActual);
 
 
             this.titleText.innerHTML = 'The experiment concluded in <b>' + config.durationActual +'</b>s. Prepare to calibrate again.';
             setTimeout(function(){
                 PageController.transition("calibration", function(){
-                    this.begin("Final");
+                    this.begin("post");
                 });
             },3000);
 /*            mailDataMandrill(function(res){
@@ -731,11 +902,12 @@
 
             if(touches[0].id && touches[1].id){
                 this.status.doubleTouch = true;
-                this.titleText.innerHTML = '';
                 clearTimeout(this.timers.cancel);
                 this.status.canceled = false;
+                this.feedbacks.onStart(touches);
 
                 if(!this.status.started){
+                    this.titleText.innerHTML = '';
                     this.timers.sample = setInterval(this.sampleRating, config.sampleInterval);
                     this.timers.end = setTimeout(this.stop, (config.duration * 1000) );
 
@@ -760,6 +932,7 @@
                     }
                 }
             }  
+            this.feedbacks.onMove(touches);
         },
 
         handleTouchEnd: function(e){
@@ -779,6 +952,7 @@
             }         
 
             if(this.status.doubleTouch && !this.touches[0].id && !this.touches[1].id){
+                this.feedbacks.onEnd(touches);
                 this.status.doubleTouch = false;
                 this.timers.cancel = setTimeout(this.stop, config.cancelTime * 1000);
                 this.status.canceled = new Date();
@@ -799,7 +973,7 @@
         },
 
         render: function(){
-            $(this.message).html("Thank you for your time.")
+            $(this.message).html("Thank you.")
             $(this.sendButton).attr("href", generateMailLink());
             this.buttons.style.opacity = 0;
         },

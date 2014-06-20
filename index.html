@@ -45,31 +45,80 @@
     <body>
 
         <div class="wrapper">
-            <div id="startPage">
+            <div id="startPage" >
                 <div id="logo"></div>
                 <div>
-                    <input id="name" type="text" placeholder="Enter your name" />
+                    <input id="name" class="inpt" type="text" placeholder="Enter your name" value="X"/>
                 </div>
                 <div>
-                    <input id="experiment" type="text" placeholder="Enter experiment name" />
+                    <input id="experiment" class="inpt" type="text" placeholder="Enter experiment name" value="Y"/>
                 </div>
                 <div>
-                    <input class="btn btn-primary" id="startSubmit" type="submit" value="Continue"/>
+                    <input class="btn btn-primary btn-wide" id="startSubmit" type="submit" value="Continue"/>
                 </div>
                 <button id="btnSettings" class=""><div class="ico-settings"></div></button>
             </div>
 
-            <div id="settingsPage" class="page" style="display:none;opacity:0">
-                <h2>Settings</h2>
-                <div class="field">
-                    <label for="email">Enter email of the experimenter</label>
-                    <input id="email" type="text" placeholder="" />
-                </div>
-                <div class="field">
-                    <label for="email">Enter duration of the experiment</label>
-                    <input id="duration" type="text" value="120" style="width:200px"/><span>secs</span>
-                </div>
-                <div class="field">
+            <div id="settingsPage" style="display:none;opacity:0">
+                <div class="settings-wrapper">
+                    <h2>Settings</h2>
+                    <div class="field">
+                        <label for="email" class="lbl">Email of the Experimenter</label>
+                        <input id="email" type="email" class="inpt" placeholder="" />
+                    </div>
+                    <div class="field">
+                        <label for="email" class="lbl">Experiment Duration <span class="light"> (in seconds)</span></label>
+                        <input id="duration" type="text" value="120" class="inpt" pattern="[0-9]*"/>
+                    </div>
+
+                    <div class="field">
+                        <label for="email" class="lbl">Pre Calibration Steps</label>
+                        <input id="preSteps" type="text" value="2" class="inpt" pattern="[0-9]*" />
+                    </div>
+
+                    <div class="field">
+                        <label for="email" class="lbl">Post Calibration Steps</label>
+                        <input id="postSteps" type="text" value="1" class="inpt" pattern="[0-9]*" />
+                    </div>
+
+                    <div class="field">
+                        <label for="email" class="lbl">Rating Interval <span class="light"> (in seconds)</span></label>
+                        <input id="ratingInterval" type="text" value="1" class="inpt" pattern="[0-9]*" />
+                    </div>
+
+                    <div class="field">
+                        <label for="email" class="lbl">Feedback</label>
+                        <div class="field-check">
+                            <label class="lbl">Barbell</label>
+                            <span class="chkbox"><input id="feedBarbell" type="checkbox" /></span>
+                        </div>
+                        <div class="field-check">
+                            <label class="lbl">Range</label>
+                            <span class="chkbox"><input id="feedRange" type="checkbox" /></span>
+                        </div>
+                        <div class="field-check">
+                            <label class="lbl">Numeric</label>
+                            <span class="chkbox"><input id="feedNumeric" type="checkbox" /></span>
+                        </div>
+                        <div class="field-check">
+                            <label class="lbl">Auditory</label>
+                            <span class="chkbox"><input id="feedAuditory" type="checkbox" /></span>
+                        </div>
+                        <div class="field-check">
+                            <label class="lbl">Tactile</label>
+                            <span class="chkbox"><input id="feedTactile" type="checkbox" /></span>
+                        </div>
+                    </div>    
+
+                    <div class="field">
+                        <div class="field-check">
+                            <label class="lbl">Post Calibration in Median</label>
+                            <span class="chkbox"><input id="postInMedian" type="checkbox" /></span>
+                        </div>
+                    </div>  
+                </div>            
+
+                <div class="fixed-wrapper">
                     <input class="btn btn-primary" id="saveSubmit" type="submit" value="Save"/>
                     <input class="btn" id="cancelSubmit" type="submit" value="Cancel"/>
                 </div>                                
@@ -89,6 +138,10 @@
             </div>
 
             <div id="experimentPage" style="display:none;opacity:0">
+                <div id="feedbacks">
+                    <div id="numericFeedback"></div>
+                    <div id="rangeFeedback"></div>
+                </div>
                 <div id="expTitle" class="title">Place two fingers to begin the experiment.</div>
             </div>
 
@@ -101,7 +154,7 @@
             </div>
 
             <div id="changeOrient" style="display:none">
-                <div class="landscapeText" style="top:120px">Rotate your phone</div>
+                <div class="landscapeText" style="top:120px">Rotate your device</div>
                 <div id="landscape"></div>
                 <div class="landscapeText" style="bottom:120px">to landscape mode</div>
             </div>
@@ -114,22 +167,34 @@
         <script src="js/util.js"></script>
         <script src="js/main.js"></script>
         
+
 <script type="text/plain" id="data_tmpl">
-User Name:,<%=userName%>\n
-Experiment name:,<%=experimentName%>\n
-Time and date of first rating:,<%=experimentDate%>\n
-Absolute time of first rating (s):,<%=firstRatingTimeAbsolute%>\n
-Interval between ratings (s):,<%=sampleInterval%>\n
-Nominal duration (s):,<%=experimentDur%>\n
-Recorded duration (s):,<%=experimentDurActual%>\n
-Initial max distance (pix):,<%=maxDistInitial%>\n
-Initial min distance (pix):,<%=minDistInitial%>\n
-Initial calibration repetitions:,<%=failInitialCalib%>\n
-Final max distance (pix):,<%=maxDistFinal%>\n
-Final min distance (pix):,<%=minDistFinal%>\n
-Ratings:,<%=ratings%>\n
-Timeline:,<%=timeline%>
-</script>
+Experiment:,<%=name%>\n
+Observer:,<%=experiment%>\n
+URL:,<%=url%>\n
+Time Zero:,<%=experimentTime.toString()%>\n
+Time since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\n
+Device:,<%=device%>\n
+Location ("longitude, latitude"):,<%=('"' + (location.long || 0) + ', ' + (location.lat || 0) + '"') %>\n
+Interval between ratings (s):,<%=(sampleInterval/1000)%>\n
+Requested duration (s):,<%=duration%>\n
+Recorded duration (s):,<%=durationActual%>\n
+Pre max distance (pix):,<%=preMaxDist.join(",")%>\n
+Pre min distance (pix):,<%=preMinDist.join(",")%>\n
+Post max distance (pix):,<%=postMaxDist.join(",")%>\n
+Post min distance (pix):,<%=postMinDist.join(",")%>\n
+Median max distance (pix):,<%=medianMaxDist%>\n
+Median min distance (pix):,<%=medianMinDist%>\n
+Rating (0 to 10):,<%=ratings.join(",")%>\n
+Time (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\n\n
+Feedback Barbell:,<%=feedback.barbell%>\n
+Feedback Range:,<%=feedback.range%>\n
+Feedback Numeric:,<%=feedback.numeric%>\n
+Feedback Auditory:,<%=feedback.auditory%>\n
+Feedback Tactile:,<%=feedback.tactile%>\n\n
+Include Post Calibration in Median:,<%=postInMedian%>
+</script>       
+
 
     </body>
 </html>

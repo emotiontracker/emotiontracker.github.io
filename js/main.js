@@ -842,6 +842,7 @@
         },
 
         onStart: function(t, rating){
+            this.el.innerHTML = Math.round(rating);
         },
 
         onMove: function(t, rating){
@@ -872,6 +873,9 @@
         },
 
         onStart: function(t, rating){
+            var height = windowHeight * (rating/10);
+            $(this.el).css('height', height + 'px');
+            $(this.el).css('backgroundColor', this.colorFromRating(rating));            
         },
 
         onMove: function(t, rating){

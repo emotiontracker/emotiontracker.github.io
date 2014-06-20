@@ -52,6 +52,93 @@
 
     });
 
+    var DoubleTouchPage = Page.extend({
+        init: function(options){
+            this._super(options);
+            _bindAll(this, 'handleTouchStart', 'handleTouchMove', 'handleTouchEnd', 'handleDoubleTouchStart', 'handleDoubleTouchEnd');
+
+            this.touches = [{x: 0, y: 0, id: false}, {x: 0, y: 0, id: false}];
+            this.touches.isDouble = function(){
+                return this[0].id && this[1].id;
+            }
+            this.doubleTouch = false;
+        },
+
+        handleTouchStart: function(e){
+            e.preventDefault();
+            var changed = e.changedTouches,
+                touches = this.touches;
+
+            for(var i = 0; i < changed.length ; i++){ 
+                for(var j = 0; j < 2; j++){
+                    if(!touches[j].id){
+                        touches[j].x = changed[i].pageX;
+                        touches[j].y = changed[i].pageY;
+                        touches[j].id = changed[i].identifier; 
+                        this.onTouchStart(touches[j]); 
+                        break;                    
+                    }
+                }
+            }
+
+            if(touches.isDouble()){
+                this.doubleTouch = true;
+                this.handleDoubleTouchStart();
+            }
+        },
+
+        handleTouchMove: function(e){
+            e.preventDefault();
+            var changed = e.changedTouches,
+                touches = this.touches;
+
+            for(var i = 0; i < changed.length ; i++){ 
+                for(var j = 0; j < 2; j++){
+                    if(touches[j].id === changed[i].identifier){
+                        touches[j].x = changed[i].pageX;
+                        touches[j].y = changed[i].pageY;
+                        this.onTouchMove(touches[j]); 
+                        break;
+                    }
+                }
+            } 
+
+            if(this.touches.isDouble()){
+                this.handleDoubleTouchMove();
+            }
+        },
+
+        handleTouchEnd: function(e){
+            e.preventDefault();
+            var changed = e.changedTouches,
+                touches = this.touches;
+            
+            for(var i = 0; i < changed.length ; i++){ 
+                for(var j = 0; j < 2; j++){
+                    if(touches[j].id === changed[i].identifier){
+                        this.onTouchEnd(touches[j]); 
+                        touches[j].id = false;
+                        break;
+                    }
+                }
+
+            } 
+
+            if(this.doubleTouch && !touches.isDouble()){
+                this.handleDoubleTouchEnd();
+                this.doubleTouch = false;
+            }
+        },
+        onTouchStart: function(){},
+        onTouchMove: function(){},
+        onTouchEnd: function(){},
+        handleDoubleTouchStart: function(){},
+        handleDoubleTouchEnd: function(){},
+        handleDoubleTouchMove: function(){}
+
+
+    });
+
     var notifier = {
         
         currentPlaying: null,
@@ -97,7 +184,7 @@
         experimentTime: '',
         absoluteTime: '',
         email: localStorage["pltrckr-email"] || 'lauren.vale@nyu.edu',
-        duration: localStorage["pltrckr-duration"] || 20, //(1000 * 2 * 60),          // 2 mins
+        duration: localStorage["pltrckr-duration"] || 30,
         durationActual: '',
         sampleInterval: 1000,
         preMaxDist: [],
@@ -125,7 +212,7 @@
             range: JSON.parse(localStorage["pltrckr-feedRange"] || "false"),
             numeric: JSON.parse(localStorage["pltrckr-feedNumeric"] || "false"),
             auditory: JSON.parse(localStorage["pltrckr-feedAuditory"] || "false"),
-            tactile: JSON.parse(localStorage["pltrckr-feedTactile"] || "false")
+            // tactile: JSON.parse(localStorage["pltrckr-feedTactile"] || "false")
         },
         postInMedian: JSON.parse(localStorage["pltrckr-postInMedian"] || "false") ,
 
@@ -138,7 +225,9 @@
         }
     };
 
-
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(saveLocation);
+    }
     function saveLocation(location) {
         config.location.lat = location.coords.latitude;
         config.location.long = location.coords.longitude;
@@ -156,7 +245,7 @@
 
         init: function(){
             this._super();
-            _bindAll(this, 'handleSave', 'showStart');
+            _bindAll(this, 'handleSave', 'showStart', 'floatButtons', 'unFloatButtons');
 
             this.email = $(this.el.find('#email')).val(config.email);
             this.duration = $(this.el.find('#duration')).val(config.duration);
@@ -167,7 +256,7 @@
             this.feedRange = $(this.el.find('#feedRange')).prop('checked', config.feedback.range);
             this.feedNumeric = $(this.el.find('#feedNumeric')).prop('checked', config.feedback.numeric);
             this.feedAuditory = $(this.el.find('#feedAuditory')).prop('checked', config.feedback.auditory);
-            this.feedTactile = $(this.el.find('#feedTactile')).prop('checked', config.feedback.tactile);
+            //this.feedTactile = $(this.el.find('#feedTactile')).prop('checked', config.feedback.tactile);
 
             this.postInMedian = $(this.el.find('#postInMedian')).prop('checked', config.postInMedian);
 
@@ -175,6 +264,9 @@
 
             new MBP.fastButton(this.el.find('#saveSubmit'), this.handleSave);
             new MBP.fastButton(this.el.find('#cancelSubmit'), this.showStart);
+
+            $(this.el).on('focusin', this.unFloatButtons);
+            $(this.el).on('focusout', this.floatButtons);
         },
 
         handleSave: function(){
@@ -188,23 +280,28 @@
             localStorage["pltrckr-feedRange"] = config.feedback.range = $(this.feedRange).prop('checked');
             localStorage["pltrckr-feedNumeric"] = config.feedback.numeric = $(this.feedNumeric).prop('checked');
             localStorage["pltrckr-feedAuditory"] = config.feedback.auditory = $(this.feedAuditory).prop('checked');
-            localStorage["pltrckr-feedTactile"] = config.feedback.tactile = $(this.feedTactile).prop('checked');
+            //localStorage["pltrckr-feedTactile"] = config.feedback.tactile = $(this.feedTactile).prop('checked');
 
             localStorage["pltrckr-postInMedian"] = config.postInMedian = $(this.postInMedian).prop('checked');
 
             this.showStart();
         },
 
-        render: function(){
+        floatButtons: function(){
             this.buttons.style.position = 'fixed';
         },
-
-        pre_conceal: function(){
+        unFloatButtons: function(){
             this.buttons.style.position = 'relative';
         },
 
+        render: function(){
+            this.floatButtons();
+        },
+        pre_conceal: function(){
+            this.unFloatButtons();
+        },
+
         showStart: function(){
-            console.log("cancelling");
             $(this.el).focus();
             this.hide(PageController.pages["start"].show);
         }
@@ -250,7 +347,6 @@
         },
 
         handleSubmit: function(){
-            console.log("show submit");
             if(this.setInvalidHighlight()){ return false; }       
 
             config.name = $(this.name).val().trim();
@@ -265,92 +361,74 @@
         },
 
         showSettings: function(){
-            console.log("show settings");
             this.hide(settingsPage.show);
         }
 
     });
 
-
-    var bubble = function(){
-        return {
-            x: 0,
-            y: windowHeight/2,
-            r: 40,
-            circle: null,
-            line: null,
-            selected: false,
-            update: function(){
-                this.circle.attr("cx", this.x);
-                this.circle.attr("cy", this.y);
-                this.line.attr("path", "M" + windowWidth/2 + " " + windowHeight/2 + "L" + this.x + " " + this.y);
-            },
-
-            toggleSelected: function(){
-                if(this.selected){
-                    this.circle.animate({
-                        "fill-opacity": 0.2,
-                        "r": 40
-                    }, 300, "bounce");  
-                    this.selected = false;                      
-                }
-                else{
-                    this.circle.animate({
-                        "fill-opacity": 0.6,
-                        "r": 60
-                    }, 300, "bounce");                     
-                }
-            }
-        };
+    var getOrientation = function(){
+        if(Math.abs(window.orientation) === 90 || window.innerWidth > window.innerHeight){
+            return 'landscape';
+        }
+        return "portrait";
     }
 
 
-    var calibrationPage = Page.extend({
+    var BubbleView = View.extend({
 
-        id: 'calibrationPage',
+        bubble: function(){
+            return {
+                x: 0,
+                y: 0,
+                r: 40,
+                circle: null,
+                line: null,
+                selected: false,
+                update: function(){
+                    this.circle.attr("cx", this.x);
+                    this.circle.attr("cy", this.y);
+                    this.line.attr("path", "M" + window.innerWidth/2 + " " + window.innerHeight/2 + "L" + this.x + " " + this.y);
+                },
 
-        trials: [{
-            title: 'Indicate <span class="strong">Maximum</span> Pleasure',
-            instr: 'Using two fingers, drag the circles as far apart as comfortably possible.',
-            configVar: 'MaxDist'
-        }, {
-            title: 'Indicate <span class="strong">Minimum</span> Pleasure',
-            instr: 'Using two fingers, drag the circles as close as comfortably possible.',
-            configVar: 'MinDist'
-        }],
-
-        init: function(){
-            this._super();
-            _bindAll(this, 'handleTouchStart', 'handleTouchMove', 'handleTouchEnd', 'handlePreEnd');
-
-            this.tracker = this.el.find('#calibTracker');
-            this.titleText = this.el.find('#calibTitle');
-            this.instrText = this.el.find('#calibInstr');
-            this.completePage = this.el.find('#calibComplete');
-
-            this.paper = Raphael(this.tracker, window.innerWidth, window.innerHeight);
-            this.begun = false;
-
-            new MBP.fastButton(this.completePage.find('#btnExp'), this.handlePreEnd);
+                toggleSelected: function(){
+                    if(this.selected){
+                        this.circle.animate({
+                            "fill-opacity": 0.2,
+                            "r": 40
+                        }, 100, "bounce");  
+                        this.selected = false;                      
+                    }
+                    else{
+                        this.circle.animate({
+                            "fill-opacity": 0.6,
+                            "r": 60
+                        }, 80, "bounce");                     
+                    }
+                }
+            };
         },
 
+        init: function(options){
+            this._super(options);
+            this.paper = Raphael(this.el, window.innerWidth, window.innerHeight);
+            this.initialized = false;
+            this.register('initialized');
+            if(getOrientation() == 'landscape'){
+                this.initPaper();
+            }
+        },
 
         initPaper: function(callback){
+            this.initialized = true;
+
             window.scrollTo( 0, 1 ); 
-            if (window.innerWidth < window.innerHeight) {
-                this.orient = false;
-                return;
-            }
-            else{
-                this.orient = true;
-            }
+            this.el.style.opacity = 1;
+            var shapes = this.shapes = {};
 
-            this.tracker.style.opacity = 1;
-            var shapes = this.paper.shapes = {};
-
-            shapes.bubbles = [new bubble(), new bubble()];
-            shapes.bubbles[0].x = windowWidth/2 - 40;
-            shapes.bubbles[1].x = windowWidth/2 + 40;
+            shapes.bubbles = [new this.bubble(), new this.bubble()];
+            shapes.bubbles[0].x = window.innerWidth/2 - 40;
+            shapes.bubbles[1].x = window.innerWidth/2 + 40;
+            shapes.bubbles[0].y = shapes.bubbles[1].y = window.innerHeight/2;
             shapes.bubbles.selected = function(){
                 return (this[0].selected && this[1].selected);
             } 
@@ -366,9 +444,6 @@
                 this.attr("path", "M" + this.bubbles[0].x + " " + this.bubbles[0].y + "L" + this.bubbles[1].x + " " + this.bubbles[1].y);
             }
             shapes.joinLine.updatePos(); 
-
-            this.titleText.style.opacity = 0;
-            this.instrText.style.opacity = 0;
 
             var self = this;
             shapes.bubbles.forEach(function(b){
@@ -389,21 +464,96 @@
 
             shapes.joinLine.animate({
                 'stroke-opacity': 1
-            }, 200, 'linear', callback); 
+            }, 200, 'linear', callback);
 
-            if(this.begun){
-                this.startTrial(0);
-            }
+            this.trigger('initialized');
         },
 
         handleResize: function(){
-            if (Math.abs(window.orientation) !== 90) {
-                window.scrollTo( 0, 1 ); 
-                if(!this.orient){
-                    this.paper.setSize(window.innerWidth, window.innerHeight);
-                    this.initPaper();
-                    this.orient = true;                   
+            if(!this.initialized && getOrientation() == 'landscape'){
+                this.paper.setSize(window.innerWidth, window.innerHeight);
+                this.initPaper();
+            }
+        },
+
+        onTouchStart: function(touch){
+            var b;
+            for(var i = 0; i < 2; i++){
+                b = this.shapes.bubbles[i];
+                if(!b.selected){
+                    if(this.drag && !b.circle.isPointInside(touch.x, touch.y)){
+                        continue;
+                    }
+                    b.x = touch.x;
+                    b.y = touch.y;
+                    b.update();
+                    b.toggleSelected();
+                    b.selected = touch.id;
+                    this.shapes.joinLine.updatePos();
+                    break;
+                }                    
+            }
+
+        },
+
+        onTouchMove: function(touch){
+            var b;
+            for(var i = 0; i < 2 ; i++){
+                b = this.shapes.bubbles[i];
+                if(b.selected === touch.id){
+                    b.x = touch.x;
+                    b.y = touch.y;
+                    b.update();
+                    this.shapes.joinLine.updatePos();
+                    break;
                 }
+            } 
+        },
+
+        onTouchEnd: function(touch){
+            var b;
+            for(var i = 0; i < 2 ; i++){
+                b = this.shapes.bubbles[i];
+                if(b.selected === touch.id){
+                    b.toggleSelected();
+                    break;
+                }
+            }
+        }
+
+    });
+
+
+    var calibrationPage = DoubleTouchPage.extend({
+
+        id: 'calibrationPage',
+
+        trials: [{
+            title: 'Indicate <span class="strong">Maximum</span> pleasure',
+            instr: 'Using two fingers, drag the circles as far apart as comfortably possible.',
+            configVar: 'MaxDist'
+        }, {
+            title: 'Indicate <span class="strong">Minimum</span> pleasure',
+            instr: 'Using two fingers, drag the circles as close as comfortably possible.',
+            configVar: 'MinDist'
+        }],
+
+        init: function(){
+            this._super();
+            _bindAll(this, 'handlePreEnd', 'beginTrials');
+
+
+            this.tracker = this.el.find('#calibTracker');
+            this.titleText = this.el.find('#calibTitle');
+            this.instrText = this.el.find('#calibInstr');
+            this.completePage = this.el.find('#calibComplete');
+
+            new MBP.fastButton(this.completePage.find('#btnExp'), this.handlePreEnd);
+        },
+
+        handleResize: function(){
+            if(this.bubbles){
+                this.bubbles.handleResize();
             }
         },
 
@@ -440,14 +590,24 @@
                 verify: (phase == 'pre') ? true : false,
             }
 
-            //console.log(this.trialParams);
+            this.titleText.style.opacity = 0;
+            this.instrText.style.opacity = 0;
 
-            this.begun = true;
-            this.initPaper();
+            this.bubbles = new BubbleView({el: this.tracker, drag: true});
+            if(this.bubbles.initialized){
+                this.beginTrials();
+            }
+            else{
+                this.bubbles.on('initialized', this.beginTrials);
+            }
+        },
 
+        beginTrials: function(){
             this.tracker.on('touchmove', this.handleTouchMove);
             this.tracker.on('touchend', this.handleTouchEnd);
-            this.tracker.on('touchcancel', this.handleTouchEnd);  
+            this.tracker.on('touchcancel', this.handleTouchEnd); 
+
+            this.startTrial(0); 
         },
 
         end: function(){
@@ -460,7 +620,7 @@
                 $(self.titleText).velocity({opacity: 0}, { duration: 200, queue: false });
                 $(self.tracker).velocity({opacity: 0}, { duration: 200, queue: false, 
                     complete: function(){
-                        self.paper.clear();
+                        self.bubbles.paper.clear();
                         
                         if(self.trialParams.phase === 'pre'){
                             $(self.completePage).show();                               
@@ -487,7 +647,7 @@
             this.titleText.innerHTML = trial.title;
             this.instrText.innerHTML = trial.instr;
 
-            this.paper.shapes.bubbles.forEach(function(b){
+            this.bubbles.shapes.bubbles.forEach(function(b){
                 b.circle.animate({
                     "fill": "rgb(216, 0, 57)"
                 }, 200);   
@@ -499,16 +659,15 @@
         },
 
         endTrial: function(){
-            var bubbles = this.paper.shapes.bubbles;
 
             this.tracker.off('touchstart', this.handleTouchStart);
-            bubbles.forEach(function(b){
+            this.bubbles.shapes.bubbles.forEach(function(b){
                 b.circle.animate({
                     "fill": "#888"
                 }, 200);   
             });
 
-            var distance = bubbles.distance(),
+            var distance = this.bubbles.shapes.bubbles.distance(),
                 tp = this.trialParams,
                 trial = this.trials[tp.cur],
                 phaseVar = tp.phase + trial.configVar;
@@ -538,79 +697,31 @@
             }
         },
 
+        onTouchStart: function(touch){
+            this.bubbles.onTouchStart(touch, this.touches);
+        },
 
-        handleTouchStart: function(e){
-            e.preventDefault();
-            var changed = e.changedTouches,
-                shapes = this.paper.shapes;
+        onTouchMove: function(touch){
+            this.bubbles.onTouchMove(touch, this.touches);
+        },
 
-            for(var i = 0; i < changed.length ; i++){ 
-                for(var j = 0; j < 2 /*shapes.bubbles.length*/; j++){
-                    var b = shapes.bubbles[j];
-                    if(!b.selected && b.circle.isPointInside(changed[i].pageX, changed[i].pageY)){
-                        b.x = changed[i].pageX;
-                        b.y = changed[i].pageY;
-                        b.update();
-                        b.toggleSelected();
-                        b.selected = changed[i].identifier;
-                        shapes.joinLine.updatePos();
-                        break;
-                    }                    
-                }
+        onTouchEnd: function(touch){
+            this.bubbles.onTouchEnd(touch, this.touches);
+            if(this.bubbles.doubleSelect && !this.bubbles.shapes.bubbles[0].selected && !this.bubbles.shapes.bubbles[1].selected){
+                this.endTrial();
+                this.bubbles.doubleSelect = false;
             }
+        },
 
-            if(shapes.bubbles.selected()){
-                this.detectedDoubleTouch = true;
+        handleDoubleTouchStart: function(){
+            if(this.bubbles.shapes.bubbles.selected()){
+                this.bubbles.doubleSelect = true;
                 $(this.instrText).velocity({opacity:0}, 50, _bind(function(){
                     this.instrText.innerHTML = 'Release both fingers to set.';
                     $(this.instrText).velocity({opacity:1}, 100);
-                }, this));
+                }, this));                 
             }
-
         },
-
-        handleTouchMove: function(e){
-            e.preventDefault();
-            var changed = e.changedTouches,
-                shapes = this.paper.shapes;
-            
-            for(var i = 0; i < changed.length ; i++){ 
-
-                for(var j = 0; j < 2 /*shapes.bubbles.length*/; j++){
-                    var b = shapes.bubbles[j];
-                    if(b.selected === changed[i].identifier){
-                        b.x = changed[i].pageX;
-                        b.y = changed[i].pageY;
-                        b.update();
-                        shapes.joinLine.updatePos();
-                        break;
-                    }
-                }
-
-            }  
-        },
-
-        handleTouchEnd: function(e){
-            e.preventDefault();
-            var changed = e.changedTouches,
-                shapes = this.paper.shapes;
-            
-            for(var i = 0; i < changed.length ; i++){ 
-
-                for(var j = 0; j < 2 /*shapes.bubbles.length*/; j++){
-                    var b = shapes.bubbles[j];
-                    if(b.selected === changed[i].identifier){
-                        b.toggleSelected();
-                        break;
-                    }
-                }
-            } 
-
-            if(this.detectedDoubleTouch && !shapes.bubbles[0].selected && !shapes.bubbles[1].selected) {
-                this.detectedDoubleTouch = false;
-                this.endTrial();
-            }
-        }
 
     });
 
@@ -691,6 +802,12 @@
             if(config.feedback.range){
                 this.enabled.push(new RangeFeedback());
             }
+            if(config.feedback.barbell){
+                this.enabled.push(new BarbellFeedback());
+            }
+            if(config.feedback.auditory){
+                this.enabled.push(new AuditoryFeedback());
+            }
             this.numEnabled = this.enabled.length;
         },
 
@@ -768,15 +885,71 @@
         }
     });
 
-    var experimentPage = Page.extend({
+    var BarbellFeedback = View.extend({
+        id: 'barbellFeedback',
+
+        init: function(){
+            this._super();
+            this.bubbles = new BubbleView({el: this.el});
+            this.bubbles.el.style.opacity = 0;
+        },
+
+        onStart: function(touches){
+            this.bubbles.el.style.opacity = 1;
+            this.bubbles.onTouchStart(touches[0]);
+            this.bubbles.onTouchStart(touches[1]);
+        },
+
+        onMove: function(touches){
+            this.bubbles.onTouchMove(touches[0]);
+            this.bubbles.onTouchMove(touches[1]);
+        },
+
+        onEnd: function(touches){
+            this.bubbles.shapes.bubbles[0].selected = this.bubbles.shapes.bubbles[1].selected = false;
+            this.bubbles.el.style.opacity = 0;
+        }
+    });
+
+    var AuditoryFeedback = View.extend({
+        init: function(){
+            this.context = new webkitAudioContext();
+            this.oscillator = this.context.createOscillator();
+            this.oscillator.type = 0;
+            this.gainNode = this.context.createGainNode();
+        },
+
+        getFrequencyFromRating: function(rating){
+            rating += 1;
+            return Math.log(rating) * 1000;
+        },
+
+        onStart: function(t, rating){
+            this.oscillator.frequency.value = this.getFrequencyFromRating(rating);
+            this.oscillator.connect(this.gainNode); 
+            this.gainNode.connect(this.context.destination); 
+            this.gainNode.gain.value = .1; 
+            this.oscillator.noteOn(0);
+        },
+
+        onMove: function(t, rating){
+            this.oscillator.frequency.value = this.getFrequencyFromRating(rating);
+        },
+
+        onEnd: function(){
+            this.oscillator.disconnect(); 
+        }
+    });
+
+
+    var experimentPage = DoubleTouchPage.extend({
         id: 'experimentPage',
 
         init: function(){
             this._super();
-            _bindAll(this, 'begin', 'stop', 'handleTouchStart', 'handleTouchMove', 'handleTouchEnd', 'sampleRating');
+            _bindAll(this, 'begin', 'stop', 'sampleRating');
             
             this.titleText = this.el.find('#expTitle');
-            this.touches = [{x: 0, y: 0, id: false}, {x: 0, y: 0, id: false}];
             this.status = {
                 doubleTouch: false,
                 started: false,
@@ -856,7 +1029,6 @@
             config.durationActual = Math.floor( (config.durationActual - config.experimentTime) / 1000 );
 
             this.sampleRating();
-            console.log(this.samples);
             config.ratings = this.samples.slice(0, config.durationActual);
 
 
@@ -866,98 +1038,42 @@
                     this.begin("post");
                 });
             },3000);
-/*            mailDataMandrill(function(res){
-                title.innerHTML = 'Thank you for your time.';
-                setTimeout(function(){
-                    $(title).velocity({opacity:0}, 300, function(){
-                        if(res[0].status === "sent"){
-                            title.innerHTML = 'Data sent successfully.';
-                        }
-                        else{
-                            title.innerHTML = 'Unable to send data. <a class="btn btn-primary" href="' + generateMailLink(data) +'">Mail Data</a>';
-                        }
-
-                        $(title).velocity({opacity:1}, 300);
-                    });
-                },2000);
-            });*/
         },
 
-        handleTouchStart: function(e){
-            e.preventDefault();
-            var changed = e.changedTouches,
-                touches = this.touches;
-
-            for(var i = 0; i < changed.length ; i++){ 
-                for(var j = 0; j < touches.length; j++){
-                    if(!touches[j].id){
-                        touches[j].x = changed[i].pageX;
-                        touches[j].y = changed[i].pageY;
-                        touches[j].id = changed[i].identifier; 
-                        notifier.play("contact");   
-                        break;                    
-                    }
-                }
-            }      
-
-            if(touches[0].id && touches[1].id){
-                this.status.doubleTouch = true;
-                clearTimeout(this.timers.cancel);
-                this.status.canceled = false;
-                this.feedbacks.onStart(touches);
-
-                if(!this.status.started){
-                    this.titleText.innerHTML = '';
-                    this.timers.sample = setInterval(this.sampleRating, config.sampleInterval);
-                    this.timers.end = setTimeout(this.stop, (config.duration * 1000) );
-
-                    this.status.started = true;
-                    config.experimentTime = new Date();
-                    config.absoluteTime = config.experimentTime.getTime();
-                }
-            }  
+        onTouchStart: function(touch){
+            notifier.play("contact");
         },
 
-        handleTouchMove: function(e){
-            e.preventDefault();
-            var changed = e.changedTouches,
-                touches = this.touches;
-            
-            for(var i = 0; i < changed.length ; i++){ 
-                for(var j = 0; j < touches.length; j++){
-                    if(touches[j].id === changed[i].identifier){
-                        touches[j].x = changed[i].pageX;
-                        touches[j].y = changed[i].pageY;
-                        break;
-                    }
-                }
-            }  
-            this.feedbacks.onMove(touches);
+        onTouchEnd: function(touch){
+            notifier.play("contactLoss");
         },
 
-        handleTouchEnd: function(e){
-            e.preventDefault();
-            var changed = e.changedTouches,
-                touches = this.touches;
-            
-            for(var i = 0; i < changed.length ; i++){ 
-                for(var j = 0; j < touches.length; j++){
-                    if(touches[j].id === changed[i].identifier){
-                        touches[j].id = false;
-                        notifier.play("contactLoss");
-                        break;
-                    }
-                }
+        handleDoubleTouchStart: function(){
+            clearTimeout(this.timers.cancel);
+            this.status.canceled = false;
+            this.feedbacks.onStart(this.touches);
 
-            }         
+            if(!this.status.started){
+                this.titleText.innerHTML = '';
+                this.timers.sample = setInterval(this.sampleRating, config.sampleInterval);
+                this.timers.end = setTimeout(this.stop, (config.duration * 1000) );
 
-            if(this.status.doubleTouch && !this.touches[0].id && !this.touches[1].id){
-                this.feedbacks.onEnd(touches);
-                this.status.doubleTouch = false;
-                this.timers.cancel = setTimeout(this.stop, config.cancelTime * 1000);
-                this.status.canceled = new Date();
-            }  
+                this.status.started = true;
+                config.experimentTime = new Date();
+                config.absoluteTime = config.experimentTime.getTime();
+            }
+        },
+
+        handleDoubleTouchEnd: function(){
+            this.feedbacks.onEnd(this.touches);
+            this.timers.cancel = setTimeout(this.stop, config.cancelTime * 1000);
+            this.status.canceled = new Date();
+        },
+
+        handleDoubleTouchMove: function(){
+            this.feedbacks.onMove(this.touches);
         }
+
     });
 
     var completePage = Page.extend({

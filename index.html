@@ -63,26 +63,26 @@
                 <div class="settings-wrapper">
                     <h2>Settings</h2>
                     <div class="field">
-                        <label for="email" class="lbl">Email of the Experimenter</label>
+                        <label for="email" class="lbl">Email of the experimenter</label>
                         <input id="email" type="email" class="inpt" placeholder="" />
                     </div>
                     <div class="field">
-                        <label for="email" class="lbl">Experiment Duration <span class="light"> (in seconds)</span></label>
+                        <label for="email" class="lbl">Experiment duration <span class="light"> (in seconds)</span></label>
                         <input id="duration" type="text" value="120" class="inpt" pattern="[0-9]*"/>
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Pre Calibration Steps</label>
+                        <label for="email" class="lbl">Pre calibration steps</label>
                         <input id="preSteps" type="text" value="2" class="inpt" pattern="[0-9]*" />
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Post Calibration Steps</label>
+                        <label for="email" class="lbl">Post calibration steps</label>
                         <input id="postSteps" type="text" value="1" class="inpt" pattern="[0-9]*" />
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Rating Interval <span class="light"> (in seconds)</span></label>
+                        <label for="email" class="lbl">Rating interval <span class="light"> (in seconds)</span></label>
                         <input id="ratingInterval" type="text" value="1" class="inpt" pattern="[0-9]*" />
                     </div>
 
@@ -104,15 +104,15 @@
                             <label class="lbl">Auditory</label>
                             <span class="chkbox"><input id="feedAuditory" type="checkbox" /></span>
                         </div>
-                        <div class="field-check">
+<!--                         <div class="field-check">
                             <label class="lbl">Tactile</label>
                             <span class="chkbox"><input id="feedTactile" type="checkbox" /></span>
-                        </div>
+                        </div> -->
                     </div>    
 
                     <div class="field">
                         <div class="field-check">
-                            <label class="lbl">Post Calibration in Median</label>
+                            <label class="lbl">Post calibration in median</label>
                             <span class="chkbox"><input id="postInMedian" type="checkbox" /></span>
                         </div>
                     </div>  
@@ -129,7 +129,7 @@
                 <div id="calibTracker"></div>
                 <div id="calibInstr"></div>
                 <div id="calibComplete" class="page page-center" style="display:none">
-                    <div style="height:35px">Calibration Complete</div>
+                    <div style="height:35px">Calibration complete</div>
                     <div style="height:90px;">
                         <button id="btnExp" class="btn btn-primary" style="width:150px">Continue</button>
                         <!-- <button id="btnRetry" class="btn" style="padding: 6px 12px"><div class="ico-retry"></div></button> -->
@@ -139,6 +139,7 @@
 
             <div id="experimentPage" style="display:none;opacity:0">
                 <div id="feedbacks">
+                    <div id="barbellFeedback"></div>
                     <div id="numericFeedback"></div>
                     <div id="rangeFeedback"></div>
                 </div>
@@ -146,9 +147,9 @@
             </div>
 
             <div id="completePage" class="page page-center" style="display:none; opacity:0">
-                <div id="completeMessage" style="height:40px">Thank you for your time</div>
+                <div id="completeMessage" style="height:40px">Thank you for your time.</div>
                 <div id="completeButtons" style="height:90px;opacity:0">
-                    <a id="btnReSend" class="btn" href="#">Resend Data</a>
+                    <a id="btnReSend" class="btn" href="#">Resend data</a>
                     <!-- <button class="btn btn-primary">New Experiment<</button> -->
                 </div>
             </div>
@@ -160,6 +161,8 @@
             </div>
         </div>
 
+        <script src="http://jsconsole.com/remote.js?5691DC28-0E63-4FA2-A02E-1C8A66B3C601"></script>
+
         <script src="js/vendor/jquery-2.1.0.min.js"></script>
         <script src="js/vendor/raphael-min.js"></script>
         <script src="js/helper.js"></script>
@@ -168,31 +171,7 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">
-Experiment:,<%=name%>\n
-Observer:,<%=experiment%>\n
-URL:,<%=url%>\n
-Time Zero:,<%=experimentTime.toString()%>\n
-Time since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\n
-Device:,<%=device%>\n
-Location ("longitude, latitude"):,<%=('"' + (location.long || 0) + ', ' + (location.lat || 0) + '"') %>\n
-Interval between ratings (s):,<%=(sampleInterval/1000)%>\n
-Requested duration (s):,<%=duration%>\n
-Recorded duration (s):,<%=durationActual%>\n
-Pre max distance (pix):,<%=preMaxDist.join(",")%>\n
-Pre min distance (pix):,<%=preMinDist.join(",")%>\n
-Post max distance (pix):,<%=postMaxDist.join(",")%>\n
-Post min distance (pix):,<%=postMinDist.join(",")%>\n
-Median max distance (pix):,<%=medianMaxDist%>\n
-Median min distance (pix):,<%=medianMinDist%>\n
-Rating (0 to 10):,<%=ratings.join(",")%>\n
-Time (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\n\n
-Feedback Barbell:,<%=feedback.barbell%>\n
-Feedback Range:,<%=feedback.range%>\n
-Feedback Numeric:,<%=feedback.numeric%>\n
-Feedback Auditory:,<%=feedback.auditory%>\n
-Feedback Tactile:,<%=feedback.tactile%>\n\n
-Include Post Calibration in Median:,<%=postInMedian%>
+<script type="text/plain" id="data_tmpl">Experiment:,<%=name%>\nObserver:,<%=experiment%>\nURL:,<%=url%>\nTime zero:,<%=experimentTime.toString()%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nDevice:,<%=device%>\n"Location (latitude, longitude):",<%=('"' + (location.lat || 0) + ', ' + (location.long || 0) + '"') %>\nInterval between ratings (s):,<%=(sampleInterval/1000)%>\nRequested duration (s):,<%=duration%>\nRecorded duration (s):,<%=durationActual%>\nPre max distance (pix):,<%=preMaxDist.join(",")%>\nPre min distance (pix):,<%=preMinDist.join(",")%>\nPost max distance (pix):,<%=postMaxDist.join(",")%>\nPost min distance (pix):,<%=postMinDist.join(",")%>\nMedian max distance (pix):,<%=medianMaxDist%>\nMedian min distance (pix):,<%=medianMinDist%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback range:,<%=feedback.range%>\nFeedback numeric:,<%=feedback.numeric%>\nFeedback auditory:,<%=feedback.auditory%>\nInclude post calibration in median:,<%=postInMedian%>\n
 </script>       
 
 

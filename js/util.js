@@ -122,6 +122,15 @@ var _bindAll = function(obj) {
   };
 })();
 
+function Event(name){
+  this.name = name;
+  this.callbacks = [];
+}
+Event.prototype.register = function(callback){
+  this.callbacks.push(callback);
+}
+
+
 var View = Class.extend({
 
 	events: {},
@@ -139,8 +148,17 @@ var View = Class.extend({
 
 	show: function(){ this.render(); this.el.show(); },
 	hide: function() { this.post_render(); this.el.hide() } ,
-	on: function(event, callback) { this.el.on(event, callback) },
-  off: function(event, callback) { this.el.off(event, callback) },
+  register: function(event) { this.events[event] = new Event(event);} ,
+  trigger: function(event, args) {   
+    this.events[event].callbacks.forEach(function(callback){
+      callback(args);
+    }); 
+  },
+  on: function(event, callback){
+    this.events[event].register(callback);
+  },
+/*	on: function(event, callback) { this.el.on(event, callback) },
+  off: function(event, callback) { this.el.off(event, callback) },*/
 
 	bind: function(){
     	var eventSplitter = /^(\S+)\s*(.*)$/;

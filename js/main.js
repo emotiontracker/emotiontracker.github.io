@@ -850,10 +850,10 @@
                 this.enabled.push(new BarbellFeedback({el:this.el.find('.barbellFeedback')}));
             }
             if(config.feedback.auditory){
-                this.enabled.push(new AuditoryFeedback());
+                this.enabled.push(AuditoryFeedback);
             }
             if(config.feedback.tactile){
-                this.enabled.push(new TactileFeedback());
+                this.enabled.push(TactileFeedback);
             }
             this.numEnabled = this.enabled.length;
         },
@@ -965,7 +965,7 @@
         }
     });
 
-    var AuditoryFeedback = View.extend({
+    var AuditoryFeedback = new (View.extend({
         init: function(){
             this.context = new webkitAudioContext();
             this.oscillator = this.context.createOscillator();
@@ -993,9 +993,9 @@
         onEnd: function(){
             this.oscillator.disconnect(); 
         }
-    });
+    }))();
 
-    var TactileFeedback = View.extend({
+    var TactileFeedback = new (View.extend({
         init: function(){
             _bindAll(this, 'start', 'stop', 'play');
             this.frequency = 100;
@@ -1033,7 +1033,7 @@
         onEnd: function(t, rating){
             this.stop();
         }
-    })
+    }))();
 
 
     var experimentPage = DoubleTouchPage.extend({

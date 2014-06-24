@@ -191,7 +191,6 @@ input[type="checkbox"]:focus, input[type=checkbox]:active{
 }
 
 .field-check, .inpt{
-  padding: 10px 20px;
   background:#fff;
   border:1px solid #ccc;
   box-sizing: border-box;
@@ -201,6 +200,7 @@ input[type="checkbox"]:focus, input[type=checkbox]:active{
 }
 
 .field-check, #settingsPage .inpt{
+  padding: 10px 20px;
   width:100%;  
   border-width: 1px 0 1px 0;
   margin: 0;

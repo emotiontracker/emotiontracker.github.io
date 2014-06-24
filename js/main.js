@@ -772,7 +772,7 @@
 
     var generateExperimentString = function(){
         var time = config.experimentTime;
-        var subjectParams = [config.name, config.experiment, time.getFullYear(), time.getMonth(), time.getDate(), time.getHours(), time.getMinutes()];
+        var subjectParams = [config.name, config.experiment, time.getFullYear(), time.getMonth() + 1, time.getDate(), time.getHours(), time.getMinutes()];
         return subjectParams.join('.');        
     }
 

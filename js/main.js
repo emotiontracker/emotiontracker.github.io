@@ -146,33 +146,33 @@
         sounds: {
             contactLoss: new Howl({urls:['alerts/contact_loss.mp3'], volume: 0.3}),
             contact: new Howl({urls:['alerts/contact.mp3'], volume: 0.5}),
-            done: new Howl({urls:['alerts/done.mp3']})
+            done: new Howl({urls:['alerts/done.mp3']}),
+            click: new Howl({urls:['alerts/click.mp3'], volume: 0.8}) 
         },
 
         init: function(){
         },
 
         play: function(sound){
-            this.sounds[sound].play();
+            return this.sounds[sound].play();
         },
 
         pause: function(sound){
             this.sounds[sound].pause();
+        },
+
+        stop: function(sound){
+            this.sounds[sound].stop();
         }
 
     }
 
-    function getDevice(){
-        var ua = navigator.userAgent,
-            devices = ['iPhone', 'iPad', 'iPod', 'Android', 'IEMobile'];
+/*    setInterval(function(){
+        notifier.play('contact');
+    },50);*/
 
-        for(var i=0; i<devices.length; i++){
-            if(ua.match(devices[i])){
-                return devices[i];
-            }
-        }
-        return ua;
-    }
+    var DEVICE_INFO = getDeviceInfo();
+    DEVICE_INFO.pixToMm = _bind(DEVICE_INFO.pixToMm, DEVICE_INFO);
 
     var windowWidth = window.innerWidth;
     var windowHeight = window.innerHeight;
@@ -199,7 +199,6 @@
         ratings: [],
         cancelTime: 5,
         url: window.location.href,
-        device: getDevice(),
         location: {
             long: null,
             lat: null,
@@ -207,6 +206,7 @@
         },
         screenWidth: window.screen.width,
         screenHeight: window.screen.height,
+        DEVICE_INFO: DEVICE_INFO,
 
         preSteps: localStorage["pltrckr-preSteps"] || 2,
         postSteps: localStorage["pltrckr-postSteps"] || 1,
@@ -215,7 +215,7 @@
             range: JSON.parse(localStorage["pltrckr-feedRange"] || "false"),
             numeric: JSON.parse(localStorage["pltrckr-feedNumeric"] || "false"),
             auditory: JSON.parse(localStorage["pltrckr-feedAuditory"] || "false"),
-            // tactile: JSON.parse(localStorage["pltrckr-feedTactile"] || "false")
+            tactile: JSON.parse(localStorage["pltrckr-feedTactile"] || "false"),
             barVaries: JSON.parse(localStorage["pltrckr-feedBarVaries"] || "false"),
         },
         postInMedian: JSON.parse(localStorage["pltrckr-postInMedian"] || "false") ,
@@ -260,7 +260,7 @@
             this.feedRange = $(this.el.find('#feedRange')).prop('checked', config.feedback.range);
             this.feedNumeric = $(this.el.find('#feedNumeric')).prop('checked', config.feedback.numeric);
             this.feedAuditory = $(this.el.find('#feedAuditory')).prop('checked', config.feedback.auditory);
-            //this.feedTactile = $(this.el.find('#feedTactile')).prop('checked', config.feedback.tactile);
+            this.feedTactile = $(this.el.find('#feedTactile')).prop('checked', config.feedback.tactile);
             this.feedBarVaries = $(this.el.find('#feedBarVaries')).prop('checked', config.feedback.barVaries);
 
             this.postInMedian = $(this.el.find('#postInMedian')).prop('checked', config.postInMedian);
@@ -285,7 +285,7 @@
             localStorage["pltrckr-feedRange"] = config.feedback.range = $(this.feedRange).prop('checked');
             localStorage["pltrckr-feedNumeric"] = config.feedback.numeric = $(this.feedNumeric).prop('checked');
             localStorage["pltrckr-feedAuditory"] = config.feedback.auditory = $(this.feedAuditory).prop('checked');
-            //localStorage["pltrckr-feedTactile"] = config.feedback.tactile = $(this.feedTactile).prop('checked');
+            localStorage["pltrckr-feedTactile"] = config.feedback.tactile = $(this.feedTactile).prop('checked');
             localStorage["pltrckr-feedBarVaries"] = config.feedback.barVaries = $(this.feedBarVaries).prop('checked');
 
 
@@ -322,7 +322,7 @@
 
         init: function(){
             this._super(true);
-            _bindAll(this, 'handleSubmit', 'showSettings');
+            _bindAll(this, 'handleSubmit', 'showSettings', 'floatButtons', 'unFloatButtons');
 
             this.name = this.el.find('#name');
             this.experiment = this.el.find('#experiment');
@@ -330,8 +330,12 @@
             this.name.on("change", this.removeInvalidHighlight);
             this.experiment.on("change", this.removeInvalidHighlight);
 
+            this.settingsButton = this.el.find('#btnSettings');
             new MBP.fastButton(this.el.find('#startSubmit'), this.handleSubmit);
-            new MBP.fastButton(this.el.find('#btnSettings'), this.showSettings);
+            new MBP.fastButton(this.settingsButton, this.showSettings);
+
+            $(this.el).on('focusin', this.unFloatButtons);
+            $(this.el).on('focusout', this.floatButtons);
         },
 
         setInvalidHighlight: function(el){
@@ -369,7 +373,14 @@
 
         showSettings: function(){
             this.hide(settingsPage.show);
-        }
+        },
+
+        floatButtons: function(){
+            this.settingsButton.style.position = 'fixed';
+        },
+        unFloatButtons: function(){
+            this.settingsButton.style.position = 'absolute';
+        },
 
     });
 
@@ -536,11 +547,11 @@
         id: 'calibrationPage',
 
         trials: [{
-            title: 'Indicate <span class="strong">Maximum</span> pleasure',
+            title: 'Indicate <span class="strong">maximum</span> pleasure',
             instr: 'Using two fingers, drag the circles as far apart as comfortably possible.',
             configVar: 'MaxDist'
         }, {
-            title: 'Indicate <span class="strong">Minimum</span> pleasure',
+            title: 'Indicate <span class="strong">minimum</span> pleasure',
             instr: 'Using two fingers, drag the circles as close as comfortably possible.',
             configVar: 'MinDist'
         }],
@@ -841,6 +852,9 @@
             if(config.feedback.auditory){
                 this.enabled.push(new AuditoryFeedback());
             }
+            if(config.feedback.tactile){
+                this.enabled.push(new TactileFeedback());
+            }
             this.numEnabled = this.enabled.length;
         },
 
@@ -981,6 +995,46 @@
         }
     });
 
+    var TactileFeedback = View.extend({
+        init: function(){
+            _bindAll(this, 'start', 'stop', 'play');
+            this.frequency = 100;
+            this.timeout = null;
+            this.audio = null;
+        },
+
+        getFrequencyFromRating: function(rating){
+            return 460 - (rating * 40);
+        },
+
+        start: function(){
+            this.play();
+        },
+
+        stop: function(){
+            clearTimeout(this.timeout);
+            notifier.stop('click');
+        },
+
+        play: function(){
+            this.audio = notifier.play('click');
+            this.timeout = setTimeout(this.play, this.frequency);
+        },
+
+        onStart: function(t, rating){
+            this.frequency = this.getFrequencyFromRating(rating);
+            this.start();
+        },
+
+        onMove:function(t, rating){
+            this.frequency = this.getFrequencyFromRating(rating);
+        },
+
+        onEnd: function(t, rating){
+            this.stop();
+        }
+    })
+
 
     var experimentPage = DoubleTouchPage.extend({
         id: 'experimentPage',
@@ -1084,7 +1138,7 @@
                         $(self.tapText).velocity({opacity: 1}, 300, function(){
                             window.addEventListener('touchstart', self.onTap);
                         });
-                    }, 100);                    
+                    }, 50);                    
                 }
             });
         },
@@ -1119,18 +1173,28 @@
             this.sampleRating();
             config.ratings = this.samples.slice(0, config.durationActual);
 
-            notifier.play("done");
-            this.titleText.innerHTML = '<span class="strong" style="font-size:1.8em">Done</span>';
-            var self = this;
-            $(this.titleText).fadeIn(200).delay(1500).fadeOut(200, function(){
-                self.titleText.innerHTML = 'The experiment concluded in <b>' + config.durationActual +'</b>s. Prepare to calibrate again.';
-                $(self.titleText).fadeIn(200);
-                setTimeout(function(){
-                    PageController.transition("calibration", function(){
-                        this.begin("post");
-                    });
-                },3000);
-            });
+            if(this.status.canceled !== false){
+                this.postStop();
+            }
+            else{
+                notifier.play("done");
+                this.titleText.innerHTML = '<span class="strong" style="font-size:1.8em">Done</span>';
+                var self = this;
+                $(this.titleText).fadeIn(200).delay(1500).fadeOut(200, function(){
+                    self.postStop();
+                }); 
+            }
+
+        },
+
+        postStop: function(){
+            this.titleText.innerHTML = 'The experiment concluded in <b>' + config.durationActual +'</b>s. Prepare to calibrate again.';
+            $(this.titleText).fadeIn(200);
+            setTimeout(function(){
+                PageController.transition("calibration", function(){
+                    this.begin("post");
+                });
+            },3000);  
         },
 
         onTouchStart: function(touch){

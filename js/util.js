@@ -189,3 +189,68 @@ function findMedian(values) {
     else
         return (values[half-1] + values[half]) / 2.0;
 }
+
+
+function getDeviceInfo(){
+  var info = {
+    type: null,
+    width: window.screen.width,
+    height: window.screen.height,
+    model: null,
+    ppi: null,
+    ppcm: null,
+    pixRatio: window.devicePixelRatio,
+    pixToMm: function(pixels){
+      if(this.ppcm === null) return null;
+      return (((pixels * this.pixRatio) / this.ppcm) * 10).toFixed(2);
+    }
+  };
+
+  var ua = navigator.userAgent,
+      deviceTypes = ['iPhone', 'iPad', 'iPod', 'Android', 'IEMobile'];  
+
+  for(var i=0; i<deviceTypes.length; i++){
+      if(ua.match(deviceTypes[i])){
+          info.type = deviceTypes[i];
+      }
+  }     
+
+  info.type = info.type || ua;
+
+  if(info.type == 'iPhone' || info.type == 'iPod'){
+    if(info.width == 320 && info.height == 480){
+      if(info.pixRatio == 1){
+        info.ppi = 163;
+        info.ppcm = 64;
+        info.model = "3rd gen";
+      }
+      else if(info.pixRatio == 2){
+        info.ppi = 326;
+        info.ppcm = 128;
+        info.model = "4th gen";
+      }
+    }
+    else if(info.width == 320 && info.height == 568){
+        info.ppi = 326;
+        info.ppcm = 128;
+        info.model = "5th gen";      
+    }
+  }
+  else if(info.type == 'iPad'){
+    if(info.width == 768 && info.height == 1024){
+      if(info.pixRatio == 1){
+        info.ppi = 132;
+        info.ppcm = 52;
+        info.model = "1st/2nd gen iPad / 1st gen iPad Mini";
+      }
+      else if(info.pixRatio == 2){
+        info.ppi = 264;
+        info.ppcm = 104;
+        info.model = "3rd/4th gen iPad / 2nd gen iPad Mini"
+      }
+    }
+  }
+
+  return info;
+
+}

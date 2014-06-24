@@ -144,8 +144,9 @@
         currentPlaying: null,
 
         sounds: {
-            contactLoss: new Howl({urls:['alerts/contact_loss.mp3'], volume: 0.9}),
-            contact: new Howl({urls:['alerts/contact.mp3']}),
+            contactLoss: new Howl({urls:['alerts/contact_loss.mp3'], volume: 0.3}),
+            contact: new Howl({urls:['alerts/contact.mp3'], volume: 0.5}),
+            done: new Howl({urls:['alerts/done.mp3']})
         },
 
         init: function(){
@@ -204,6 +205,8 @@
             lat: null,
             accuracy: null
         },
+        screenWidth: window.screen.width,
+        screenHeight: window.screen.height,
 
         preSteps: localStorage["pltrckr-preSteps"] || 2,
         postSteps: localStorage["pltrckr-postSteps"] || 1,
@@ -213,6 +216,7 @@
             numeric: JSON.parse(localStorage["pltrckr-feedNumeric"] || "false"),
             auditory: JSON.parse(localStorage["pltrckr-feedAuditory"] || "false"),
             // tactile: JSON.parse(localStorage["pltrckr-feedTactile"] || "false")
+            barVaries: JSON.parse(localStorage["pltrckr-feedBarVaries"] || "false"),
         },
         postInMedian: JSON.parse(localStorage["pltrckr-postInMedian"] || "false") ,
 
@@ -257,6 +261,7 @@
             this.feedNumeric = $(this.el.find('#feedNumeric')).prop('checked', config.feedback.numeric);
             this.feedAuditory = $(this.el.find('#feedAuditory')).prop('checked', config.feedback.auditory);
             //this.feedTactile = $(this.el.find('#feedTactile')).prop('checked', config.feedback.tactile);
+            this.feedBarVaries = $(this.el.find('#feedBarVaries')).prop('checked', config.feedback.barVaries);
 
             this.postInMedian = $(this.el.find('#postInMedian')).prop('checked', config.postInMedian);
 
@@ -281,6 +286,8 @@
             localStorage["pltrckr-feedNumeric"] = config.feedback.numeric = $(this.feedNumeric).prop('checked');
             localStorage["pltrckr-feedAuditory"] = config.feedback.auditory = $(this.feedAuditory).prop('checked');
             //localStorage["pltrckr-feedTactile"] = config.feedback.tactile = $(this.feedTactile).prop('checked');
+            localStorage["pltrckr-feedBarVaries"] = config.feedback.barVaries = $(this.feedBarVaries).prop('checked');
+
 
             localStorage["pltrckr-postInMedian"] = config.postInMedian = $(this.postInMedian).prop('checked');
 
@@ -419,10 +426,11 @@
         },
 
         initPaper: function(callback){
-            this.initialized = true;
-
             window.scrollTo( 0, 1 ); 
+            this.paper.setSize(window.innerWidth, window.innerHeight);
+            this.initialized = true;
             this.el.style.opacity = 1;
+
             var shapes = this.shapes = {};
 
             shapes.bubbles = [new this.bubble(), new this.bubble()];
@@ -471,7 +479,6 @@
 
         handleResize: function(){
             if(!this.initialized && getOrientation() == 'landscape'){
-                this.paper.setSize(window.innerWidth, window.innerHeight);
                 this.initPaper();
             }
         },
@@ -548,6 +555,8 @@
             this.instrText = this.el.find('#calibInstr');
             this.completePage = this.el.find('#calibComplete');
 
+            this.feedbacks = new Feedbacks({el:this.el, disableBarbell:true});
+
             new MBP.fastButton(this.completePage.find('#btnExp'), this.handlePreEnd);
         },
 
@@ -590,6 +599,18 @@
                 verify: (phase == 'pre') ? true : false,
             }
 
+            if(phase == 'pre'){
+                var self = this;
+                rater = (function(){
+                    var that = self;
+                    return{
+                        getRating: function(){
+                            return (that.trialParams.cur == 0) ? 10 : 0;
+                        }
+                    };
+                })();
+            }
+
             this.titleText.style.opacity = 0;
             this.instrText.style.opacity = 0;
 
@@ -603,6 +624,8 @@
         },
 
         beginTrials: function(){
+            this.feedbacks.enable();
+
             this.tracker.on('touchmove', this.handleTouchMove);
             this.tracker.on('touchend', this.handleTouchEnd);
             this.tracker.on('touchcancel', this.handleTouchEnd); 
@@ -698,6 +721,7 @@
         },
 
         onTouchStart: function(touch){
+            notifier.play("contact");
             this.bubbles.onTouchStart(touch, this.touches);
         },
 
@@ -706,6 +730,7 @@
         },
 
         onTouchEnd: function(touch){
+            notifier.play("contactLoss");
             this.bubbles.onTouchEnd(touch, this.touches);
             if(this.bubbles.doubleSelect && !this.bubbles.shapes.bubbles[0].selected && !this.bubbles.shapes.bubbles[1].selected){
                 this.endTrial();
@@ -714,6 +739,7 @@
         },
 
         handleDoubleTouchStart: function(){
+            this.feedbacks.onStart(this.touches);
             if(this.bubbles.shapes.bubbles.selected()){
                 this.bubbles.doubleSelect = true;
                 $(this.instrText).velocity({opacity:0}, 50, _bind(function(){
@@ -722,6 +748,14 @@
                 }, this));                 
             }
         },
+
+        handleDoubleTouchMove: function(){
+            this.feedbacks.onMove(this.touches);
+        },
+
+        handleDoubleTouchEnd: function(){
+            this.feedbacks.onEnd(this.touches);
+        }
 
     });
 
@@ -787,23 +821,22 @@
 
 
     var Feedbacks = View.extend({
-        id: 'feedbacks',
         enabled: [],
 
-        init: function(){
-            this._super();
+        init: function(options){
+            this._super(options);
         },
 
         enable: function(){
             this.enabled = [];
             if(config.feedback.numeric){
-                this.enabled.push(new NumericFeedback());
+                this.enabled.push(new NumericFeedback({el:this.el.find('.numericFeedback')}));
             }
             if(config.feedback.range){
-                this.enabled.push(new RangeFeedback());
+                this.enabled.push(new RangeFeedback({el:this.el.find('.rangeFeedback')}));
             }
-            if(config.feedback.barbell){
-                this.enabled.push(new BarbellFeedback());
+            if(config.feedback.barbell && !this.disableBarbell){
+                this.enabled.push(new BarbellFeedback({el:this.el.find('.barbellFeedback')}));
             }
             if(config.feedback.auditory){
                 this.enabled.push(new AuditoryFeedback());
@@ -835,10 +868,9 @@
 
 
     var NumericFeedback = View.extend({
-        id: 'numericFeedback',
 
-        init: function(){
-            this._super();
+        init: function(options){
+            this._super(options);
         },
 
         onStart: function(t, rating){
@@ -855,45 +887,49 @@
     });
 
     var RangeFeedback = View.extend({
-        id: 'rangeFeedback',
-
-        init: function(){
-            this._super();
+        init: function(options){
+            this._super(options);
             this.colors = [
-                '#e70000',
-                '#e76700',
-                '#f1bb00',
-                '#add800',
-                '#00c40e'  
-            ];
+                '#c0392b',
+                '#e74c3c',
+                '#d35400',
+                '#e67e22',
+                '#f39c12',
+                '#f1c40f',
+                '#2ecc71',
+                '#27ae60',
+                '#1abc9c',
+                '#16a085',   
+                '#16a085'   
+            ];                
+
         },
 
         colorFromRating: function(rating){
-            return this.colors[Math.round(rating/2)];
+            return ((config.feedback.barVaries) ? this.colors[Math.round(rating)] : '#736baf');
         },
 
         onStart: function(t, rating){
-            var height = windowHeight * (rating/10);
-            $(this.el).css('height', height + 'px');
+            var top = windowHeight - (windowHeight * (rating/10));
+            $(this.el).css('top', top + 'px');
             $(this.el).css('backgroundColor', this.colorFromRating(rating));            
         },
 
         onMove: function(t, rating){
-            var height = windowHeight * (rating/10);
-            $(this.el).css('height', height + 'px');
+            var top = windowHeight - (windowHeight * (rating/10));
+            $(this.el).css('top', top + 'px');
             $(this.el).css('backgroundColor', this.colorFromRating(rating));
         },
 
         onEnd: function(t, rating){
-            $(this.el).css('height', 0);
+            $(this.el).css('top', windowHeight + 'px');
         }
     });
 
     var BarbellFeedback = View.extend({
-        id: 'barbellFeedback',
 
-        init: function(){
-            this._super();
+        init: function(options){
+            this._super(options);
             this.bubbles = new BubbleView({el: this.el});
             this.bubbles.el.style.opacity = 0;
         },
@@ -932,7 +968,7 @@
             this.oscillator.frequency.value = this.getFrequencyFromRating(rating);
             this.oscillator.connect(this.gainNode); 
             this.gainNode.connect(this.context.destination); 
-            this.gainNode.gain.value = .1; 
+            this.gainNode.gain.value = .01; 
             this.oscillator.noteOn(0);
         },
 
@@ -951,9 +987,10 @@
 
         init: function(){
             this._super();
-            _bindAll(this, 'begin', 'stop', 'sampleRating');
+            _bindAll(this, 'begin', 'stop', 'sampleRating', 'onTap');
             
             this.titleText = this.el.find('#expTitle');
+            this.tapText = this.el.find('#expTap');
             this.status = {
                 doubleTouch: false,
                 started: false,
@@ -970,7 +1007,13 @@
                     clearTimeout(this.sample);
                 }
             };
-            this.feedbacks = new Feedbacks();
+            this.feedbacks = new Feedbacks({el:this.el.find('.feedbacks')});
+            this.titleTexts = [
+                'Soon, you will continuously rate your pleasure, spreading your fingers to indicate how much pleasure you are getting at that moment from the object.',
+                'Keep your fingers on the screen, and keep rating pleasure, even after the object goes away, until I say <b>Done</b>.',
+                '<span class="strong">When you\'re ready, place two fingers to begin.</span>'
+            ];
+
 
         },
 
@@ -998,13 +1041,54 @@
                 };
             })();
 
-            this.feedbacks.enable();
-
-            window.addEventListener('touchstart', this.handleTouchStart);
-            window.addEventListener('touchmove', this.handleTouchMove);
-            window.addEventListener('touchend', this.handleTouchEnd);
-            window.addEventListener('touchcancel', this.handleTouchEnd);            
+            this.beginPre();          
         },
+
+
+        beginPre: function(){
+            this.titleIndex = 0;
+            this.showTitle();
+        },
+
+        onTap: function(){
+            var self = this;
+
+            $(this.tapText).velocity({opacity:0}, 100);
+            $(this.titleText).velocity({opacity:0}, 100, function(){
+                $(self.titleText).hide();
+                self.titleIndex++;
+                self.showTitle();
+            });
+        },
+
+        showTitle: function(){
+
+            window.removeEventListener('touchstart', this.onTap);
+
+            var self = this;
+
+            this.titleText.innerHTML = this.titleTexts[this.titleIndex];
+            $(this.titleText).show();
+            $(this.titleText).velocity({opacity:1}, 150, function(){
+                if(self.titleIndex == self.titleTexts.length - 1){                    
+                    // End case
+                    self.feedbacks.enable();
+
+                    window.addEventListener('touchstart', self.handleTouchStart);
+                    window.addEventListener('touchmove', self.handleTouchMove);
+                    window.addEventListener('touchend', self.handleTouchEnd);
+                    window.addEventListener('touchcancel', self.handleTouchEnd);             
+                }
+                else{
+                    setTimeout(function(){
+                        $(self.tapText).velocity({opacity: 1}, 300, function(){
+                            window.addEventListener('touchstart', self.onTap);
+                        });
+                    }, 100);                    
+                }
+            });
+        },
+
 
         sampleRating: function(){
             var touches = this.touches,
@@ -1035,13 +1119,18 @@
             this.sampleRating();
             config.ratings = this.samples.slice(0, config.durationActual);
 
-
-            this.titleText.innerHTML = 'The experiment concluded in <b>' + config.durationActual +'</b>s. Prepare to calibrate again.';
-            setTimeout(function(){
-                PageController.transition("calibration", function(){
-                    this.begin("post");
-                });
-            },3000);
+            notifier.play("done");
+            this.titleText.innerHTML = '<span class="strong" style="font-size:1.8em">Done</span>';
+            var self = this;
+            $(this.titleText).fadeIn(200).delay(1500).fadeOut(200, function(){
+                self.titleText.innerHTML = 'The experiment concluded in <b>' + config.durationActual +'</b>s. Prepare to calibrate again.';
+                $(self.titleText).fadeIn(200);
+                setTimeout(function(){
+                    PageController.transition("calibration", function(){
+                        this.begin("post");
+                    });
+                },3000);
+            });
         },
 
         onTouchStart: function(touch){
@@ -1058,7 +1147,7 @@
             this.feedbacks.onStart(this.touches);
 
             if(!this.status.started){
-                this.titleText.innerHTML = '';
+                $(this.titleText).hide();
                 this.timers.sample = setInterval(this.sampleRating, config.sampleInterval);
                 this.timers.end = setTimeout(this.stop, (config.duration * 1000) );
 
@@ -1151,8 +1240,8 @@
         handleResize: function(){
             windowWidth = window.innerWidth;
             windowHeight = window.innerHeight;
-
             if(this.curPage.limitOrient){ 
+                window.scrollTo( 0, 1 ); 
                 if (window.innerWidth > window.innerHeight) { // Landscape
                     this.orientPage.hide();
                     this.curPage.el.show();

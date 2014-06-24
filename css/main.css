@@ -86,12 +86,10 @@ h2{
   overflow-y:auto;
 }
 
-#feedbacks{
-  position:relative;
-  top:0;left:0;right:0;bottom:0;
+.feedbacks{
 }
 
-#numericFeedback{
+.numericFeedback{
   position:absolute;
   top:6px;
   right:10px;
@@ -101,13 +99,14 @@ h2{
   color:#595577;
 }
 
-#rangeFeedback{
+.rangeFeedback{
   position: absolute;
-  left:0;top:0;height:0;
+  left:0;bottom:0;
   background-color:#666;
   display: block;
-  width:8px;
-  -webkit-transition: background-color 0.3s;
+  width:15px;
+  -webkit-transition: background-color 0.2s;
+  opacity:0.8;
 }
 
 .fixed-wrapper{
@@ -315,9 +314,41 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
 .title, #calibInstr{
   height:30px;
   margin: auto;
+  padding: 0 35px;
   position: absolute;
   left: 0; right: 0;
 }
+
+.center-text-wrapper{
+  height:100%;
+  width:100%;
+  position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  display: table;  
+}
+
+.center-text{
+  display: table-cell;
+  vertical-align: middle;
+  text-align:center;
+}
+
+#expTitle{
+  padding: 0 55px;
+}
+
+#expTap{
+  font-size:12px;
+  text-transform:uppercase;
+  padding-top:25px;
+  color:#aaa;
+}
+
+
+#expTap, #expTitle{
+  opacity:0;
+}
+
 
 #changeOrient{
   position:  absolute;
@@ -427,7 +458,7 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
 
 .strong{
   font-weight:bold;
-  font-size:1.2em;
+  font-size:1.1em;
   color:#6e65b0;  
 }
 

@@ -93,16 +93,20 @@
                             <span class="chkbox"><input id="feedBarbell" type="checkbox" /></span>
                         </div>
                         <div class="field-check">
-                            <label class="lbl">Range</label>
+                            <label class="lbl">Bar</label>
                             <span class="chkbox"><input id="feedRange" type="checkbox" /></span>
                         </div>
                         <div class="field-check">
-                            <label class="lbl">Numeric</label>
+                            <label class="lbl">Number</label>
                             <span class="chkbox"><input id="feedNumeric" type="checkbox" /></span>
                         </div>
                         <div class="field-check">
-                            <label class="lbl">Auditory</label>
+                            <label class="lbl">Tone</label>
                             <span class="chkbox"><input id="feedAuditory" type="checkbox" /></span>
+                        </div>
+                        <div class="field-check">
+                            <label class="lbl">Bar color varies</label>
+                            <span class="chkbox"><input id="feedBarVaries" type="checkbox" /></span>
                         </div>
 <!--                         <div class="field-check">
                             <label class="lbl">Tactile</label>
@@ -127,6 +131,9 @@
             <div id="calibrationPage" style="display:none;opacity:0">
                 <div id="calibTitle" class="title"></div>
                 <div id="calibTracker"></div>
+                <div class="numericFeedback"></div>
+                <div class="rangeFeedback"></div>
+
                 <div id="calibInstr"></div>
                 <div id="calibComplete" class="page page-center" style="display:none">
                     <div style="height:35px">Calibration complete</div>
@@ -137,13 +144,20 @@
                 </div>
             </div>
 
-            <div id="experimentPage" style="display:none;opacity:0">
-                <div id="feedbacks">
-                    <div id="barbellFeedback"></div>
-                    <div id="numericFeedback"></div>
-                    <div id="rangeFeedback"></div>
+            <div id="experimentPage" style="display:none; opacity:0">
+                <div class="feedbacks">
+                    <div class="barbellFeedback"></div>
+                    <div class="numericFeedback"></div>
+                    <div class="rangeFeedback"></div>
                 </div>
-                <div id="expTitle" class="title">Place two fingers to begin the experiment.</div>
+
+                <div class="center-text-wrapper">
+                    <div class="center-text">
+                        <div id="expTitle"></div>
+                        <div id="expTap">Tap to continue.</div>           
+                    </div>
+
+                </div>
             </div>
 
             <div id="completePage" class="page page-center" style="display:none; opacity:0">
@@ -169,9 +183,8 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">Experiment:,<%=name%>\nObserver:,<%=experiment%>\nURL:,<%=url%>\nTime zero:,<%=experimentTime.toString()%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nDevice:,<%=device%>\n"Location (latitude, longitude):",<%=('"' + (location.lat || 0) + ', ' + (location.long || 0) + '"') %>\nInterval between ratings (s):,<%=(sampleInterval/1000)%>\nRequested duration (s):,<%=duration%>\nRecorded duration (s):,<%=durationActual%>\nPre max distance (pix):,<%=preMaxDist.join(",")%>\nPre min distance (pix):,<%=preMinDist.join(",")%>\nPost max distance (pix):,<%=postMaxDist.join(",")%>\nPost min distance (pix):,<%=postMinDist.join(",")%>\nMedian max distance (pix):,<%=medianMaxDist%>\nMedian min distance (pix):,<%=medianMinDist%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback range:,<%=feedback.range%>\nFeedback numeric:,<%=feedback.numeric%>\nFeedback auditory:,<%=feedback.auditory%>\nInclude post calibration in median:,<%=postInMedian%>\n
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nURL:,<%=url%>\nTime zero:,<%=experimentTime.toString()%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nDevice:,<%=device%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Location (latitude, longitude):",<%=(location.lat || 0) + '\t' + (location.long || 0)%>\nInterval between ratings (s):,<%=(sampleInterval/1000)%>\nRequested duration (s):,<%=duration%>\nRecorded duration (s):,<%=durationActual%>\nPre max distance (pix):,<%=preMaxDist.join(",")%>\nPre min distance (pix):,<%=preMinDist.join(",")%>\nPost max distance (pix):,<%=postMaxDist.join(",")%>\nPost min distance (pix):,<%=postMinDist.join(",")%>\nMedian max distance (pix):,<%=medianMaxDist%>\nMedian min distance (pix):,<%=medianMinDist%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nInclude post calibration in median:,<%=postInMedian%>\n
 </script>       
-
 
     </body>
 </html>

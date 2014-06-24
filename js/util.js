@@ -157,8 +157,8 @@ var View = Class.extend({
   on: function(event, callback){
     this.events[event].register(callback);
   },
-/*	on: function(event, callback) { this.el.on(event, callback) },
-  off: function(event, callback) { this.el.off(event, callback) },*/
+  onEl: function(event, callback) { this.el.on(event, callback) },
+  offEl: function(event, callback) { this.el.off(event, callback) },
 
 	bind: function(){
     	var eventSplitter = /^(\S+)\s*(.*)$/;

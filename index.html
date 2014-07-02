@@ -75,12 +75,17 @@
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Pre calibration steps</label>
+                        <label for="email" class="lbl">Setup trial steps</label>
+                        <input id="setupSteps" type="text" value="2" class="inpt" pattern="[0-9]*" />
+                    </div>
+
+                    <div class="field">
+                        <label for="email" class="lbl">Initial trial steps</label>
                         <input id="preSteps" type="text" value="2" class="inpt" pattern="[0-9]*" />
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Post calibration steps</label>
+                        <label for="email" class="lbl">Final trial steps</label>
                         <input id="postSteps" type="text" value="1" class="inpt" pattern="[0-9]*" />
                     </div>
 
@@ -108,7 +113,7 @@
                             <span class="chkbox"><input id="feedAuditory" type="checkbox" /></span>
                         </div>
                         <div class="field-check">
-                            <label class="lbl">Tactile</label>
+                            <label class="lbl">Ticks</label>
                             <span class="chkbox"><input id="feedTactile" type="checkbox" /></span>
                         </div>
                         <div class="field-check">
@@ -120,7 +125,7 @@
 
                     <div class="field">
                         <div class="field-check">
-                            <label class="lbl">Post calibration in median</label>
+                            <label class="lbl">Include practice in median</label>
                             <span class="chkbox"><input id="postInMedian" type="checkbox" /></span>
                         </div>
                     </div>  
@@ -179,6 +184,7 @@
             </div>
         </div>
 
+<script src="http://10.0.0.9/remote.js?E38C5736-85A2-4943-ACE3-D7165F730697"></script>
         <script src="js/vendor/jquery-2.1.0.min.js"></script>
         <script src="js/vendor/raphael-min.js"></script>
         <script src="js/helper.js"></script>
@@ -187,7 +193,7 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nURL:,<%=url%>\nTime zero:,<%=experimentTime.toString()%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nDevice:,<%=DEVICE_INFO.type%>\nModel:,<%=DEVICE_INFO.model%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Location (latitude, longitude):",<%=(location.lat || 0) + '\t' + (location.long || 0)%>\nInterval between ratings (s):,<%=(sampleInterval/1000)%>\nRequested duration (s):,<%=duration%>\nRecorded duration (s):,<%=durationActual%>\nPre max distance (pix):,<%=preMaxDist.join(",")%>\nPre min distance (pix):,<%=preMinDist.join(",")%>\nPost max distance (pix):,<%=postMaxDist.join(",")%>\nPost min distance (pix):,<%=postMinDist.join(",")%>\nMedian max distance (pix):,<%=medianMaxDist%>\nMedian min distance (pix):,<%=medianMinDist%>\nPre max distance (mm):,<%=$.map(preMaxDist, DEVICE_INFO.pixToMm).join(",")%>\nPre min distance (mm):,<%=$.map(preMinDist, DEVICE_INFO.pixToMm).join(",")%>\nPost max distance (mm):,<%=$.map(postMaxDist, DEVICE_INFO.pixToMm).join(",")%>\nPost min distance (mm):,<%=$.map(postMinDist, DEVICE_INFO.pixToMm).join(",")%>\nMedian max distance (mm):,<%=DEVICE_INFO.pixToMm(medianMaxDist)%>\nMedian min distance (mm):,<%=DEVICE_INFO.pixToMm(medianMinDist)%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback tactile:,<%=feedback.tactile%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nInclude post calibration in median:,<%=postInMedian%>\n
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nURL:,<%=url%>\nTime zero:,<%=experimentTime.toString()%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nRating (pix):,<%=ratingsPx.join(",")%>\nDevice:,<%=DEVICE_INFO.type%>\nModel:,<%=DEVICE_INFO.model%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Location (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nInterval between ratings (s):,<%=(sampleInterval/1000)%>\nRequested duration (s):,<%=duration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min (pix):,<%=setupMinDist.join(",")%>\nSet up max (pix):,<%=setupMaxDist.join(",")%>\nInitial practice min (pix):,<%=preMinDist.join(",")%>\nInitial practice max (pix):,<%=preMaxDist.join(",")%>\nFinal practice min (pix):,<%=postMinDist.join(",")%>\nFinal practice max (pix):,<%=postMaxDist.join(",")%>\nMedian practice min (pix):,<%=medianMinDist%>\nMedian practice max (pix):,<%=medianMaxDist%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback ticks:,<%=feedback.tactile%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nInclude practice in median:,<%=postInMedian%>\n
 </script>       
 
     </body>

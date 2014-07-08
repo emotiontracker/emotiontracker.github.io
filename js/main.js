@@ -7,6 +7,7 @@
     var Page = View.extend({
         shown: true,
         limitOrient: true,
+        el: '',
 
         init: function(start){
             this._super();
@@ -57,11 +58,15 @@
             this._super(options);
             _bindAll(this, 'handleTouchStart', 'handleTouchMove', 'handleTouchEnd', 'handleDoubleTouchStart', 'handleDoubleTouchEnd');
 
+            this.resetDoubleTouch();
+        },
+
+        resetDoubleTouch: function(){
             this.touches = [{x: 0, y: 0, id: false}, {x: 0, y: 0, id: false}];
             this.touches.isDouble = function(){
                 return this[0].id && this[1].id;
             }
-            this.doubleTouch = false;
+            this.doubleTouch = false;            
         },
 
         handleTouchStart: function(e){
@@ -134,7 +139,15 @@
         onTouchEnd: function(){},
         handleDoubleTouchStart: function(){},
         handleDoubleTouchEnd: function(){},
-        handleDoubleTouchMove: function(){}
+        handleDoubleTouchMove: function(){},
+        handleResize: function(){
+            this.el.style.width = window.innerWidth + 'px';
+            this.el.style.height = window.innerHeight + 'px';
+        },
+        render: function(){
+            this.el.className = 'doubleTouch';
+            this.resetDoubleTouch();
+        }
 
 
     });
@@ -147,7 +160,7 @@
             contactLoss: new Howl({urls:['alerts/contact_loss.mp3'], volume: 0.3}),
             contact: new Howl({urls:['alerts/contact.mp3'], volume: 0.5}),
             done: new Howl({urls:['alerts/done.mp3']}),
-            click: new Howl({urls:['alerts/click.mp3'], volume: 0.8}) 
+            click: new Howl({urls:['alerts/click.mp3'], volume: 0.9}) 
         },
 
         init: function(){
@@ -174,8 +187,6 @@
     var DEVICE_INFO = getDeviceInfo();
     DEVICE_INFO.pixToMm = _bind(DEVICE_INFO.pixToMm, DEVICE_INFO);
 
-    var windowWidth = window.innerWidth;
-    var windowHeight = window.innerHeight;
     var pixelRatio = window.devicePixelRatio || 1;
     var rater = { getRating: function(){} };
 
@@ -183,11 +194,11 @@
         name: '',
         experiment: '',
         experimentTime: '',
-        absoluteTime: '',
+        absoluteTime: 0,
         email: localStorage["pltrckr-email"] || 'lauren.vale@nyu.edu',
         duration: localStorage["pltrckr-duration"] || 30,
-        durationActual: '',
-        sampleInterval: 1000,
+        durationActual: 0,
+        ratingInterval: localStorage["pltrckr-ratingInterval"] || 1000,
         setupMaxDist: [],
         setupMinDist: [],
         preMaxDist: [],
@@ -196,11 +207,14 @@
         postMinDist: [],
         medianMaxDist: 0,
         medianMinDist: 0,
+        medianMaxRating: 0,
+        medianMinRating: 0,
         touchFeedback: true,
-        calibFail: false,
         ratings: [],
         ratingsPx: [],
-        cancelTime: 5,
+        practiceMinRatings: [],
+        practiceMaxRatings: [],
+        cancelTime: 5000,
         url: window.location.href,
         location: {
             long: null,
@@ -226,20 +240,24 @@
             }
         },
         postInMedian: JSON.parse(localStorage["pltrckr-postInMedian"] || "false") ,
+        feltPleasure: '',
 
         generateData: function(){
 
             this.medianMaxDist = (this.postInMedian) ? findMedian(this.preMaxDist.concat(this.postMaxDist)) : findMedian(this.preMaxDist); 
             this.medianMinDist = (this.postInMedian) ? findMedian(this.preMinDist.concat(this.postMinDist)) : findMedian(this.preMinDist); 
             
+            this.medianMaxRating = findMedian(this.practiceMaxRatings).toFixed(1); 
+            this.medianMinRating = findMedian(this.practiceMinRatings).toFixed(1); 
+            
             return tmpl("data_tmpl", this);       
         }
     };
 
-    function updateRater(){
+    function updateRater(config){
 
         var minVals = config.setupMinDist, maxVals = config.setupMaxDist;
-        if(config.postInMedian && !config.feedback.isEnabled()){
+        if(config.postInMedian){
             minVals = minVals.concat(config.preMinDist, config.postMinDist);
             maxVals = maxVals.concat(config.preMaxDist, config.postMaxDist);
         }
@@ -252,8 +270,8 @@
                 ratingStep = ratingRange / 10;
 
             return {
-                getRating: function(touches){
-                    var distance = getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
+                getRatingFromDist: function(distance){
+
                     if(distance < minDist) {
                         distance = minDist;
                     }
@@ -261,8 +279,13 @@
                         distance = maxDist;
                     }
 
-                    return (distance - minDist) / ratingStep;                 
-                }
+                    return (distance - minDist) / ratingStep;                      
+                },
+
+                getRating: function(touches){
+                    var distance = getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
+                    return this.getRatingFromDist(distance);                
+                },
             };
         })();
     }
@@ -295,6 +318,7 @@
             this.setupSteps = $(this.el.find('#setupSteps')).val(config.setupSteps);
             this.preSteps = $(this.el.find('#preSteps')).val(config.preSteps);
             this.postSteps = $(this.el.find('#postSteps')).val(config.postSteps);
+            this.ratingInterval = $(this.el.find('#ratingInterval')).val(config.ratingInterval/1000);
 
             this.feedBarbell = $(this.el).find('#feedBarbell').prop('checked', config.feedback.barbell);
             this.feedRange = $(this.el.find('#feedRange')).prop('checked', config.feedback.range);
@@ -321,6 +345,7 @@
             localStorage["pltrckr-setupSteps"] = config.setupSteps = $(this.setupSteps).val().trim();
             localStorage["pltrckr-preSteps"] = config.preSteps = $(this.preSteps).val().trim();
             localStorage["pltrckr-postSteps"] = config.postSteps = $(this.postSteps).val().trim();
+            localStorage["pltrckr-ratingInterval"] = config.ratingInterval = +($(this.ratingInterval).val().trim())*1000;
 
             localStorage["pltrckr-feedBarbell"] = config.feedback.barbell = $(this.feedBarbell).prop('checked');
             localStorage["pltrckr-feedRange"] = config.feedback.range = $(this.feedRange).prop('checked');
@@ -422,6 +447,24 @@
         unFloatButtons: function(){
             this.settingsButton.style.position = 'absolute';
         },
+
+        render: function(){
+            $(this.name).val('');
+            $(this.experiment).val('');
+
+            config.setupMaxDist = [];
+            config.setupMinDist = [];
+            config.preMaxDist = [];
+            config.preMinDist = [];
+            config.postMaxDist = [];
+            config.postMinDist = []; 
+            config.practiceMinRatings = [];
+            config.practiceMaxRatings = [];
+            config.ratings = [];
+            config.ratingsPx = [];
+
+            rater = { getRating: function(){} };
+        }
 
     });
 
@@ -590,29 +633,32 @@
         trials: [{
             title: 'Indicate <span class="strong">maximum</span> pleasure',
             instr: 'Using two fingers, drag the circles as far apart as comfortably possible.',
-            configVar: 'MaxDist'
+            configVar: 'Max'
         }, {
             title: 'Indicate <span class="strong">minimum</span> pleasure',
             instr: 'Using two fingers, drag the circles as close as comfortably possible.',
-            configVar: 'MinDist'
+            configVar: 'Min'
         }],
 
         init: function(){
             this._super();
-            _bindAll(this, 'handlePreEnd', 'beginTrials');
+            _bindAll(this, 'handlePreEnd', 'beginTrials', 'onTap');
 
 
             this.tracker = this.el.find('#calibTracker');
             this.titleText = this.el.find('#calibTitle');
             this.instrText = this.el.find('#calibInstr');
-            this.completePage = this.el.find('#calibComplete');
+            this.titlesText = this.el.find('#calibTitles');
+            this.tapText = this.el.find('#calibTap');
 
             this.feedbacks = new Feedbacks({el:this.el, disableBarbell:true});
 
-            new MBP.fastButton(this.completePage.find('#btnExp'), this.handlePreEnd);
         },
 
         handleResize: function(){
+            this.el.style.width = window.innerWidth + 'px';
+            this.el.style.height = window.innerHeight + 'px';
+
             if(this.bubbles){
                 this.bubbles.handleResize();
             }
@@ -638,6 +684,45 @@
             return queue;
         },
 
+        onTap: function(){
+            var self = this;
+            window.removeEventListener('touchstart', this.onTap);
+
+            $(this.tapText).velocity({opacity:0}, 100);
+            $(this.titlesText).velocity({opacity:0}, 100, function(){
+                $(self.titlesText).hide();
+                self.titleIndex++;
+                
+                if(self.titleIndex == self.titleTexts[self.trialParams.phase][self.titlePhase].length ){                    
+                    if(self.titlePhase == 'start'){
+                        self.beginPre();
+                    }   
+                    else if(self.titlePhase == 'end'){
+                        self.titleTexts[self.trialParams.phase].onEnd();
+                    }       
+                }
+                else{
+                    self.showTitle();
+                }
+            });
+        },
+
+        showTitle: function(){
+
+            var self = this;
+
+            this.titlesText.innerHTML = this.titleTexts[this.trialParams.phase][this.titlePhase][this.titleIndex];
+            $(this.titlesText).show();
+            $(this.titlesText).velocity({opacity:1}, 150, function(){
+
+                setTimeout(function(){
+                    $(self.tapText).velocity({opacity: 1}, 300, function(){
+                        window.addEventListener('touchstart', self.onTap);
+                    });
+                }, 50);                    
+            });
+        }, 
+
         begin: function(phase){
             var self = this;
 
@@ -651,10 +736,66 @@
                 verify: (phase == 'post') ? false : true,
             }
 
+            this.titleTexts = {
+                'setup':{
+                    start:[
+                        'Prepare to setup settings.'
+                    ],
+                    end:[],
+                    onEnd: function(){
+                        self.begin('pre');
+                    }
+                },
+                'pre':{
+                    start: [
+                        'Next we\'ll practice making ratings. We encourage you to play!',
+                        'As time passes, continually adjust the spread of your fingers to indicate how much pleasure you are getting from the object at each moment.'        
+                    ],
+                    end: [],
+                    onEnd: function(){
+                        self.handlePreEnd();
+                    }
+                },
+                'post':{
+                    start: [ 'Prepare for the final practice ratings.' ],
+                    end: [],
+                    onEnd: function(){
+                        PageController.transition("complete");
+                    }
+                }
+            };
+
+            if(config.feedback.auditory || config.feedback.tactile){
+                this.titleTexts['pre'].start[1] += ' Adjust the volume of your device to suit your comfort level.';
+            }
+
+            if(phase == 'setup'){
+                rater = (function(){
+                    return{
+                        getRating: function(){
+                            return (self.trialParams.cur == 0) ? 10 : 0;
+                        }
+                    };
+                })();
+            }
+
             this.titleText.style.opacity = 0;
             this.instrText.style.opacity = 0;
+            this.tracker.innerHTML = '';
 
+            if(this.titleTexts[phase].start.length > 0){
+                this.titlePhase = 'start';
+                this.titleIndex = 0;
+                this.showTitle();
+            }
+            else{
+                this.beginPre();
+            }
+        },
+
+        beginPre: function(){
             this.bubbles = new BubbleView({el: this.tracker, drag: true});
+
             if(this.bubbles.initialized){
                 this.beginTrials();
             }
@@ -663,23 +804,21 @@
             }
         },
 
-        beginTrials: function(){
-            if(this.trialParams.phase !== 'setup'){
-                this.feedbacks.enable();
-            }            
+        beginTrials: function(){       
 
-            this.tracker.on('touchmove', this.handleTouchMove);
-            this.tracker.on('touchend', this.handleTouchEnd);
-            this.tracker.on('touchcancel', this.handleTouchEnd); 
+            this.feedbacks.enable();
+            window.addEventListener('touchmove', this.handleTouchMove);
+            window.addEventListener('touchend', this.handleTouchEnd);
+            window.addEventListener('touchcancel', this.handleTouchEnd); 
 
             this.startTrial(0); 
         },
 
         end: function(){
             this.feedbacks.disableAll();
-            this.tracker.off('touchmove', this.handleTouchMove);
-            this.tracker.off('touchend', this.handleTouchEnd);
-            this.tracker.off('touchcancel', this.handleTouchEnd);  
+            window.removeEventListener('touchmove', this.handleTouchMove);
+            window.removeEventListener('touchend', this.handleTouchEnd);
+            window.removeEventListener('touchcancel', this.handleTouchEnd);  
 
             var self = this;
             $(this.instrText).velocity({opacity: 0}, 50, function(){
@@ -688,16 +827,15 @@
                     complete: function(){
                         self.bubbles.paper.clear();
                         
-                        updateRater();
+                        updateRater(config);
 
-                        if(self.trialParams.phase === 'setup'){
-                            self.begin('pre');
-                        }
-                        else if(self.trialParams.phase === 'pre'){
-                            $(self.completePage).show();                               
+                        if(self.titleTexts[self.trialParams.phase].end.length > 0){
+                            self.titlePhase = 'end';
+                            self.titleIndex = 0;
+                            self.showTitle();
                         }
                         else{
-                            PageController.transition("complete");
+                            self.titleTexts[self.trialParams.phase].onEnd();
                         }
                    
                     }
@@ -723,7 +861,7 @@
                     "fill": "rgb(216, 0, 57)"
                 }, 200);   
             }); 
-            this.tracker.on('touchstart', this.handleTouchStart);
+            window.addEventListener('touchstart', this.handleTouchStart);
 
             $(this.titleText).velocity({opacity: 1}, 200);
             $(this.instrText).velocity({opacity: 1}, 200);
@@ -731,7 +869,7 @@
 
         endTrial: function(){
 
-            this.tracker.off('touchstart', this.handleTouchStart);
+            window.removeEventListener('touchstart', this.handleTouchStart);
             this.bubbles.shapes.bubbles.forEach(function(b){
                 b.circle.animate({
                     "fill": "#888"
@@ -741,7 +879,7 @@
             var distance = this.bubbles.shapes.bubbles.distance(),
                 tp = this.trialParams,
                 trial = this.trials[tp.cur],
-                phaseVar = tp.phase + trial.configVar;
+                phaseVar = tp.phase + trial.configVar + 'Dist';
 
             if(tp.step == tp.maxSteps && tp.maxSteps > 1 && tp.verify){
                 if( Math.abs(distance - config[phaseVar].slice(-1)[0]) > 100 ){
@@ -749,6 +887,9 @@
                 }             
             }
             config[phaseVar].push(distance);
+            if(tp.phase !== 'setup'){
+                config['practice' + trial.configVar + 'Ratings'].push(rater.getRatingFromDist(distance));
+            }
 
             if(tp.index % this.trials.length == 0){
                 tp.step++;
@@ -787,8 +928,8 @@
         },
 
         handleDoubleTouchStart: function(){
-            this.feedbacks.onStart(this.touches);
             if(this.bubbles.shapes.bubbles.selected()){
+                this.feedbacks.onStart(this.touches);
                 this.bubbles.doubleSelect = true;
                 $(this.instrText).velocity({opacity:0}, 50, _bind(function(){
                     this.instrText.innerHTML = 'Release both fingers to set.';
@@ -798,7 +939,9 @@
         },
 
         handleDoubleTouchMove: function(){
-            this.feedbacks.onMove(this.touches);
+            if(this.bubbles.shapes.bubbles.selected()){
+                this.feedbacks.onMove(this.touches);
+            }
         },
 
         handleDoubleTouchEnd: function(){
@@ -809,18 +952,18 @@
 
     var generateExperimentString = function(){
         var time = config.experimentTime;
-        var subjectParams = [config.name, config.experiment, time.getFullYear(), time.getMonth() + 1, time.getDate(), time.getHours(), time.getMinutes()];
+        var subjectParams = [config.experiment, config.name, time.getFullYear(), time.getMonth() + 1, time.getDate(), time.getHours(), time.getMinutes()];
         return subjectParams.join('.');        
     }
 
     var generateMailBody = function(){
         var html = ' \
-            <h2> Experiment Report </h2> \
+            <h2> Results </h2> \
             <table> \
-                <tr> <td>Username:</td> <td>' + config.name + '</td> </tr> \
                 <tr> <td>Experiment:</td> <td>' + config.experiment + '</td> </tr> \
-                <tr> <td>Date and Time:</td> <td>' + config.experimentTime.toString() + '</td> </tr> \
-            </table>';
+                <tr> <td>Username:</td> <td>' + config.name + '</td> </tr> \
+            </table> \
+            <div>' + config.experimentTime.toString() + '</div>';
         return html;
     }
 
@@ -852,10 +995,17 @@
                 "async": false
         }   
 
-        $.post("https://mandrillapp.com/api/1.0/messages/send.json",
-            JSON.stringify(msg),
-            callback
-        );     
+        $.ajax({
+            type: "POST",
+            url: "https://mandrillapp.com/api/1.0/messages/send.json",
+            data: JSON.stringify(msg),
+            success: function(res){
+                callback(res);
+            },
+            error: function(res) {
+                callback(res);
+            }
+        });   
     }
 
     var generateMailLink = function(){
@@ -957,7 +1107,8 @@
                 '#1abc9c',
                 '#16a085',   
                 '#16a085'   
-            ];                
+            ];         
+            this.el.style.opacity = 0;         
 
         },
 
@@ -965,20 +1116,21 @@
             return ((config.feedback.barVaries) ? this.colors[Math.round(rating)] : '#736baf');
         },
 
-        onStart: function(t, rating){
-            var top = windowHeight - (windowHeight * (rating/10));
+        onStart: function(t, rating){ 
+            var top = window.innerHeight - (window.innerHeight * (rating/10));
             $(this.el).css('top', top + 'px');
-            $(this.el).css('backgroundColor', this.colorFromRating(rating));            
+            $(this.el).css('backgroundColor', this.colorFromRating(rating));   
+            this.el.style.opacity = 0.7;         
         },
 
         onMove: function(t, rating){
-            var top = windowHeight - (windowHeight * (rating/10));
+            var top = window.innerHeight - (window.innerHeight * (rating/10));
             $(this.el).css('top', top + 'px');
             $(this.el).css('backgroundColor', this.colorFromRating(rating));
         },
 
         onEnd: function(t, rating){
-            $(this.el).css('top', windowHeight + 'px');
+            this.el.style.opacity = 0; 
         }
     });
 
@@ -986,6 +1138,7 @@
 
         init: function(options){
             this._super(options);
+            this.el.innerHTML = '';
             this.bubbles = new BubbleView({el: this.el});
             this.bubbles.el.style.opacity = 0;
         },
@@ -1042,13 +1195,13 @@
     var TactileFeedback = new (View.extend({
         init: function(){
             _bindAll(this, 'start', 'stop', 'play');
-            this.frequency = 100;
+            this.frequency = 800;
             this.timeout = null;
             this.audio = null;
         },
 
         getFrequencyFromRating: function(rating){
-            return 460 - (rating * 40);
+            return 800 - (rating * 40);
         },
 
         start: function(){
@@ -1061,11 +1214,12 @@
         },
 
         play: function(){
-            this.audio = notifier.play('click');
+            notifier.play('click');
             this.timeout = setTimeout(this.play, this.frequency);
         },
 
         onStart: function(t, rating){
+            this.stop();
             this.frequency = this.getFrequencyFromRating(rating);
             this.start();
         },
@@ -1089,11 +1243,17 @@
             
             this.titleText = this.el.find('#expTitle');
             this.tapText = this.el.find('#expTap');
-            this.status = {
-                doubleTouch: false,
-                started: false,
-                canceled: false
-            };
+
+            this.feedbacks = new Feedbacks({el:this.el.find('.feedbacks')});
+            this.titleTexts = [
+                'Soon, you will continuously rate your pleasure. You\'ll spread your fingers to indicate how much pleasure you are getting from the object at that moment.',
+                'While your fingers are on the screen, keep rating pleasure, even after the object goes away, until I say, <b>"Done"</b>.',
+                '<span class="strong">When you\'re ready, place two fingers to begin.</span>'
+            ];
+
+        },
+
+        begin: function(){
             this.samples = [];
             this.samplesPx = [];
             this.timers = {
@@ -1106,24 +1266,13 @@
                     clearTimeout(this.sample);
                 }
             };
-            this.feedbacks = new Feedbacks({el:this.el.find('.feedbacks')});
-            this.titleTexts = [
-                'Soon, you will continuously rate your pleasure. You\'ll spread your fingers to indicate how much pleasure you are getting from the object at that moment.',
-                'Keep your fingers on the screen. Keep rating pleasure, even after the object goes away, until I say, <b>"Done"</b>.',
-                '<span class="strong">When you\'re ready, place two fingers to begin.</span>'
-            ];
-
-
-        },
-
-        begin: function(){
-            this.beginPre();          
-        },
-
-
-        beginPre: function(){
+            this.status = {
+                doubleTouch: false,
+                started: false,
+                canceled: false
+            }; 
             this.titleIndex = 0;
-            this.showTitle();
+            this.showTitle();         
         },
 
         onTap: function(){
@@ -1214,13 +1363,17 @@
         },
 
         postStop: function(){
-            this.titleText.innerHTML = 'Prepare to calibrate again.';
-            $(this.titleText).fadeIn(200);
-            setTimeout(function(){
-                PageController.transition("calibration", function(){
-                    this.begin("post");
-                });
-            },3000);  
+            // this.titleText.innerHTML = 'Prepare to calibrate again.';
+            // $(this.titleText).fadeIn(200);
+            // setTimeout(function(){
+            PageController.transition("calibration", function(){
+                this.begin("post");
+            });
+            // },3000);  
+        },
+
+        conceal: function(){
+            this.timers.clearAll();
         },
 
         onTouchStart: function(touch){
@@ -1237,11 +1390,11 @@
             this.feedbacks.onStart(this.touches);
 
             if(!this.status.started){
+                this.status.started = true;
                 $(this.titleText).hide();
-                this.timers.sample = setInterval(this.sampleRating, config.sampleInterval);
+                this.timers.sample = setInterval(this.sampleRating, config.ratingInterval);
                 this.timers.end = setTimeout(this.stop, (config.duration * 1000) );
 
-                this.status.started = true;
                 config.experimentTime = new Date();
                 config.absoluteTime = config.experimentTime.getTime();
             }
@@ -1249,7 +1402,7 @@
 
         handleDoubleTouchEnd: function(){
             this.feedbacks.onEnd(this.touches);
-            this.timers.cancel = setTimeout(this.stop, config.cancelTime * 1000);
+            this.timers.cancel = setTimeout(this.stop, config.cancelTime);
             this.status.canceled = new Date();
         },
 
@@ -1265,37 +1418,84 @@
 
         init: function(){
             this._super();
+             _bindAll(this, 'showFinal');
 
+            this.survey = this.el.find("#completeSurvey");
+            this.surveyTap = this.el.find("#completeSurveyTap");
+            this.surveyRadio = $(this.el).find('input[name="pleasureSurvey"]');
             this.message = this.el.find("#completeMessage");
             this.buttons = this.el.find("#completeButtons");
-            this.sendButton = this.buttons.find("#btnReSend");
+            this.sendButton = this.buttons.find('#btnReSend');
+            this.restartButton = this.buttons.find('#btnRestart');
+
+            new MBP.fastButton(this.surveyTap, this.showFinal);
+            new MBP.fastButton(this.restartButton, function(){
+                PageController.transition('start');
+            });
+
         },
 
         render: function(){
-            $(this.message).html("Thank you.")
-            $(this.sendButton).attr("href", generateMailLink());
+            this.surveyChange = false;
+            this.survey.style.opacity = 1;
+            this.survey.style.display = 'block';
+            this.surveyTap.style.opacity = 0;
+            this.surveyTap.style.display = 'none';
+
+            $(this.message).html("Thank you.");
+
             this.buttons.style.opacity = 0;
+            this.buttons.style.display = 'none';
         },
 
         post_render: function(){
             var self = this;
-            mailDataMandrill(function(res){
-                setTimeout(_bind(function(){
-                    $(self.message).velocity({opacity:0}, 300, function(){
-                        if(res[0].status === "rejected" || res[0].status === "invalid"){
-                            $(self.message).html('Unable to send data.');
-                        }
-                        else{
-                            $(self.message).html('Data sent successfully.');
-                        }
 
-                        $(self.message).velocity({opacity:1}, 300);
-                        $(self.buttons).velocity({opacity:1}, 300);
-                    });
-                }, this), 2000);
+            this.surveyRadio.change(function(){
+                if(!self.surveyChange){
+                    self.surveyChange = true;
+
+                    $(self.surveyTap).css({display: 'block'}).velocity({opacity:1}, 300);
+                }
             });
+        },
 
+        showFinal: function(){
+            var self = this;
+            config.feltPleasure = $(self.el).find('input[name="pleasureSurvey"]:checked').val();
+            $(self.el).find('input[name="pleasureSurvey"]:checked').prop('checked', false);
+
+            $(self.survey).velocity({opacity:0}, 100, function(){
+                $(this).css({display: 'none'});
+
+                $(self.message).css({display: 'block'}).velocity({opacity:1}, 300, function(){
+
+                    $(self.sendButton).attr("href", generateMailLink());
+                    mailDataMandrill(function(res){
+                        setTimeout(_bind(function(){
+
+                            $(self.message).velocity({opacity:0}, 300, function(){
+                                if( res[0] == undefined  || res[0].status === undefined || 
+                                    res[0].status === "rejected" || 
+                                    res[0].status === "invalid"){
+                                    $(self.message).html('Unable to send data.');
+                                }
+                                else{
+                                    $(self.message).html('Data sent successfully.');
+                                }
+
+                                $(self.message).velocity({opacity:1},300).delay(1000).velocity({opacity:0},300, function(){
+                                    $(this).css({display: 'none'});
+                                    $(self.buttons).css({display: 'block'}).velocity({opacity:1}, 300);
+                                });
+                            });
+
+                        }, this), 1000);
+                    });                                
+                })
+            });
         }
+
     });
 
     var PageController = new (Class.extend({
@@ -1328,16 +1528,14 @@
         },
 
         handleResize: function(){
-            windowWidth = window.innerWidth;
-            windowHeight = window.innerHeight;
             if(this.curPage.limitOrient){ 
                 window.scrollTo( 0, 1 ); 
                 if (window.innerWidth > window.innerHeight) { // Landscape
                     this.orientPage.hide();
-                    this.curPage.el.show();
+                    //this.curPage.el.show();
                 }
                 else{ // Portrait
-                    this.curPage.el.hide();
+                    //this.curPage.el.hide();
                     this.orientPage.show();
                 }                
             }

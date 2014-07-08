@@ -45,7 +45,7 @@
     <body>
 
         <div class="wrapper">
-            <div id="startPage" style="">
+            <div id="startPage">
                 <div class="start-wrapper">
                     <div id="logo"></div>
                     <div>
@@ -66,7 +66,7 @@
                 <div class="settings-wrapper">
                     <h2>Settings</h2>
                     <div class="field">
-                        <label for="email" class="lbl">Email of the experimenter</label>
+                        <label for="email" class="lbl">Email address of the experimenter</label>
                         <input id="email" type="email" class="inpt" placeholder="" />
                     </div>
                     <div class="field">
@@ -75,22 +75,22 @@
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Setup trial steps</label>
+                        <label for="email" class="lbl">Setup settings</label>
                         <input id="setupSteps" type="text" value="2" class="inpt" pattern="[0-9]*" />
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Initial trial steps</label>
+                        <label for="email" class="lbl">Initial practice ratings</label>
                         <input id="preSteps" type="text" value="2" class="inpt" pattern="[0-9]*" />
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Final trial steps</label>
+                        <label for="email" class="lbl">Final practice ratings</label>
                         <input id="postSteps" type="text" value="1" class="inpt" pattern="[0-9]*" />
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Rating interval <span class="light"> (in seconds)</span></label>
+                        <label for="email" class="lbl">Sampling interval <span class="light"> (in seconds)</span></label>
                         <input id="ratingInterval" type="text" value="1" class="inpt" pattern="[0-9]*" />
                     </div>
 
@@ -105,6 +105,10 @@
                             <span class="chkbox"><input id="feedRange" type="checkbox" /></span>
                         </div>
                         <div class="field-check">
+                            <label class="lbl">Bar color varies</label>
+                            <span class="chkbox"><input id="feedBarVaries" type="checkbox" /></span>
+                        </div>
+                        <div class="field-check">
                             <label class="lbl">Number</label>
                             <span class="chkbox"><input id="feedNumeric" type="checkbox" /></span>
                         </div>
@@ -116,10 +120,7 @@
                             <label class="lbl">Ticks</label>
                             <span class="chkbox"><input id="feedTactile" type="checkbox" /></span>
                         </div>
-                        <div class="field-check">
-                            <label class="lbl">Bar color varies</label>
-                            <span class="chkbox"><input id="feedBarVaries" type="checkbox" /></span>
-                        </div>
+
 
                     </div>    
 
@@ -144,12 +145,13 @@
                 <div class="rangeFeedback"></div>
 
                 <div id="calibInstr"></div>
-                <div id="calibComplete" class="page page-center" style="display:none">
-                    <div style="height:35px">Calibration complete</div>
-                    <div style="height:90px;">
-                        <button id="btnExp" class="btn btn-primary" style="width:150px">Continue</button>
-                        <!-- <button id="btnRetry" class="btn" style="padding: 6px 12px"><div class="ico-retry"></div></button> -->
+
+                <div class="center-text-wrapper">
+                    <div class="center-text">
+                        <div id="calibTitles"></div>
+                        <div id="calibTap">Tap to continue.</div>           
                     </div>
+
                 </div>
             </div>
 
@@ -170,10 +172,34 @@
             </div>
 
             <div id="completePage" class="page page-center" style="display:none; opacity:0">
-                <div id="completeMessage" style="height:40px">Thank you for your time.</div>
-                <div id="completeButtons" style="height:90px;opacity:0">
+                <div id="completeSurvey">
+                    <div class="strong">During this trial, did you get the feeling of beauty from the object?</div>
+                    <table>
+                        <tr>
+                            <td>
+                                <input type="radio" name="pleasureSurvey"  id="pleasureSurvey1" value="0"><label for="pleasureSurvey1" >Yes, definitely</label>                                    
+                            </td>
+                            <td>
+                                <input type="radio" name="pleasureSurvey" id="pleasureSurvey2" value="1"><label for="pleasureSurvey2" >Perhaps yes</label>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <input type="radio" name="pleasureSurvey" id="pleasureSurvey3" value="2"><label for="pleasureSurvey3" >Perhaps no</label>
+                            </td>
+                            <td>
+                                <input type="radio" name="pleasureSurvey" id="pleasureSurvey4" value="3"><label for="pleasureSurvey4" >Definitely not</label>                   
+                            </td>
+                        </tr>
+                    </table>
+
+                    <a href="#" id="completeSurveyTap">Click here to continue</a>
+                </div>
+                <div id="completeMessage" style="height:40px; opacity:0;display:none">Thank you for your time.</div>
+                <div id="completeButtons" style="height:90px">
                     <a id="btnReSend" class="btn" href="#">Resend data</a>
-                    <!-- <button class="btn btn-primary">New Experiment<</button> -->
+                    <button id="btnRestart" class="btn btn-primary">New experiment</button>
                 </div>
             </div>
 
@@ -184,7 +210,6 @@
             </div>
         </div>
 
-<script src="http://10.0.0.9/remote.js?E38C5736-85A2-4943-ACE3-D7165F730697"></script>
         <script src="js/vendor/jquery-2.1.0.min.js"></script>
         <script src="js/vendor/raphael-min.js"></script>
         <script src="js/helper.js"></script>
@@ -193,7 +218,7 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nURL:,<%=url%>\nTime zero:,<%=experimentTime.toString()%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nRating (pix):,<%=ratingsPx.join(",")%>\nDevice:,<%=DEVICE_INFO.type%>\nModel:,<%=DEVICE_INFO.model%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Location (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nInterval between ratings (s):,<%=(sampleInterval/1000)%>\nRequested duration (s):,<%=duration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min (pix):,<%=setupMinDist.join(",")%>\nSet up max (pix):,<%=setupMaxDist.join(",")%>\nInitial practice min (pix):,<%=preMinDist.join(",")%>\nInitial practice max (pix):,<%=preMaxDist.join(",")%>\nFinal practice min (pix):,<%=postMinDist.join(",")%>\nFinal practice max (pix):,<%=postMaxDist.join(",")%>\nMedian practice min (pix):,<%=medianMinDist%>\nMedian practice max (pix):,<%=medianMaxDist%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback ticks:,<%=feedback.tactile%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nInclude practice in median:,<%=postInMedian%>\n
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nURL:,<%=url%>\nTime zero:,<%=experimentTime.toString()%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nRating (pix):,<%=ratingsPx.join(",")%>\nDevice:,<%=DEVICE_INFO.type%>\nModel:,<%=DEVICE_INFO.model%>\nDevice pixel ratio:,<%=DEVICE_INFO.pixRatio%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approx. ':'')%>Location (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nInterval between ratings (s):,<%=(ratingInterval/1000)%>\nRequested duration (s):,<%=duration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min (pix):,<%=setupMinDist.join(",")%>\nSet up max (pix):,<%=setupMaxDist.join(",")%>\nInitial practice min (pix):,<%=preMinDist.join(",")%>\nInitial practice max (pix):,<%=preMaxDist.join(",")%>\nFinal practice min (pix):,<%=postMinDist.join(",")%>\nFinal practice max (pix):,<%=postMaxDist.join(",")%>\nMedian min (pix):,<%=medianMinDist%>\nMedian max (pix):,<%=medianMaxDist%>\nMedian practice min (1 to 10):,<%=medianMinRating%>\nMedian practice max (1 to 10):,<%=medianMaxRating%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback ticks:,<%=feedback.tactile%>\nInclude practice in median:,<%=postInMedian%>\n
 </script>       
 
     </body>

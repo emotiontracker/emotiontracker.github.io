@@ -154,10 +154,18 @@ input[type="checkbox"]:checked:after {
   left: 22px;
 }
 
-input[type="checkbox"]:focus, input[type=checkbox]:active{
+.inpt:focus{
+  outline: 1px solid #9160A3;
+}
+
+input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:focus{
   outline:0;
 }
 
+.doubleTouch{
+  overflow:hidden;
+  cursor: none;
+}
 
 .page{
   position: absolute;
@@ -240,7 +248,7 @@ input[type="checkbox"]:focus, input[type=checkbox]:active{
   color:#000;
 }
 
-button, input, .inpt, .btn{
+button, input, .inpt, .btn, a, a:link, label{
   -webkit-tap-highlight-color: rgba(0,0,0,0);  
 }
 
@@ -282,9 +290,11 @@ input[type="text"]{
   border:1px solid #bbb; 
   -webkit-appearance:none; 
   border-radius: 3px;
+  background-repeat: repeat-x;
 }
 
-.btn:focus, .btn:active{
+
+.btn:active{
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
 }
 
@@ -298,6 +308,7 @@ input[type="text"]{
   background-image: linear-gradient(to bottom, #8C80E5 0%, #695DC2 100%);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 1px 2px rgba(0,0,0,0.1);
 }
+
 
 .btn-wide{
   width:220px;
@@ -337,19 +348,62 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   text-align:center;
 }
 
-#expTitle{
-  padding: 0 55px;
+#expTitle, #calibTitles, #completeSurvey{
+  padding: 0 35px;
 }
 
-#expTap{
+#completeSurvey{
+  position:relative;
+  top:-20px;
+}
+
+#completeSurvey div.strong{
+  margin-bottom:20px;
+}
+
+#completeSurvey table{
+  width:100%;
+}
+
+#expTap, #calibTap, #completeSurveyTap{
   font-size:12px;
   text-transform:uppercase;
   padding-top:25px;
   color:#aaa;
 }
 
+#completeSurveyTap{
+  padding:0;
+  position: fixed;
+  width:100%;
+  bottom:20px;left:0;right:0;
+  text-decoration: none;
+}
 
-#expTap, #expTitle{
+input[type="radio"]{
+  margin:10px 0;
+}
+
+input[type="radio"] + label {
+  padding: 0 20px 0 10px;
+  color:#777;
+}
+
+input[type="radio"]:hover{
+  cursor: pointer;
+}
+
+input[type="radio"]:hover + label{
+  cursor: pointer;
+  color:#000;
+}
+
+input[type="radio"]:checked + label{
+  color:#000;
+}
+
+
+#expTap, #expTitle, #calibTap, #calibTitles{
   opacity:0;
 }
 
@@ -390,6 +444,7 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   border:0;
   background:#fff;
   position:fixed;bottom:8px;right:8px;
+  border-radius:4px;
 }
 
 #btnSettings:active{
@@ -484,6 +539,13 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
     50% {opacity: 1.0;}
     100% {-webkit-transform: scale(2.5, 2.5); opacity: 0.0;}
 }
+
+@media screen and (orientation:portrait) {
+  #completeSurvey{
+    padding: 0 15px;
+  }
+}
+
 
 
 

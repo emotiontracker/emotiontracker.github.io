@@ -352,13 +352,15 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   padding: 0 35px;
 }
 
-#completeSurvey{
-  position:relative;
-  top:-20px;
-}
 
 #completeSurvey div.strong{
-  margin-bottom:20px;
+  text-align:left;
+  margin-bottom:30px;
+}
+
+.survey-wrapper{
+  max-width: 500px;
+  margin: 0 auto;  
 }
 
 #completeSurvey table{
@@ -378,15 +380,42 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   width:100%;
   bottom:20px;left:0;right:0;
   text-decoration: none;
+  border:none;
+  background: transparent;
 }
 
-input[type="radio"]{
-  margin:10px 0;
+input[type=radio] {
+    display:none; 
+    margin:10px;
 }
 
 input[type="radio"] + label {
-  padding: 0 20px 0 10px;
+  display:inline-block;
+  margin-left:-1px;
+  padding: 8px 16px;
+  background-color: #fafafa;
+  border:1px solid #ccc;
   color:#777;
+  letter-spacing: 0px;
+  position: relative;
+  float:left;
+}
+
+input[type=radio]:checked + label { 
+  background-image: none;
+  background-color:#6e65b0;
+  color:#fff;
+  border-color:#6e65b0;
+}
+
+input[type="radio"]:first-child + label{
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+
+input[type="radio"] + label:last-child{
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 input[type="radio"]:hover{
@@ -395,12 +424,9 @@ input[type="radio"]:hover{
 
 input[type="radio"]:hover + label{
   cursor: pointer;
-  color:#000;
+  
 }
 
-input[type="radio"]:checked + label{
-  color:#000;
-}
 
 
 #expTap, #expTitle, #calibTap, #calibTitles{
@@ -516,9 +542,10 @@ input[type="radio"]:checked + label{
 .strong{
   font-weight:bold;
   font-size:1.1em;
-  color:#6e65b0;  
-}
+  color:#6e65b0;
+  letter-spacing:-0.05em;  
 
+}
 
 .bubble{
     width:50px;
@@ -541,13 +568,34 @@ input[type="radio"]:checked + label{
 }
 
 @media screen and (orientation:portrait) {
+
+  #completePage{
+    height:300px;
+  }
+
   #completeSurvey{
-    padding: 0 15px;
+    padding: 0 25px;
+  }
+
+  input[type="radio"] + label {
+    display:block;
+    float:none;
+    margin: -1px 0;
+  padding: 11px 16px;
+  }
+
+  input[type="radio"]:first-child + label{
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-left-radius: 0;
+  }
+
+  input[type="radio"] + label:last-child{
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
   }
 }
-
-
-
 
 
 

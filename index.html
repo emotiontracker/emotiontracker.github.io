@@ -173,32 +173,19 @@
 
             <div id="completePage" class="page page-center" style="display:none; opacity:0">
                 <div id="completeSurvey">
-                    <div class="strong">During this trial, did you get the feeling of beauty from the object?</div>
-                    <table>
-                        <tr>
-                            <td>
-                                <input type="radio" name="pleasureSurvey"  id="pleasureSurvey1" value="0"><label for="pleasureSurvey1" >Yes, definitely</label>                                    
-                            </td>
-                            <td>
-                                <input type="radio" name="pleasureSurvey" id="pleasureSurvey2" value="1"><label for="pleasureSurvey2" >Perhaps yes</label>
-                            </td>
-                        </tr>
+                    <div class="strong survey-wrapper">During this trial, did you get the feeling of beauty from the object?</div>
+                    <div class="survey-wrapper">
+                        <input type="radio" name="pleasureSurvey"  id="pleasureSurvey1" value="0"><label for="pleasureSurvey1" >Yes, definitely</label>
+                        <input type="radio" name="pleasureSurvey" id="pleasureSurvey2" value="1"><label for="pleasureSurvey2" >Perhaps yes</label>
+                        <input type="radio" name="pleasureSurvey" id="pleasureSurvey3" value="2"><label for="pleasureSurvey3" >Perhaps no</label>
+                        <input type="radio" name="pleasureSurvey" id="pleasureSurvey4" value="3"><label for="pleasureSurvey4" >Definitely not</label>
+                    </div>
 
-                        <tr>
-                            <td>
-                                <input type="radio" name="pleasureSurvey" id="pleasureSurvey3" value="2"><label for="pleasureSurvey3" >Perhaps no</label>
-                            </td>
-                            <td>
-                                <input type="radio" name="pleasureSurvey" id="pleasureSurvey4" value="3"><label for="pleasureSurvey4" >Definitely not</label>                   
-                            </td>
-                        </tr>
-                    </table>
-
-                    <a href="#" id="completeSurveyTap">Click here to continue</a>
+                    <button id="completeSurveyTap">Tap here to continue</button>
                 </div>
                 <div id="completeMessage" style="height:40px; opacity:0;display:none">Thank you for your time.</div>
-                <div id="completeButtons" style="height:90px">
-                    <a id="btnReSend" class="btn" href="#">Resend data</a>
+                <div id="completeButtons" style="height:45px;">
+                    <a id="btnReSend" class="btn" href="#" style="padding: 8px 26px;">Resend data</a>
                     <button id="btnRestart" class="btn btn-primary">New experiment</button>
                 </div>
             </div>

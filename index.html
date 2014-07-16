@@ -126,7 +126,7 @@
 
                     <div class="field">
                         <div class="field-check">
-                            <label class="lbl">Include practice in median</label>
+                            <label class="lbl">Include practice in reference</label>
                             <span class="chkbox"><input id="postInMedian" type="checkbox" /></span>
                         </div>
                     </div>  
@@ -183,7 +183,7 @@
 
                     <button id="completeSurveyTap">Tap here to continue</button>
                 </div>
-                <div id="completeMessage" style="height:40px; opacity:0;display:none">Thank you for your time.</div>
+                <div id="completeMessage" style="height:40px; opacity:0;display:none">Thank you.</div>
                 <div id="completeButtons" style="height:45px;">
                     <a id="btnReSend" class="btn" href="#" style="padding: 8px 26px;">Resend data</a>
                     <button id="btnRestart" class="btn btn-primary">New experiment</button>
@@ -205,7 +205,7 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nURL:,<%=url%>\nTime zero:,<%=experimentTime.toString()%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nRating (pix):,<%=ratingsPx.join(",")%>\nDevice:,<%=DEVICE_INFO.type%>\nModel:,<%=DEVICE_INFO.model%>\nDevice pixel ratio:,<%=DEVICE_INFO.pixRatio%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approx. ':'')%>Location (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nInterval between ratings (s):,<%=(ratingInterval/1000)%>\nRequested duration (s):,<%=duration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min (pix):,<%=setupMinDist.join(",")%>\nSet up max (pix):,<%=setupMaxDist.join(",")%>\nInitial practice min (pix):,<%=preMinDist.join(",")%>\nInitial practice max (pix):,<%=preMaxDist.join(",")%>\nFinal practice min (pix):,<%=postMinDist.join(",")%>\nFinal practice max (pix):,<%=postMaxDist.join(",")%>\nMedian min (pix):,<%=medianMinDist%>\nMedian max (pix):,<%=medianMaxDist%>\nMedian practice min (1 to 10):,<%=medianMinRating%>\nMedian practice max (1 to 10):,<%=medianMaxRating%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback ticks:,<%=feedback.tactile%>\nInclude practice in median:,<%=postInMedian%>\n
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nURL:,<%=url%>\nTime zero:,<%=experimentTime.toString()%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nRating (pix):,<%=ratingsPx.join(",")%>\nDevice:,<%=DEVICE_INFO.type%>\nModel:,<%=DEVICE_INFO.model%>\nDevice pixel ratio:,<%=DEVICE_INFO.pixRatio%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approx. ':'')%>Location (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nInterval between ratings (s):,<%=(ratingInterval/1000)%>\nRequested duration (s):,<%=duration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min (pix):,<%=setupMinDist.join(",")%>\nSet up max (pix):,<%=setupMaxDist.join(",")%>\nInitial practice min (pix):,<%=preMinDist.join(",")%>\nInitial practice max (pix):,<%=preMaxDist.join(",")%>\nFinal practice min (pix):,<%=postMinDist.join(",")%>\nFinal practice max (pix):,<%=postMaxDist.join(",")%>\nReference min (pix):,<%=medianMinDist%>\nReference max (pix):,<%=medianMaxDist%>\nMedian practice min (1 to 10):,<%=medianMinRating%>\nMedian practice max (1 to 10):,<%=medianMaxRating%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback ticks:,<%=feedback.tactile%>\nInclude practice in reference:,<%=postInMedian%>\n
 </script>       
 
     </body>

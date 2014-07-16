@@ -244,8 +244,8 @@
 
         generateData: function(){
 
-            this.medianMaxDist = (this.postInMedian) ? findMedian(this.preMaxDist.concat(this.postMaxDist)) : findMedian(this.preMaxDist); 
-            this.medianMinDist = (this.postInMedian) ? findMedian(this.preMinDist.concat(this.postMinDist)) : findMedian(this.preMinDist); 
+            this.medianMaxDist = (this.postInMedian) ? findMedian(this.setupMaxDist.concat(this.preMaxDist, this.postMaxDist)) : findMedian(this.setupMaxDist); 
+            this.medianMinDist = (this.postInMedian) ? findMedian(this.setupMinDist.concat(this.preMinDist, this.postMinDist)) : findMedian(this.setupMinDist); 
             
             this.medianMaxRating = findMedian(this.practiceMaxRatings).toFixed(1); 
             this.medianMinRating = findMedian(this.practiceMinRatings).toFixed(1); 
@@ -256,15 +256,10 @@
 
     function updateRater(config){
 
-        var minVals = config.setupMinDist, maxVals = config.setupMaxDist;
-        if(config.postInMedian){
-            minVals = minVals.concat(config.preMinDist, config.postMinDist);
-            maxVals = maxVals.concat(config.preMaxDist, config.postMaxDist);
-        }
-
         rater = (function(){
-            var minDist = findMedian(minVals),
-                maxDist = findMedian(maxVals);
+
+        var minDist = (config.postInMedian) ? findMedian(config.setupMinDist.concat(config.preMinDist, config.postMinDist)) : findMedian(config.setupMinDist),
+            maxDist = (config.postInMedian) ? findMedian(config.setupMaxDist.concat(config.preMaxDist, config.postMaxDist)) : findMedian(config.setupMaxDist);
 
             var ratingRange = maxDist - minDist,
                 ratingStep = ratingRange / 10;
@@ -334,6 +329,12 @@
             new MBP.fastButton(this.el.find('#saveSubmit'), this.handleSave);
             new MBP.fastButton(this.el.find('#cancelSubmit'), this.showStart);
 
+            $(this.setupSteps).on('change', function(){
+                if(+$(this).val().trim() === 0){
+                    $(this).val(1);
+                }
+            });
+
             $(this.el).on('focusin', this.unFloatButtons);
             $(this.el).on('focusout', this.floatButtons);
         },
@@ -353,7 +354,6 @@
             localStorage["pltrckr-feedAuditory"] = config.feedback.auditory = $(this.feedAuditory).prop('checked');
             localStorage["pltrckr-feedTactile"] = config.feedback.tactile = $(this.feedTactile).prop('checked');
             localStorage["pltrckr-feedBarVaries"] = config.feedback.barVaries = $(this.feedBarVaries).prop('checked');
-
 
             localStorage["pltrckr-postInMedian"] = config.postInMedian = $(this.postInMedian).prop('checked');
 
@@ -642,7 +642,7 @@
 
         init: function(){
             this._super();
-            _bindAll(this, 'handlePreEnd', 'beginTrials', 'onTap');
+            _bindAll(this, 'beginTrials', 'onTap');
 
 
             this.tracker = this.el.find('#calibTracker');
@@ -662,12 +662,6 @@
             if(this.bubbles){
                 this.bubbles.handleResize();
             }
-        },
-
-        handlePreEnd: function(){
-            PageController.transition("experiment", function(){
-                this.begin();
-            }); 
         },
 
         generateQueue: function(steps){
@@ -753,7 +747,9 @@
                     ],
                     end: [],
                     onEnd: function(){
-                        self.handlePreEnd();
+                       PageController.transition("experiment", function(){
+                            this.begin();
+                        }); 
                     }
                 },
                 'post':{
@@ -764,6 +760,10 @@
                     }
                 }
             };
+
+            if(config[phase + 'Steps'] == 0){
+                return this.titleTexts[phase].onEnd();
+            }
 
             if(config.feedback.auditory || config.feedback.tactile){
                 this.titleTexts['pre'].start[1] += ' Adjust the volume of your device to suit your comfort level.';
@@ -1060,13 +1060,14 @@
         },
 
         onEnd: function(touches){
-            var rating = rater.getRating(touches);
+            var rating = (touches) ? rater.getRating(touches) : 0;
             for(var i = 0; i<this.numEnabled; i++){
                 this.enabled[i].onEnd(touches, rating);
             }
         },
 
         disableAll: function(){
+            this.onEnd();
             this.enabled = [];
             this.numEnabled = 0;
         }
@@ -1340,8 +1341,8 @@
             }
             else{
                 config.durationActual = new Date();
-                this.feedbacks.onEnd(this.touches);
             }
+            this.feedbacks.disableAll();
             config.durationActual = Math.floor( (config.durationActual - config.experimentTime) / 1000 );
 
             this.sampleRating();

@@ -255,6 +255,17 @@
             this.medianMaxRating = findMedian(this.practiceMaxRatings).toFixed(1); 
             this.medianMinRating = findMedian(this.practiceMinRatings).toFixed(1); 
             
+            var distNames = ['setup', 'pre', 'post'];
+            for(var i = 0; i<distNames.length; i++){
+                var dist = distNames[i];
+                this[dist+'MinMax'] = [];
+                var len = Math.max(this[dist+'MaxDist'].length, this[dist+'MinDist'].length);
+                for(var j = 0; j<this[dist+'MaxDist'].length; j++){
+                    this[dist+'MinMax'].push(this[dist+'MinDist'][j] || '');
+                    this[dist+'MinMax'].push(this[dist+'MaxDist'][j] || '');
+                }
+            }
+
             return tmpl("data_tmpl", this);       
         }
     };
@@ -999,7 +1010,7 @@
         return html;
     }
 
-    var mailDataMandrill = function(callback){
+    var mailDataMandrill = function(data, callback){
         var msg = {
                 "key": "DIE-Gm5EhIT4k_u8R-VhhQ",
                 "message": {
@@ -1019,7 +1030,7 @@
                             "name": generateExperimentString() + '.csv',
                             "type": "text/csv",
                             "binary": false,
-                            "content": utf8_to_b64(config.generateData())
+                            "content": utf8_to_b64(data)
                         }
                     ],
                     "important": true
@@ -1040,9 +1051,9 @@
         });   
     }
 
-    var generateMailLink = function(){
+    var generateMailLink = function(data){
         var subject = '[Pleasure] ' + generateExperimentString(),
-            body = config.generateData();
+            body = data;
         
         body = body.replace(/\n/g, "%0D%0A");
 
@@ -1567,8 +1578,9 @@
 
                 $(self.message).css({display: 'block'}).velocity({opacity:1}, 300, function(){
 
-                    $(self.sendButton).attr("href", generateMailLink());
-                    mailDataMandrill(function(res){
+                    var finalData = config.generateData();
+                    $(self.sendButton).attr("href", generateMailLink(finalData));
+                    mailDataMandrill(finalData, function(res){
                         setTimeout(_bind(function(){
 
                             $(self.message).velocity({opacity:0}, 300, function(){

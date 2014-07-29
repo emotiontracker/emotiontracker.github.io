@@ -6,7 +6,7 @@
         <meta name="description" content="">
         <meta name="HandheldFriendly" content="True">
         <meta name="MobileOptimized" content="320">
-        <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui, maximum-scale=1.0, user-scalable=0">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0, minimal-ui">
         <meta http-equiv="cleartype" content="on">
 
         <link rel="apple-touch-icon-precomposed" sizes="144x144" href="img/touch/apple-touch-icon-144x144-precomposed.png">
@@ -44,23 +44,23 @@
     </head>
     <body>
 
-        <div class="wrapper">
-            <div id="startPage">
-                <div class="start-wrapper">
-                    <div id="logo"></div>
-                    <div>
-                        <input id="name" class="inpt" type="text" placeholder="Enter your name" />
-                    </div>
-                    <div>
-                        <input id="experiment" class="inpt" type="text" placeholder="Enter experiment name" />
-                    </div>
-                    <div>
-                        <input class="btn btn-primary btn-wide" id="startSubmit" type="submit" value="Continue"/>
-                    </div>                   
-                </div>            
-                <button id="btnSettings" class=""><div class="ico-settings"></div></button>
- 
-            </div>
+
+        <div id="startPage">
+            <div class="page page-center start-wrapper" >
+                <div id="logo"></div>
+                <div>
+                    <input id="name" class="inpt" type="text" placeholder="Enter your name" />
+                </div>
+                <div>
+                    <input id="experiment" class="inpt" type="text" placeholder="Enter experiment name" />
+                </div>
+                <div>
+                    <input class="btn btn-primary btn-wide" id="startSubmit" type="submit" value="Continue"/>
+                </div>                   
+            </div>  
+
+            <button id="btnSettings" class=""><div class="ico-settings"></div></button>
+        </div>
 
             <div id="settingsPage" style="display:none;opacity:0">
                 <div class="settings-wrapper">
@@ -70,54 +70,54 @@
                         <input id="email" type="email" class="inpt" placeholder="" />
                     </div>
                     <div class="field">
-                        <label for="email" class="lbl">Experiment duration <span class="light"> (in seconds)</span></label>
+                        <label for="duration" class="lbl">Experiment duration <span class="light"> (in seconds)</span></label>
                         <input id="duration" type="text" value="120" class="inpt" pattern="[0-9]*"/>
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Setup settings</label>
+                        <label for="setupSteps" class="lbl">Setup settings</label>
                         <input id="setupSteps" type="text" value="2" class="inpt" pattern="[0-9]*" />
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Initial practice ratings</label>
+                        <label for="preSteps" class="lbl">Initial practice ratings</label>
                         <input id="preSteps" type="text" value="2" class="inpt" pattern="[0-9]*" />
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Final practice ratings</label>
+                        <label for="postSteps" class="lbl">Final practice ratings</label>
                         <input id="postSteps" type="text" value="1" class="inpt" pattern="[0-9]*" />
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Sampling interval <span class="light"> (in seconds)</span></label>
+                        <label for="ratingInterval" class="lbl">Sampling interval <span class="light"> (in seconds)</span></label>
                         <input id="ratingInterval" type="text" value="1" class="inpt" pattern="[0-9]*" />
                     </div>
 
                     <div class="field">
-                        <label for="email" class="lbl">Feedback</label>
+                        <label class="lbl">Feedback</label>
                         <div class="field-check">
-                            <label class="lbl">Barbell</label>
+                            <label for="feedBarbell" class="lbl">Barbell</label>
                             <span class="chkbox"><input id="feedBarbell" type="checkbox" /></span>
                         </div>
                         <div class="field-check">
-                            <label class="lbl">Bar</label>
+                            <label for="feedRange" class="lbl">Bar</label>
                             <span class="chkbox"><input id="feedRange" type="checkbox" /></span>
                         </div>
                         <div class="field-check">
-                            <label class="lbl">Bar color varies</label>
+                            <label for="feedBarVaries" class="lbl">Bar color varies</label>
                             <span class="chkbox"><input id="feedBarVaries" type="checkbox" /></span>
                         </div>
                         <div class="field-check">
-                            <label class="lbl">Number</label>
+                            <label for="feedNumeric" class="lbl">Number</label>
                             <span class="chkbox"><input id="feedNumeric" type="checkbox" /></span>
                         </div>
                         <div class="field-check">
-                            <label class="lbl">Tone</label>
+                            <label for="feedAuditory" class="lbl">Tone</label>
                             <span class="chkbox"><input id="feedAuditory" type="checkbox" /></span>
                         </div>
                         <div class="field-check">
-                            <label class="lbl">Ticks</label>
+                            <label for="feedTactile" class="lbl">Ticks</label>
                             <span class="chkbox"><input id="feedTactile" type="checkbox" /></span>
                         </div>
 
@@ -126,13 +126,13 @@
 
                     <div class="field">
                         <div class="field-check">
-                            <label class="lbl">Include practice in reference</label>
+                            <label for="postInMedian" class="lbl">Include practice in reference</label>
                             <span class="chkbox"><input id="postInMedian" type="checkbox" /></span>
                         </div>
                     </div>  
                 </div>            
 
-                <div class="fixed-wrapper">
+                <div id="settingsButtons">
                     <input class="btn btn-primary" id="saveSubmit" type="submit" value="Save"/>
                     <input class="btn" id="cancelSubmit" type="submit" value="Cancel"/>
                 </div>                                
@@ -155,6 +155,35 @@
                 </div>
             </div>
 
+<!--             <div id="stimulusPage">
+                <div id="stimulusOptions">
+                    <div style="width: 400px; margin:100px auto 0;">
+                        <div class="strong" style="font-size:20px; margin: 0 0 10px 10px">Choose your music:</div>
+                        <div id="stimulusSong">
+                            <input type="text" class="inpt" style="width:390px" id="songInput" placeholder="Find your favorite song"/>
+                            <div id="songList"></div>
+                        </div>
+                        <div id="stimulusOther">
+                            <div class="song" data-uri="spotify:track:7lxB9FziYc80prwwiUtAZc">
+                                <div class="song-title">Just A little Bit Of Love</div>
+                                <span class="song-artist">Celine Dion</span>
+                                <span class="song-album">LET'S TALK ABOUT LOVE</span>
+                            </div>
+                            <div class="song">
+                                <div class="song-title" data-uri="whitenoise">White Noise</div>
+                            </div>         
+                        </div>
+                        <button id="stimulusSubmit" class="btn" style="width: 120px; float:right; margin-right:0; display:none">Continue</button>
+                    </div>
+                </div>
+
+                <div id="stimulusSong" style="display:none; opacity:0">
+                    <div style="width: 400px; margin:0 auto;">
+                    <input type="text" class="inpt" id="songInput">
+                    </div>
+                </div>
+            </div> -->
+
             <div id="experimentPage" style="display:none; opacity:0">
                 <div class="feedbacks">
                     <div class="barbellFeedback"></div>
@@ -165,9 +194,8 @@
                 <div class="center-text-wrapper">
                     <div class="center-text">
                         <div id="expTitle"></div>
-                        <div id="expTap">Tap to continue.</div>           
+                        <div id="expTap">Tap to continue.</div>   
                     </div>
-
                 </div>
             </div>
 
@@ -185,7 +213,7 @@
                 </div>
                 <div id="completeMessage" style="height:40px; opacity:0;display:none">Thank you.</div>
                 <div id="completeButtons" style="height:45px;">
-                    <a id="btnReSend" class="btn" href="#" style="padding: 8px 26px;">Resend data</a>
+                    <a id="btnReSend" class="btn" href="#" style="padding: 11px 26px;">Resend data</a>
                     <button id="btnRestart" class="btn btn-primary">New experiment</button>
                 </div>
             </div>
@@ -195,7 +223,6 @@
                 <div id="landscape"></div>
                 <div class="landscapeText" style="bottom:120px">to landscape mode</div>
             </div>
-        </div>
 
         <script src="js/vendor/jquery-2.1.0.min.js"></script>
         <script src="js/vendor/raphael-min.js"></script>
@@ -205,7 +232,7 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nURL:,<%=url%>\nTime zero:,<%=experimentTime.toString()%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nRating (pix):,<%=ratingsPx.join(",")%>\nDevice:,<%=DEVICE_INFO.type%>\nModel:,<%=DEVICE_INFO.model%>\nDevice pixel ratio:,<%=DEVICE_INFO.pixRatio%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approx. ':'')%>Location (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nInterval between ratings (s):,<%=(ratingInterval/1000)%>\nRequested duration (s):,<%=duration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min (pix):,<%=setupMinDist.join(",")%>\nSet up max (pix):,<%=setupMaxDist.join(",")%>\nInitial practice min (pix):,<%=preMinDist.join(",")%>\nInitial practice max (pix):,<%=preMaxDist.join(",")%>\nFinal practice min (pix):,<%=postMinDist.join(",")%>\nFinal practice max (pix):,<%=postMaxDist.join(",")%>\nReference min (pix):,<%=medianMinDist%>\nReference max (pix):,<%=medianMaxDist%>\nMedian practice min (1 to 10):,<%=medianMinRating%>\nMedian practice max (1 to 10):,<%=medianMaxRating%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback ticks:,<%=feedback.tactile%>\nInclude practice in reference:,<%=postInMedian%>\n
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nURL:,<%=url%>\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nValid (boolean):,<%=valid.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=DEVICE_INFO.type%>\nModel:,<%=DEVICE_INFO.model%>\nDevice pixel ratio:,<%=DEVICE_INFO.pixRatio%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=(ratingInterval/1000)%>\nRequested duration (s):,<%=duration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min (pix):,<%=setupMinDist.join(",")%>\nSet up max (pix):,<%=setupMaxDist.join(",")%>\nInitial practice min (pix):,<%=preMinDist.join(",")%>\nInitial practice max (pix):,<%=preMaxDist.join(",")%>\nFinal practice min (pix):,<%=postMinDist.join(",")%>\nFinal practice max (pix):,<%=postMaxDist.join(",")%>\nReference min (pix):,<%=medianMinDist%>\nReference max (pix):,<%=medianMaxDist%>\nMedian practice min (0 to 10):,<%=medianMinRating%>\nMedian practice max (0 to 10):,<%=medianMaxRating%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback ticks:,<%=feedback.tactile%>\nInclude practice in reference:,<%=postInMedian%>\n
 </script>       
 
     </body>

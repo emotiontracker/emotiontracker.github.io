@@ -69,19 +69,22 @@ textarea {
 
 h2{
   font-size:32px;
-  color:#7f73d6;
+  color:#fff;
+  background-color:#7f73d6;
   font-weight:normal;
-  padding: 20px 20px 30px;
+  letter-spacing:-1px;
+  padding: 15px 20px 10px;
   margin:0;
   text-align: left;
 }
 
-.start-wrapper{
-  padding: 40px 0 60px;
+.page.start-wrapper{
+  height:450px;
+  width:240px;
 }
 
 .settings-wrapper{
-  background-color: #f8f8f8;
+  background-color: #fcfcfc;
   padding-bottom:110px;
   overflow-y:auto;
 }
@@ -109,14 +112,17 @@ h2{
   opacity:0.8;
 }
 
-.fixed-wrapper{
-  bottom:0;left:0;right:0;
-  background:#fff;  
-  border-top:1px solid #bbb;
+
+#settingsButtons{
+  text-align:center;
+  background-color: rgba(255,255,255,0.9);
+  bottom:0;left:0;right:0; 
+  border-top:1px solid #ddd;  
+  box-shadow: 0 -1px 6px rgba(0,0,0,0.08);
 }
 
-.fixed-wrapper .btn{
-  width:120px;
+#settingsButtons .btn{
+  width:130px;
 }
 
 input[type="checkbox"]{
@@ -155,7 +161,9 @@ input[type="checkbox"]:checked:after {
 }
 
 .inpt:focus{
-  outline: 1px solid #9160A3;
+  border: 1px solid #9160A3 !important;
+  background:#fff !important;
+  outline: 0;
 }
 
 input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:focus{
@@ -171,11 +179,10 @@ input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:fo
   position: absolute;
   width:100%;height:100%;
   margin: auto;
-  left: 0; right: 0; top: 0;  
+  left: 0; right: 0; top: 0; bottom:0; 
 }
 
 .page.page-center{
-  height:130px;
   bottom: 0;
 }
 
@@ -187,6 +194,73 @@ input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:fo
 .light{
   font-size:0.85em;
   opacity:0.6;
+}
+
+#songList, #stimulusOther{
+  margin-left: 10px;  
+}
+
+#stimulusOther{
+  border-top:1px solid #ddd;
+  margin-top:20px; 
+}
+
+#stimulusOther::before{
+  content: 'or';
+  background:#fff;
+  padding: 0 10px;
+  top:-12px; left:49%;
+  position: relative;
+}
+
+.song{
+  padding: 12px 10px 10px;
+  border-radius:2px;
+  border-top:1px solid #ddd;
+}
+
+.song:first-child{
+  border:none;
+}
+
+.song:hover{
+  background:#f8f8f8;
+  cursor:pointer;
+  border-color: transparent;
+}
+
+.song-title{
+  font-weight:bold;
+  line-height:16px;
+}
+
+.song-artist{
+  font-size:12px;
+  line-height:12px;
+}
+
+.song-album{
+  font-size:10px;
+  text-transform: uppercase;
+  margin-left:10px;
+}
+
+.song-album::before{
+  content: '•';
+  position:relative;
+  top:0;left:-6px;
+}
+
+.song-artist, .song-album{
+  opacity:0.6;
+}
+
+.song.selected{
+  background-color:#6e65b0;
+}
+
+.song.selected > *{
+  color:#fff;
 }
 
 .lbl{
@@ -203,12 +277,12 @@ input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:fo
   border:1px solid #ccc;
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
-  margin: 8px 0;
+  margin: 8px 10px;
   border-radius: 3px;
 }
 
 .field-check, #settingsPage .inpt{
-  padding: 10px 20px;
+  padding: 12px 20px;
   width:100%;  
   border-width: 1px 0 1px 0;
   margin: 0;
@@ -274,12 +348,11 @@ input[type="text"]{
 
 .btn{
   border-radius: 3px;
-  padding: 8px 12px;
-  font-size:18px;  
+  padding: 10px 12px;
+  font-size:16px;
   margin: 15px 10px;
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
-
   background-color:#EBEBEB;
   background-image: -o-linear-gradient(bottom, #FAFAFA 0%, #EBEBEB 100%);
   background-image: -moz-linear-gradient(bottom, #FAFAFA 0%, #EBEBEB 100%);
@@ -332,6 +405,11 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   padding: 0 35px;
   position: absolute;
   left: 0; right: 0;
+  text-align:center;
+}
+
+#changeOrient{
+  text-align:center;
 }
 
 .center-text-wrapper{
@@ -345,6 +423,11 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
 .center-text{
   display: table-cell;
   vertical-align: middle;
+  text-align:center;
+}
+
+#completePage{
+  height: 130px;
   text-align:center;
 }
 
@@ -378,7 +461,7 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   padding:0;
   position: fixed;
   width:100%;
-  bottom:20px;left:0;right:0;
+  bottom:30px;left:0;right:0;
   text-decoration: none;
   border:none;
   background: transparent;
@@ -483,13 +566,13 @@ input[type="radio"]:hover + label{
   width:128px;
   height:128px;
   background-size: 128px 128px;
-  margin: 0 auto 20px;
+  margin: 30px auto 5px;
   opacity: 0.6;
 }
 
-.invalid{
-  border: 1px solid #ea385b !important;
-  background-color:#ffefef !important;
+.inpt.invalid{
+  border: 1px solid #ea385b;
+  background-color:#ffefef;
 }
 
 @media only screen and (-webkit-min-device-pixel-ratio: 2) {
@@ -565,6 +648,13 @@ input[type="radio"]:hover + label{
     0% {-webkit-transform: scale(1, 1); opacity: 0.0;}
     50% {opacity: 1.0;}
     100% {-webkit-transform: scale(2.5, 2.5); opacity: 0.0;}
+}
+
+@media only screen and (max-height: 450px) {
+  .page.start-wrapper{
+    position:relative;
+    height:350px;
+  }
 }
 
 @media screen and (orientation:portrait) {

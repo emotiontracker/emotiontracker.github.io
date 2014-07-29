@@ -212,6 +212,7 @@
         touchFeedback: true,
         ratings: [],
         ratingsPx: [],
+        valid: [],
         practiceMinRatings: [],
         practiceMaxRatings: [],
         cancelTime: 5000,
@@ -219,10 +220,14 @@
         location: {
             long: null,
             lat: null,
-            accuracy: null
+            accuracy: null,
+            near: ''
         },
         screenWidth: window.screen.width,
         screenHeight: window.screen.height,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
+
         DEVICE_INFO: DEVICE_INFO,
 
         setupSteps: localStorage["pltrckr-setupSteps"] || 2,
@@ -288,10 +293,16 @@
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(saveLocation);
     }
+
     function saveLocation(location) {
         config.location.lat = location.coords.latitude;
         config.location.long = location.coords.longitude;
         config.location.accuracy = location.coords.accuracy;
+
+        $.get('http://maps.googleapis.com/maps/api/geocode/json?latlng=' + config.location.lat + ',' + config.location.long, function(data) { 
+            var addr = data.results[1] || data.results[0];
+            config.location.near = addr.formatted_address;
+        });
     }
 
     var getDistance = function(x1, y1, x2, y2){
@@ -324,7 +335,7 @@
 
             this.postInMedian = $(this.el.find('#postInMedian')).prop('checked', config.postInMedian);
 
-            this.buttons = this.el.find('.fixed-wrapper');
+            this.buttons = this.el.find('#settingsButtons');
 
             new MBP.fastButton(this.el.find('#saveSubmit'), this.handleSave);
             new MBP.fastButton(this.el.find('#cancelSubmit'), this.showStart);
@@ -404,37 +415,53 @@
             $(this.el).on('focusout', this.floatButtons);
         },
 
-        setInvalidHighlight: function(el){
-            var els = [this.name, this.experiment];
+/*        setInvalidHighlight: function(els){
             var flag = false;
             for(var i = 0; i < els.length; i++){
                 var el = els[i];
-                if($(el).val().trim() === ''){
+                if(el === ''){
                     $(el).addClass('invalid');
                     flag = true;
                 }
             }
             return flag;
-        },
+        },*/
 
         removeInvalidHighlight: function(e){
             var el = e.target;
-            $(el).removeClass('invalid');
-
+            if($(el).val().trim() !== '' ){
+                $(el).removeClass('invalid');
+            }
+            else{
+                $(el).val('');
+            }
         },
 
-        handleSubmit: function(){
-            if(this.setInvalidHighlight()){ return false; }       
+        handleSubmit: function(){      
 
             config.name = $(this.name).val().trim();
             config.experiment = $(this.experiment).val().trim(); 
 
+            var flag = false;
+            if(config.name === ''){
+                $(this.name).addClass('invalid');
+                flag = true;
+            }
+
+            if(config.experiment === ''){
+                $(this.experiment).addClass('invalid');
+                flag = true;
+            }
+
             $(this.name).blur();
             $(this.experiment).blur();
 
-            PageController.transition("calibration", function(){
-                this.begin("setup");
-            });
+            if(flag === false){
+                PageController.transition("calibration", function(){
+                    this.begin("setup");
+                });
+            }
+
         },
 
         showSettings: function(){
@@ -449,9 +476,6 @@
         },
 
         render: function(){
-            $(this.name).val('');
-            $(this.experiment).val('');
-
             config.setupMaxDist = [];
             config.setupMinDist = [];
             config.preMaxDist = [];
@@ -631,11 +655,11 @@
         id: 'calibrationPage',
 
         trials: [{
-            title: 'Indicate <span class="strong">maximum</span> pleasure',
+            title: 'Indicate <span class="strong">maximum</span> pleasure.',
             instr: 'Using two fingers, drag the circles as far apart as comfortably possible.',
             configVar: 'Max'
         }, {
-            title: 'Indicate <span class="strong">minimum</span> pleasure',
+            title: 'Indicate <span class="strong">minimum</span> pleasure.',
             instr: 'Using two fingers, drag the circles as close as comfortably possible.',
             configVar: 'Min'
         }],
@@ -678,9 +702,11 @@
             return queue;
         },
 
-        onTap: function(){
+        onTap: function(e){
+            e.preventDefault();
+
             var self = this;
-            window.removeEventListener('touchstart', this.onTap);
+            document.removeEventListener('touchstart', this.onTap);
 
             $(this.tapText).velocity({opacity:0}, 100);
             $(this.titlesText).velocity({opacity:0}, 100, function(){
@@ -709,11 +735,11 @@
             $(this.titlesText).show();
             $(this.titlesText).velocity({opacity:1}, 150, function(){
 
-                setTimeout(function(){
+                //setTimeout(function(){
                     $(self.tapText).velocity({opacity: 1}, 300, function(){
-                        window.addEventListener('touchstart', self.onTap);
+                        document.addEventListener('touchstart', self.onTap);
                     });
-                }, 50);                    
+                //}, 50);                    
             });
         }, 
 
@@ -733,7 +759,7 @@
             this.titleTexts = {
                 'setup':{
                     start:[
-                        'Prepare to setup settings.'
+                        'Please show me how you rate pleasure.'
                     ],
                     end:[],
                     onEnd: function(){
@@ -742,8 +768,8 @@
                 },
                 'pre':{
                     start: [
-                        'Next we\'ll practice making ratings. We encourage you to play!',
-                        'As time passes, continually adjust the spread of your fingers to indicate how much pleasure you are getting from the object at each moment.'        
+                        'Next we\'ll practice making ratings. We encourage you to play during practice.',
+                        'In the actual experiment, later, you\'ll be spreading your fingers to continually rate pleasure. You can play now, to get used to it. On the next screen, try spreading and closing your fingers. Once the setting is right, lift your fingers to proceed.'        
                     ],
                     end: [],
                     onEnd: function(){
@@ -766,7 +792,7 @@
             }
 
             if(config.feedback.auditory || config.feedback.tactile){
-                this.titleTexts['pre'].start[1] += ' Adjust the volume of your device to suit your comfort level.';
+                this.titleTexts['pre'].start[1] += ' Adjust the volume of your device to be comfortable.';
             }
 
             if(phase == 'setup'){
@@ -804,7 +830,12 @@
             }
         },
 
-        beginTrials: function(){       
+        beginTrials: function(){  
+
+            if(this.trialParams.phase == 'setup'){
+                config.windowWidth = window.innerHeight;
+                config.windowHeight = window.innerWidth;
+            }       
 
             this.feedbacks.enable();
             window.addEventListener('touchmove', this.handleTouchMove);
@@ -835,6 +866,7 @@
                             self.showTitle();
                         }
                         else{
+                            document.removeEventListener('touchstart', this.onTap);
                             self.titleTexts[self.trialParams.phase].onEnd();
                         }
                    
@@ -963,7 +995,7 @@
                 <tr> <td>Experiment:</td> <td>' + config.experiment + '</td> </tr> \
                 <tr> <td>Username:</td> <td>' + config.name + '</td> </tr> \
             </table> \
-            <div>' + config.experimentTime.toString() + '</div>';
+            <table><tr>' + getDateString(config.experimentTime) + '</tr></table>';
         return html;
     }
 
@@ -1163,7 +1195,7 @@
 
     var AuditoryFeedback = new (View.extend({
         init: function(){
-            this.context = new webkitAudioContext();
+            this.context = Howler.ctx;
             this.oscillator = this.context.createOscillator();
             this.oscillator.type = 0;
             this.gainNode = this.context.createGainNode();
@@ -1233,7 +1265,66 @@
             this.stop();
         }
     }))();
+/*
+    var stimulusPage = Page.extend({
+        id: 'stimulusPage',
 
+        init: function(){
+            this._super();
+
+            _bindAll(this, 'findSongs');
+
+            this.songInput = this.el.find("#songInput");
+            this.songList = this.el.find("#songList");
+            this.submit = this.el.find("#stimulusSubmit");
+            this.curSong = null;
+
+            $(this.songInput).on("keyup", _debounce(this.findSongs, 500) );
+
+            var self = this;
+            $(this.el).on('click', '.song', function(e){
+                if(self.curSong){
+                    $(self.curSong).removeClass('selected');
+                }
+
+                $(this).addClass('selected');
+                self.curSong = this;
+                $(self.submit).css('display', 'block');
+            });
+        },
+
+        findSongs: function(e){
+            var self = this;
+            var query = $(this.songInput).val().trim();
+
+            $(this.curSong).removeClass('selected');
+            this.curSong = null;
+            $(this.submit).css('display', 'none');
+
+            $.ajax({
+                type: "GET",
+                url: "https://api.spotify.com/v1/search?q=" + encodeURIComponent(query) + "&type=track&limit=5",
+                success: function(res){
+                    var tracks = res.tracks.items;
+                    self.songList.innerHTML = '';
+                    console.log(tracks);
+                    if(tracks.length == 0){
+                        self.songList.innerHTML = '<span style="font-size:12px;margin-left:10px">No tracks found for <b>' + query + '</b>.</span>';
+                    }
+                    else{
+                        for(var i = 0; i < tracks.length; i++){
+                            $(self.songList).append('<div class="song" data-uri="' +  tracks[i].uri + '"> <div class="song-title">' + tracks[i].name + '</div> <span class="song-artist">' + tracks[i].artists[0].name + '</span> <span class="song-album">' + tracks[i].album.name.slice(0, 40) + ((tracks[i].album.name.length > 40) ? '...' : '') + '</span></div>');
+                        }                        
+                    }
+                },
+                error: function(res) {
+                    self.songList.innerHTML = 'There was an error finding songs.';
+                }
+            }); 
+        }
+
+    });
+*/
 
     var experimentPage = DoubleTouchPage.extend({
         id: 'experimentPage',
@@ -1257,6 +1348,7 @@
         begin: function(){
             this.samples = [];
             this.samplesPx = [];
+            this.valid = [];
             this.timers = {
                 end: null,
                 cancel: null,
@@ -1276,7 +1368,9 @@
             this.showTitle();         
         },
 
-        onTap: function(){
+        onTap: function(e){
+            e.preventDefault();
+            document.removeEventListener('touchstart', this.onTap);
             var self = this;
 
             $(this.tapText).velocity({opacity:0}, 100);
@@ -1288,11 +1382,7 @@
         },
 
         showTitle: function(){
-
-            window.removeEventListener('touchstart', this.onTap);
-
             var self = this;
-
             this.titleText.innerHTML = this.titleTexts[this.titleIndex];
             $(this.titleText).show();
             $(this.titleText).velocity({opacity:1}, 150, function(){
@@ -1300,17 +1390,17 @@
                     // End case
                     self.feedbacks.enable();
 
-                    window.addEventListener('touchstart', self.handleTouchStart);
-                    window.addEventListener('touchmove', self.handleTouchMove);
-                    window.addEventListener('touchend', self.handleTouchEnd);
-                    window.addEventListener('touchcancel', self.handleTouchEnd);             
+                    document.addEventListener('touchstart', self.handleTouchStart);
+                    document.addEventListener('touchmove', self.handleTouchMove);
+                    document.addEventListener('touchend', self.handleTouchEnd);
+                    document.addEventListener('touchcancel', self.handleTouchEnd);             
                 }
                 else{
-                    setTimeout(function(){
+                    //setTimeout(function(){
                         $(self.tapText).velocity({opacity: 1}, 300, function(){
-                            window.addEventListener('touchstart', self.onTap);
+                            document.addEventListener('touchstart', self.onTap);
                         });
-                    }, 50);                    
+                    //}, 50);                    
                 }
             });
         },
@@ -1322,8 +1412,11 @@
                 dist = getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
             
             if(!touches[0].id || !touches[1].id && rating !== this.samples[this.samples.length-1]){
-                rating = (+rating) + 100;
-                dist += 100;
+                rating = (+rating);
+                this.valid.push(0);
+            }
+            else{
+                this.valid.push(1);
             }
             this.samples.push(rating);  
             this.samplesPx.push(dist);
@@ -1331,10 +1424,10 @@
 
         stop: function(){
             this.timers.clearAll();
-            window.removeEventListener('touchstart', this.handleTouchStart);
-            window.removeEventListener('touchmove', this.handleTouchMove);
-            window.removeEventListener('touchend', this.handleTouchEnd);
-            window.removeEventListener('touchcancel', this.handleTouchEnd); 
+            document.removeEventListener('touchstart', this.handleTouchStart);
+            document.removeEventListener('touchmove', this.handleTouchMove);
+            document.removeEventListener('touchend', this.handleTouchEnd);
+            document.removeEventListener('touchcancel', this.handleTouchEnd); 
 
             if(this.status.canceled !== false){
                 config.durationActual = this.status.canceled;
@@ -1348,6 +1441,7 @@
             this.sampleRating();
             config.ratings = this.samples.slice(0, config.durationActual);
             config.ratingsPx = this.samplesPx.slice(0, config.durationActual);
+            config.valid = this.valid.slice(0, config.durationActual);
 
             if(this.status.canceled !== false){
                 this.postStop();
@@ -1431,6 +1525,8 @@
 
             new MBP.fastButton(this.surveyTap, this.showFinal);
             new MBP.fastButton(this.restartButton, function(){
+                $(PageController.pages.start.name).val('');
+                $(PageController.pages.start.experiment).val('');
                 PageController.transition('start');
             });
 
@@ -1466,7 +1562,7 @@
             config.feltPleasure = $(self.el).find('input[name="pleasureSurvey"]:checked').val();
             $(self.el).find('input[name="pleasureSurvey"]:checked').prop('checked', false);
 
-            $(self.survey).velocity({opacity:0}, 100, function(){
+            $(self.survey).velocity({opacity:0}, 150, function(){
                 $(this).css({display: 'none'});
 
                 $(self.message).css({display: 'block'}).velocity({opacity:1}, 300, function(){
@@ -1504,6 +1600,7 @@
         pages: {
             "start" : new startPage(),
             "calibration": new calibrationPage(),
+            //"stimulus" : new stimulusPage(),
             "experiment": new experimentPage(),
             "complete": new completePage()
         },
@@ -1529,8 +1626,13 @@
         },
 
         handleResize: function(){
+            setTimeout(function(){
+                //console.log("scrolling");
+                window.scrollTo(0, 1);
+            }, 0);
+
             if(this.curPage.limitOrient){ 
-                window.scrollTo( 0, 1 ); 
+
                 if (window.innerWidth > window.innerHeight) { // Landscape
                     this.orientPage.hide();
                     //this.curPage.el.show();
@@ -1546,6 +1648,6 @@
 
     }))();
 
-    PageController.init();
+    //PageController.init();
 
 })();

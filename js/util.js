@@ -16,6 +16,14 @@ _extend = function(obj) {
 	return obj;
 };
 _isFunction = function(obj) { return typeof obj === 'function' };
+_keys = function(obj) {
+  if (!(obj === Object(obj))) return [];
+  if (nativeKeys) return nativeKeys(obj);
+  var keys = [];
+  for (var key in obj) if (hasOwnProperty.call(obj, key)) keys.push(key);
+  return keys;
+};
+_now = Date.now || function() { return new Date().getTime(); };
 
 var slice = Array.prototype.slice;
 
@@ -28,7 +36,7 @@ var _each = function(obj, iterator, context) {
         if (iterator.call(context, obj[i], i, obj) === breaker) return;
       }
     } else {
-      var keys = _.keys(obj);
+      var keys = _keys(obj);
       for (var i = 0, length = keys.length; i < length; i++) {
         if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
       }
@@ -39,7 +47,7 @@ var _each = function(obj, iterator, context) {
 var _bind = function(func, context) {
     var args, bound;
     if (Function.prototype.bind && func.bind === Function.prototype.bind) return Function.prototype.bind.apply(func, slice.call(arguments, 1));
-    if (!_.isFunction(func)) throw new TypeError;
+    if (!_isFunction(func)) throw new TypeError;
     args = slice.call(arguments, 2);
     return bound = function() {
       if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
@@ -178,6 +186,39 @@ var View = Class.extend({
     }
 });
 
+_debounce = function(func, wait, immediate) {
+  var timeout, args, context, timestamp, result;
+
+  var later = function() {
+    var last = _now() - timestamp;
+    if (last < wait) {
+      timeout = setTimeout(later, wait - last);
+    } else {
+      timeout = null;
+      if (!immediate) {
+        result = func.apply(context, args);
+        context = args = null;
+      }
+    }
+  };
+
+  return function() {
+    context = this;
+    args = arguments;
+    timestamp = _now();
+    var callNow = immediate && !timeout;
+    if (!timeout) {
+      timeout = setTimeout(later, wait);
+    }
+    if (callNow) {
+      result = func.apply(context, args);
+      context = args = null;
+    }
+
+    return result;
+  };
+};
+
 function findMedian(values) {
     values.sort( function(a,b) {return a - b;} );
 
@@ -252,4 +293,11 @@ function getDeviceInfo(){
 
   return info;
 
+}
+
+function getDateString(date){
+    var dayMap = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    var monthMap = ['January', 'Febuary', 'March', 'May', 'June', 'July', 'August', 'Spetember', 'October', 'November', 'December'];
+
+    return dayMap[date.getDay()] + ' ' + monthMap[date.getMonth()] + ' ' + date.getDate() + ' ' + date.getFullYear() + ' ' + date.toTimeString();
 }

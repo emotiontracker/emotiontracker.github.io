@@ -296,8 +296,8 @@ function getDeviceInfo(){
 }
 
 function getDateString(date){
-    var dayMap = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    var monthMap = ['January', 'Febuary', 'March', 'May', 'June', 'July', 'August', 'Spetember', 'October', 'November', 'December'];
+    var dayMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var monthMap = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
     return dayMap[date.getDay()] + ' ' + monthMap[date.getMonth()] + ' ' + date.getDate() + ' ' + date.getFullYear() + ' ' + date.toTimeString();
 }

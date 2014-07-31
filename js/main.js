@@ -346,7 +346,7 @@
 
             this.postInMedian = $(this.el.find('#postInMedian')).prop('checked', config.postInMedian);
 
-            this.buttons = this.el.find('#settingsButtons');
+            this.header = this.el.find('#settingsHeader');
 
             new MBP.fastButton(this.el.find('#saveSubmit'), this.handleSave);
             new MBP.fastButton(this.el.find('#cancelSubmit'), this.showStart);
@@ -357,11 +357,11 @@
                 }
             });
 
-            $(this.el).on('focusin', this.unFloatButtons);
-            $(this.el).on('focusout', this.floatButtons);
+            $(this.el).on('focus', 'input[type="text"]', this.unFloatButtons);
+            $(this.el).on('focusout', 'input[type="text"]', this.floatButtons);
         },
 
-        handleSave: function(){
+        handleSave: function(e){
             localStorage["pltrckr-email"] = config.email = $(this.email).val().trim();
             localStorage["pltrckr-duration"] = config.duration = $(this.duration).val().trim();
 
@@ -379,25 +379,28 @@
 
             localStorage["pltrckr-postInMedian"] = config.postInMedian = $(this.postInMedian).prop('checked');
 
-            this.showStart();
+            this.showStart(e);
         },
 
         floatButtons: function(){
-            this.buttons.style.position = 'fixed';
+            this.header.style.position = 'fixed';
         },
-        unFloatButtons: function(){
-            this.buttons.style.position = 'relative';
+        unFloatButtons: function(e){
+            this.header.style.position = 'absolute';
+            this.focused = e.target;
         },
 
         render: function(){
             this.floatButtons();
         },
+
         pre_conceal: function(){
-            this.unFloatButtons();
+            $(this.el).hide();
         },
 
-        showStart: function(){
-            $(this.el).focus();
+        showStart: function(e){
+            e.preventDefault();
+            $(this.focused).blur();
             this.hide(PageController.pages["start"].show);
         }
 
@@ -422,8 +425,8 @@
             new MBP.fastButton(this.el.find('#startSubmit'), this.handleSubmit);
             new MBP.fastButton(this.settingsButton, this.showSettings);
 
-            $(this.el).on('focusin', this.unFloatButtons);
-            $(this.el).on('focusout', this.floatButtons);
+            $(this.el).on('focus', 'input[type="text"]', this.unFloatButtons);
+            $(this.el).on('focusout', 'input[type="text"]', this.floatButtons);
         },
 
 /*        setInvalidHighlight: function(els){
@@ -448,7 +451,8 @@
             }
         },
 
-        handleSubmit: function(){      
+        handleSubmit: function(e){      
+            e.preventDefault();
 
             config.name = $(this.name).val().trim();
             config.experiment = $(this.experiment).val().trim(); 
@@ -475,7 +479,10 @@
 
         },
 
-        showSettings: function(){
+        showSettings: function(e){
+            e.preventDefault();
+            $(this.name).blur();
+            $(this.experiment).blur();
             this.hide(settingsPage.show);
         },
 
@@ -844,8 +851,8 @@
         beginTrials: function(){  
 
             if(this.trialParams.phase == 'setup'){
-                config.windowWidth = window.innerHeight;
-                config.windowHeight = window.innerWidth;
+                config.windowWidth = window.innerWidth;
+                config.windowHeight = window.innerHeight;
             }       
 
             this.feedbacks.enable();
@@ -1028,7 +1035,7 @@
                     "attachments": [
                         {
                             "name": generateExperimentString() + '.csv',
-                            "type": "text/csv",
+                            "type": "text/plain",
                             "binary": false,
                             "content": utf8_to_b64(data)
                         }
@@ -1121,6 +1128,7 @@
 
         init: function(options){
             this._super(options);
+            this.el.style.width = window.innerHeight*0.20 + 'px';
         },
 
         onStart: function(t, rating){
@@ -1153,7 +1161,7 @@
                 '#16a085'   
             ];         
             this.el.style.opacity = 0;         
-
+            this.el.style.width = window.innerHeight*0.20 + 'px';
         },
 
         colorFromRating: function(rating){
@@ -1418,6 +1426,8 @@
 
 
         sampleRating: function(){
+            this.timers.sample = setTimeout(this.sampleRating, config.ratingInterval);
+
             var touches = this.touches,
                 rating = rater.getRating(touches).toFixed(1),
                 dist = getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
@@ -1429,6 +1439,7 @@
             else{
                 this.valid.push(1);
             }
+
             this.samples.push(rating);  
             this.samplesPx.push(dist);
         },
@@ -1450,9 +1461,10 @@
             config.durationActual = Math.floor( (config.durationActual - config.experimentTime) / 1000 );
 
             this.sampleRating();
-            config.ratings = this.samples.slice(0, config.durationActual);
-            config.ratingsPx = this.samplesPx.slice(0, config.durationActual);
-            config.valid = this.valid.slice(0, config.durationActual);
+            var numSamples = Math.floor(config.durationActual/(config.ratingInterval/1000));
+            config.ratings = this.samples.slice(0, numSamples);
+            config.ratingsPx = this.samplesPx.slice(0, numSamples);
+            config.valid = this.valid.slice(0, numSamples);
 
             if(this.status.canceled !== false){
                 this.postStop();
@@ -1498,7 +1510,7 @@
             if(!this.status.started){
                 this.status.started = true;
                 $(this.titleText).hide();
-                this.timers.sample = setInterval(this.sampleRating, config.ratingInterval);
+                this.timers.sample = setTimeout(this.sampleRating, config.ratingInterval);
                 this.timers.end = setTimeout(this.stop, (config.duration * 1000) );
 
                 config.experimentTime = new Date();
@@ -1638,12 +1650,13 @@
         },
 
         handleResize: function(){
-            setTimeout(function(){
-                //console.log("scrolling");
-                window.scrollTo(0, 1);
-            }, 0);
 
             if(this.curPage.limitOrient){ 
+
+                setTimeout(function(){
+                    //console.log("scrolling");
+                    window.scrollTo(0, 1);
+                }, 0);
 
                 if (window.innerWidth > window.innerHeight) { // Landscape
                     this.orientPage.hide();

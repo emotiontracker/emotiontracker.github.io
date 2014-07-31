@@ -64,7 +64,14 @@
 
             <div id="settingsPage" style="display:none;opacity:0">
                 <div class="settings-wrapper">
-                    <h2>Settings</h2>
+                    <div id="settingsHeader" class="fixed-wrapper row">
+                        <div class="col"><h2>Settings</h2></div>
+                        <div class="row col-right">
+                            <button class="btn btn-primary col" id="saveSubmit">Save</button>
+                            <button class="btn btn-img2 col" id="cancelSubmit"><div class="ico-close"></div></button>
+                        </div>
+                    </div>
+                    
                     <div class="field">
                         <label for="email" class="lbl">Email address of the experimenter</label>
                         <input id="email" type="email" class="inpt" placeholder="" />
@@ -121,7 +128,6 @@
                             <span class="chkbox"><input id="feedTactile" type="checkbox" /></span>
                         </div>
 
-
                     </div>    
 
                     <div class="field">
@@ -131,18 +137,14 @@
                         </div>
                     </div>  
                 </div>            
-
-                <div id="settingsButtons">
-                    <input class="btn btn-primary" id="saveSubmit" type="submit" value="Save"/>
-                    <input class="btn" id="cancelSubmit" type="submit" value="Cancel"/>
-                </div>                                
+                             
             </div>
 
             <div id="calibrationPage" style="display:none;opacity:0">
                 <div id="calibTitle" class="title"></div>
                 <div id="calibTracker"></div>
-                <div class="numericFeedback"></div>
                 <div class="rangeFeedback"></div>
+                <div class="numericFeedback"></div>
 
                 <div id="calibInstr"></div>
 
@@ -187,8 +189,8 @@
             <div id="experimentPage" style="display:none; opacity:0">
                 <div class="feedbacks">
                     <div class="barbellFeedback"></div>
-                    <div class="numericFeedback"></div>
                     <div class="rangeFeedback"></div>
+                    <div class="numericFeedback"></div>
                 </div>
 
                 <div class="center-text-wrapper">
@@ -232,7 +234,7 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nURL:,<%=url%>\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: durationActual + 1}).map(Number.call, Number).slice(1).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nValid (boolean):,<%=valid.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=DEVICE_INFO.type%>\nModel:,<%=DEVICE_INFO.model%>\nDevice pixel ratio:,<%=DEVICE_INFO.pixRatio%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=(ratingInterval/1000)%>\nRequested duration (s):,<%=duration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (0 to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback ticks:,<%=feedback.tactile%>\nInclude practice in reference:,<%=postInMedian%>\n
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nApp:,Web (<%=url%>)\nApp creation date:,Thursday July 31 2014\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: ratings.length + 1}).map(Number.call, Number).slice(1).map(function(x){ return x*(ratingInterval/1000);}).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nValid (boolean):,<%=valid.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=DEVICE_INFO.type%>\nModel:,<%=DEVICE_INFO.model%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=(ratingInterval/1000)%>\nRequested duration (s):,<%=duration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (0 to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback ticks:,<%=feedback.tactile%>\nInclude practice in reference:,<%=postInMedian%>\n
 </script>       
 
     </body>

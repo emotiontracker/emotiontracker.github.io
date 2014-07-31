@@ -68,14 +68,11 @@ textarea {
    ========================================================================== */
 
 h2{
-  font-size:32px;
-  color:#fff;
-  background-color:#7f73d6;
+  font-size:30px;
+  color:#7f73d6;
   font-weight:normal;
   letter-spacing:-1px;
-  padding: 15px 20px 10px;
   margin:0;
-  text-align: left;
 }
 
 .page.start-wrapper{
@@ -85,7 +82,7 @@ h2{
 
 .settings-wrapper{
   background-color: #fcfcfc;
-  padding-bottom:110px;
+  padding:70px 0 20px;
   overflow-y:auto;
 }
 
@@ -94,12 +91,12 @@ h2{
 
 .numericFeedback{
   position:absolute;
-  top:6px;
-  right:10px;
-  font-size:28px;
-  letter-spacing:-1px;
-  font-weight:bold;
-  color:#595577;
+  bottom:10px;
+  left:-2px;
+  font-size:32px;
+  color:#000;
+  opacity:0.55;
+  text-align:center;
 }
 
 .rangeFeedback{
@@ -112,18 +109,29 @@ h2{
   opacity:0.8;
 }
 
+.fixed-wrapper{
+  position: fixed;
+  top:0;left:0;right:0; 
+  z-index:9999;
+}
 
-#settingsButtons{
-  text-align:center;
-  background-color: rgba(255,255,255,0.9);
-  bottom:0;left:0;right:0; 
-  border-top:1px solid #ddd;  
+#settingsHeader{
+  padding: 15px 10px 10px 20px;
+  background-color: rgba(255,255,255,0.9);; 
+  border-bottom:1px solid #ddd;  
   box-shadow: 0 -1px 6px rgba(0,0,0,0.08);
 }
 
-#settingsButtons .btn{
-  width:130px;
+#settingsHeader .btn{
+  margin: 2px 0 0 5px;
+  padding: 5px 20px;
+  line-height:24px;
 }
+
+#settingsHeader .btn-img2{
+  padding: 5px 8px;
+}
+
 
 input[type="checkbox"]{
   appearance: none;
@@ -548,6 +556,25 @@ input[type="radio"]:hover + label{
   background-size: 24px 24px;
 }
 
+.ico-close{
+  background-image:url(../img/close_thin.png);  
+  width:24px;
+  height:24px;
+  background-size: 24px 24px;  
+}
+
+.btn-img{
+  padding: 8px;
+  border:0;
+  background:#fff; 
+  border-radius:4px;
+}
+
+.btn-img:active{
+  background:#eee;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);  
+}
+
 #btnSettings{
   padding: 8px;
   border:0;
@@ -587,6 +614,10 @@ input[type="radio"]:hover + label{
   .ico-settings{
     background-image:url(../img/settings@2x.png);
   }
+
+.ico-close{
+  background-image:url(../img/close_thin@2x.png);  
+}
 
   #logo{
     background-image:url(../img/logo@2x.png);
@@ -800,6 +831,10 @@ textarea[contenteditable] {
 
 .col{
   float:left;
+}
+
+.col-right{
+  float:right;
 }
 
 /* ==========================================================================

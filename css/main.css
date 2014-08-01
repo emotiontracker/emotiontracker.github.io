@@ -104,7 +104,6 @@ h2{
   left:0;bottom:0;
   background-color:#666;
   display: block;
-  width:60px;
   -webkit-transition: background-color 0.2s;
   opacity:0.8;
 }

@@ -196,7 +196,7 @@
         experimentTime: '',
         absoluteTime: 0,
         email: localStorage["pltrckr-email"] || 'lauren.vale@nyu.edu',
-        duration: localStorage["pltrckr-duration"] || 30,
+        duration: +(localStorage["pltrckr-duration"] || 30),
         durationActual: 0,
         ratingInterval: localStorage["pltrckr-ratingInterval"] || 1000,
         setupMaxDist: [],
@@ -246,6 +246,8 @@
         },
         postInMedian: JSON.parse(localStorage["pltrckr-postInMedian"] || "false") ,
         feltPleasure: '',
+        postStimulusDuration: +(localStorage["pltrckr-postStimulusDuration"] || 120),
+        totalDuration: (+localStorage["pltrckr-duration"] || 30) + (+localStorage["pltrckr-postStimulusDuration"] || 120),
 
         generateData: function(){
 
@@ -331,6 +333,7 @@
 
             this.email = $(this.el.find('#email')).val(config.email);
             this.duration = $(this.el.find('#duration')).val(config.duration);
+            this.postStimulusDuration = $(this.el.find('#postStimulusDuration')).val(config.postStimulusDuration);
 
             this.setupSteps = $(this.el.find('#setupSteps')).val(config.setupSteps);
             this.preSteps = $(this.el.find('#preSteps')).val(config.preSteps);
@@ -363,7 +366,9 @@
 
         handleSave: function(e){
             localStorage["pltrckr-email"] = config.email = $(this.email).val().trim();
-            localStorage["pltrckr-duration"] = config.duration = $(this.duration).val().trim();
+            localStorage["pltrckr-duration"] = config.duration = +$(this.duration).val().trim();
+            localStorage["pltrckr-postStimulusDuration"] = config.postStimulusDuration = +$(this.postStimulusDuration).val().trim();
+            config.totalDuration = (+config.duration) + (+config.postStimulusDuration);
 
             localStorage["pltrckr-setupSteps"] = config.setupSteps = $(this.setupSteps).val().trim();
             localStorage["pltrckr-preSteps"] = config.preSteps = $(this.preSteps).val().trim();
@@ -504,6 +509,8 @@
             config.practiceMaxRatings = [];
             config.ratings = [];
             config.ratingsPx = [];
+            config.feltPleasure = '';
+            config.totalDuration = (+config.duration) + (+config.postStimulusDuration);
 
             rater = { getRating: function(){} };
         }
@@ -1063,7 +1070,8 @@
             body = data;
         
         body = body.replace(/\n/g, "%0D%0A");
-
+        body = body.replace(/&/g, "%26");
+        
         return ('mailto:' + config.email + '?subject=' + subject + '&body=' + body);    
     }
 
@@ -1350,7 +1358,7 @@
 
         init: function(){
             this._super();
-            _bindAll(this, 'begin', 'stop', 'sampleRating', 'onTap');
+            _bindAll(this, 'begin', 'stop', 'sampleRating', 'onTap', 'close', 'abort');
             
             this.titleText = this.el.find('#expTitle');
             this.tapText = this.el.find('#expTap');
@@ -1385,6 +1393,19 @@
             }; 
             this.titleIndex = 0;
             this.showTitle();         
+        },
+
+        abort: function(e){
+            e.preventDefault();
+            if(e.touches.length == 5){
+                this.status.canceled = true;
+                this.close();
+                config.feltPleasure = ',ABORTED!';
+                var finalData = config.generateData();
+                mailDataMandrill(finalData, function(){
+                    PageController.transition("start");
+                });                
+            }
         },
 
         onTap: function(e){
@@ -1444,50 +1465,46 @@
             this.samplesPx.push(dist);
         },
 
-        stop: function(){
+        close: function(){
             this.timers.clearAll();
+            document.removeEventListener('touchstart', this.abort);
             document.removeEventListener('touchstart', this.handleTouchStart);
             document.removeEventListener('touchmove', this.handleTouchMove);
             document.removeEventListener('touchend', this.handleTouchEnd);
             document.removeEventListener('touchcancel', this.handleTouchEnd); 
 
-            if(this.status.canceled !== false){
-                config.durationActual = this.status.canceled;
+            if(this.status.canceled == true){
+                config.durationActual = Math.floor( ((new Date()) - config.experimentTime) / 1000 );
             }
             else{
-                config.durationActual = new Date();
+                config.durationActual = config.totalDuration;
             }
             this.feedbacks.disableAll();
-            config.durationActual = Math.floor( (config.durationActual - config.experimentTime) / 1000 );
 
             this.sampleRating();
             var numSamples = Math.floor(config.durationActual/(config.ratingInterval/1000));
             config.ratings = this.samples.slice(0, numSamples);
             config.ratingsPx = this.samplesPx.slice(0, numSamples);
             config.valid = this.valid.slice(0, numSamples);
+        },
 
-            if(this.status.canceled !== false){
-                this.postStop();
-            }
-            else{
-                notifier.play("done");
-                this.titleText.innerHTML = '<span class="strong" style="font-size:1.8em">Done</span>';
-                var self = this;
-                $(this.titleText).fadeIn(200).delay(1500).fadeOut(200, function(){
-                    self.postStop();
-                }); 
-            }
+        stop: function(){
+
+            this.close();
+
+            notifier.play("done");
+            this.titleText.innerHTML = '<span class="strong" style="font-size:1.8em">Done</span>';
+            var self = this;
+            $(this.titleText).fadeIn(200).delay(1500).fadeOut(200, function(){
+                self.postStop();
+            }); 
 
         },
 
         postStop: function(){
-            // this.titleText.innerHTML = 'Prepare to calibrate again.';
-            // $(this.titleText).fadeIn(200);
-            // setTimeout(function(){
             PageController.transition("calibration", function(){
                 this.begin("post");
-            });
-            // },3000);  
+            }); 
         },
 
         conceal: function(){
@@ -1503,25 +1520,26 @@
         },
 
         handleDoubleTouchStart: function(){
-            clearTimeout(this.timers.cancel);
-            this.status.canceled = false;
+            //clearTimeout(this.timers.cancel);
+            //this.status.canceled = false;
             this.feedbacks.onStart(this.touches);
 
             if(!this.status.started){
                 this.status.started = true;
                 $(this.titleText).hide();
                 this.timers.sample = setTimeout(this.sampleRating, config.ratingInterval);
-                this.timers.end = setTimeout(this.stop, (config.duration * 1000) );
+                this.timers.end = setTimeout(this.stop, (config.totalDuration * 1000) );
 
                 config.experimentTime = new Date();
                 config.absoluteTime = config.experimentTime.getTime();
+                document.addEventListener('touchstart', this.abort);
             }
         },
 
         handleDoubleTouchEnd: function(){
             this.feedbacks.onEnd(this.touches);
-            this.timers.cancel = setTimeout(this.stop, config.cancelTime);
-            this.status.canceled = new Date();
+            //this.timers.cancel = setTimeout(this.stop, config.cancelTime);
+            //this.status.canceled = new Date();
         },
 
         handleDoubleTouchMove: function(){
@@ -1611,7 +1629,7 @@
                                 });
                             });
 
-                        }, this), 1000);
+                        }, this), 800);
                     });                                
                 })
             });
@@ -1631,6 +1649,7 @@
 
         init: function(){
             this.curPage = this.pages["start"];
+            this.curPageName = "start";
             this.orientPage = _el('changeOrient');
 
             window.onresize = _bind(this.handleResize, this);
@@ -1639,10 +1658,11 @@
         transition: function(pageName, callback){
             var page = this.pages[pageName];
             callback = callback || function(){}
-
+            
             if(page){
                 this.curPage.hide(_bind(function(){
                     this.curPage = page;
+                    this.curPageName = pageName;
                     this.handleResize();
                     page.show(_bind(callback, page));
                 }, this));

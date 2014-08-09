@@ -9,7 +9,10 @@
 /* ==========================================================================
    Base styles: opinionated defaults
    ========================================================================== */
-
+*{
+/* Prevent any object from being highlighted upon touch event*/
+  -webkit-tap-highlight-color: rgba(0,0,0,0); 
+}
 
 html,
 button,
@@ -80,6 +83,11 @@ h2{
   width:240px;
 }
 
+.page.knockout-wrapper{
+  height:200px;
+  text-align:center;
+}
+
 .settings-wrapper{
   background-color: #fcfcfc;
   padding:70px 0 20px;
@@ -112,6 +120,131 @@ h2{
   position: fixed;
   top:0;left:0;right:0; 
   z-index:9999;
+}
+
+.fixed-btn-wrapper{
+  position: fixed;
+  bottom:0;left:0;right:0; 
+  background:#fff;
+  border-top: 1px solid #aaa;
+  text-align: center;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  z-index:101;
+}
+
+.fixed-btn-wrapper .btn{
+  width:40%;
+}
+
+#knockRecordings{
+  position:absolute;
+  top:0;left:0;right:0;bottom:74px;
+  overflow-y:scroll;
+  padding-bottom:120px;
+  background-color: #EBEBEB
+}
+
+#knockNameMessages{
+  position:fixed;
+  bottom:74px;left:0;right:0;
+  z-index:100;
+}
+
+.knock-msg{
+  padding:0 20px;
+  font-size:12px;
+  line-height:42px;  
+  position:relative;
+  overflow:hidden;
+}
+.knock-msg-btn{
+  padding:0 8px;
+  border-radius:5px;
+  line-height:22px;
+  margin: 10px 0;
+}
+.msg-alert .knock-msg-btn{
+  background-color:#4F4835;
+  color:#FFCF3D;
+}  
+
+.msg-error{
+  background-color:#ce2339; color:#fff;  
+  border-top:1px solid #aa1e2f;
+}
+
+.msg-alert{
+  background-color:#FFCF3D; color:#4F4835;
+  border-top:1px solid #e5ba39;  
+}
+
+.knock-rec{
+  border-bottom:1px solid #aaacbf;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  overflow:hidden;
+}
+
+
+.knock-rec:nth-child(odd){
+  background:#fff;  
+}
+
+.knock-rec:nth-child(even){
+  background:#e8f0ff;  
+}
+
+
+#knockSelector .btn{
+  width:50%;
+  padding: 18px 0;
+  font-size:20px;
+  background:#fff;
+  border-color:#383fc4;
+  color:#6e65b0;
+  margin: 20px 0 40px -5px;
+  box-sizing:border-box;
+  border-radius:0;
+}
+
+#knockSelector .btn:active{
+  background-color:#6e65b0;
+  color:#fff;
+}
+
+#knockSelector .btn:first-child{
+  border-left:none;
+  margin-left:-1px;
+}
+
+#knockSelector .btn:last-child{
+  border-right:none;
+}
+
+
+.rec-btn, .rec-remove-btn{
+  width:24px;
+  height:24px;
+  background-size: 24px 24px;
+  padding: 25px 20px;
+  background-repeat: no-repeat;
+  background-position: 20px 25px;
+}
+
+.rec-btn{
+  background-image:url(../img/play.png);  
+}
+.rec-btn.rec-pause{
+  background-image:url(../img/pause.png);  
+}
+.rec-remove-btn{
+  padding:0;
+  margin: 25px 20px;
+  background-position: 0 0;
+  background-image:url(../img/close_thin.png); 
+}
+
+audio{
+  margin:10px;
 }
 
 #settingsHeader{
@@ -389,6 +522,26 @@ input[type="text"]{
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 1px 2px rgba(0,0,0,0.1);
 }
 
+.btn-success{
+  background-color:#4DDE8C;
+  color:#fff;
+  border:1px solid #41B372;
+  background-image: -o-linear-gradient(bottom, #4DDE8C 0%, #44BD79 100%);
+  background-image: -moz-linear-gradient(bottom, #4DDE8C 0%, #44BD79 100%);
+  background-image: -webkit-linear-gradient(bottom, #4DDE8C 0%, #44BD79 100%);
+  background-image: -ms-linear-gradient(bottom, #4DDE8C 0%, #44BD79 100%);
+  background-image: linear-gradient(to bottom, #4DDE8C 0%, #44BD79 100%);  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.btn:disabled{
+background-image: -o-linear-gradient(bottom, #C2C2C2 0%, #D9D9D9 100%);
+background-image: -moz-linear-gradient(bottom, #C2C2C2 0%, #D9D9D9 100%);
+background-image: -webkit-linear-gradient(bottom, #C2C2C2 0%, #D9D9D9 100%);
+background-image: -ms-linear-gradient(bottom, #C2C2C2 0%, #D9D9D9 100%);
+background-image: linear-gradient(to bottom, #C2C2C2 0%, #D9D9D9 100%);
+border:none;
+box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);   
+}
 
 .btn-wide{
   width:220px;
@@ -438,7 +591,7 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   text-align:center;
 }
 
-#expTitle, #calibTitles, #completeSurvey{
+#expTitle, #calibTitles, #completeSurvey, #moodTitles{
   padding: 0 35px;
 }
 
@@ -457,7 +610,7 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   width:100%;
 }
 
-#expTap, #calibTap, #completeSurveyTap{
+#expTap, #calibTap, #completeSurveyTap, #moodTap{
   font-size:12px;
   text-transform:uppercase;
   padding-top:25px;
@@ -601,6 +754,12 @@ input[type="radio"]:hover + label{
   background-color:#ffefef;
 }
 
+.big-loader{
+  width:60px;height:64px;  
+  background-size: 60px 64px;
+  background-image:url(../img/loader.gif);
+}
+
 @media only screen and (-webkit-min-device-pixel-ratio: 2) {
   #landscape{
     background-image:url(../img/landscape@2x.png);
@@ -614,12 +773,24 @@ input[type="radio"]:hover + label{
     background-image:url(../img/settings@2x.png);
   }
 
-.ico-close{
-  background-image:url(../img/close_thin@2x.png);  
-}
+  .ico-close, .rec-remove-btn{
+    background-image:url(../img/close_thin@2x.png);  
+  }
 
   #logo{
     background-image:url(../img/logo@2x.png);
+  }
+
+  .rec-btn{
+    background-image:url(../img/play@2x.png);  
+  }
+
+  .rec-btn.rec-pause{
+    background-image:url(../img/pause@2x.png);  
+  }
+
+  .big-loader{
+    background-image:url(../img/loader@2x.gif);
   }
 
 }

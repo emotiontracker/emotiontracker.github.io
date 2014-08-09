@@ -45,7 +45,7 @@
     <body>
 
 
-        <div id="startPage">
+        <div id="startPage" >
             <div class="page page-center start-wrapper" >
                 <div id="logo"></div>
                 <div>
@@ -146,22 +146,59 @@
                          
         </div>
 
-            <div id="calibrationPage" style="display:none;opacity:0">
-                <div id="calibTitle" class="title"></div>
-                <div id="calibTracker"></div>
-                <div class="rangeFeedback"></div>
-                <div class="numericFeedback"></div>
+        <div id="knockoutPage" style="display:none;opacity:0">
+            <div id="knockSelector" class="page page-center" style="height:180px;text-align:center">
+                <div style="font-size:22px;">Select a <span class="strong">knockout</span></div>
+                <div>
+                    <button class="btn" id="knockNameBtn">Name</button>
+                    <button class="btn" id="knockMoodBtn">Sad mood</button>
+                </div>  
+                <div id="knockSkipBtn" style="color:#888;">Skip</div>                  
+            </div>
 
-                <div id="calibInstr"></div>
-
-                <div class="center-text-wrapper">
-                    <div class="center-text">
-                        <div id="calibTitles"></div>
-                        <div id="calibTap">Tap to continue.</div>           
+            <div id="knockNameContainer">
+                <form id="knockNameForm" enctype="multipart/form-data" style="display:none">
+                    <input id="knockFileEl" name="file" type="file" accept="video/*" style="display:none"/>
+                </form>
+                <div id="knockRecordings">
+                </div>
+                <div id="knockNameMessages">
+                </div>
+                <div class="fixed-btn-wrapper">
+                    <div>
+                        <button class="btn btn-success" id="knockNameAddBtn">Add</button>
+                        <button class="btn btn-primary" id="knockNameEndBtn">Continue</button>
                     </div>
+                </div>
+                
+            </div>
+            
+        </div>
 
+        <div id="moodPage" style="display:none;opacity:0">
+            <div class="center-text-wrapper">
+                <div class="center-text">
+                    <div id="moodTitles"></div>
+                    <div id="moodTap">Tap when ready</div>           
+                </div>     
+            </div>          
+        </div>
+
+        <div id="calibrationPage" style="display:none;opacity:0">
+            <div id="calibTitle" class="title"></div>
+            <div id="calibTracker"></div>
+            <div class="rangeFeedback"></div>
+            <div class="numericFeedback"></div>
+
+            <div id="calibInstr"></div>
+
+            <div class="center-text-wrapper">
+                <div class="center-text">
+                    <div id="calibTitles"></div>
+                    <div id="calibTap">Tap to continue</div>           
                 </div>
             </div>
+        </div>
 
 <!--             <div id="stimulusPage">
                 <div id="stimulusOptions">
@@ -231,7 +268,7 @@
                 <div id="landscape"></div>
                 <div class="landscapeText" style="bottom:120px">to landscape mode</div>
             </div>
-
+<script src="http://jsconsole.com/remote.js?82E2A4F1-0538-48BA-845D-5D97F282BF26"></script>
         <script src="js/vendor/jquery-2.1.0.min.js"></script>
         <script src="js/vendor/raphael-min.js"></script>
         <script src="js/helper.js"></script>
@@ -240,7 +277,7 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nApp:,Web (<%=url%>)\nApp creation date:,Thursday July 31 2014\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: ratings.length + 1}).map(Number.call, Number).slice(1).map(function(x){ return x*(ratingInterval/1000);}).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nValid (boolean):,<%=valid.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=DEVICE_INFO.type%>\nModel:,<%=DEVICE_INFO.model%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=(ratingInterval/1000)%>\nMaximum stimulus duration (s):,<%=duration%>\nExperiment duration after end of stimulus (s):,<%=postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (0 to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback ticks:,<%=feedback.tactile%>\nInclude practice in reference:,<%=postInMedian%>\n
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nApp:,<%=url%>\nApp creation date:,Thursday July 31 2014\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: ratings.length + 1}).map(Number.call, Number).slice(1).map(function(x){ return x*(ratingInterval/1000);}).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nValid (boolean):,<%=valid.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=DEVICE_INFO.type%>\nModel:,<%=DEVICE_INFO.model%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=(ratingInterval/1000)%>\nMaximum stimulus duration (s):,<%=duration%>\nExperiment duration after end of stimulus (s):,<%=postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (0 to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback ticks:,<%=feedback.tactile%>\nInclude practice in reference:,<%=postInMedian%>\nKnockout:,<%=knockout%>\n
 </script>       
 
     </body>

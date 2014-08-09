@@ -1,8 +1,15 @@
+window.URL = window.URL || window.webkitURL;
+
 (function(){
 
     function utf8_to_b64( str ) {
         return window.btoa(unescape(encodeURIComponent( str )));
     }
+
+    function shuffle(o){
+        for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+        return o;
+    };
 
     var Page = View.extend({
         shown: true,
@@ -248,6 +255,7 @@
         feltPleasure: '',
         postStimulusDuration: +(localStorage["pltrckr-postStimulusDuration"] || 120),
         totalDuration: (+localStorage["pltrckr-duration"] || 30) + (+localStorage["pltrckr-postStimulusDuration"] || 120),
+        knockout: '',
 
         generateData: function(){
 
@@ -266,6 +274,16 @@
                     this[dist+'MinMax'].push(this[dist+'MinDist'][j] || '');
                     this[dist+'MinMax'].push(this[dist+'MaxDist'][j] || '');
                 }
+            }
+
+            if(config.knockout == ''){
+                config.knockout = 'None';
+            }
+            else if(config.knockout == 'mood'){
+                config.knockout = 'Sad mood';
+            }
+            else if(config.knockout == 'name'){
+                config.knockout = 'Name'
             }
 
             return tmpl("data_tmpl", this);       
@@ -477,9 +495,7 @@
             $(this.experiment).blur();
 
             if(flag === false){
-                PageController.transition("calibration", function(){
-                    this.begin("setup");
-                });
+                PageController.transition("knockout");
             }
 
         },
@@ -511,11 +527,341 @@
             config.ratingsPx = [];
             config.feltPleasure = '';
             config.totalDuration = (+config.duration) + (+config.postStimulusDuration);
-
+            config.knockout = '';
             rater = { getRating: function(){} };
         }
 
     });
+
+    function transEl(el1, el2, dur, cb){
+        $(el1).velocity({opacity: 0}, (dur * 0.25), function(){
+            el1.style.display = "none";
+            el2.style.display = "";
+            $(el2).velocity({opacity: 1}, (dur * 0.75), cb);
+        });
+    }
+
+    var knockoutPage = Page.extend({
+        id: 'knockoutPage',
+        limitOrient: false,
+        serverUrl: 'http://pleasure-back-env-pgjp3eennr.elasticbeanstalk.com',
+
+        init: function(){
+            this._super();
+            _bindAll(this, "beginName", "showNameError", "handleAddRecording", "handleRecordPlay", "handleRecordRemove", "clearRecordings", "playRecordings", "stopRecordings", "end");
+
+            this.selector = this.el.find("#knockSelector");
+            this.nameContainer = this.el.find("#knockNameContainer");
+
+            this.nameBtn = this.el.find("#knockNameBtn");
+            this.moodBtn = this.el.find("#knockMoodBtn");
+            this.skipBtn = this.el.find("#knockSkipBtn");
+
+            this.nameAddBtn = this.el.find("#knockNameAddBtn");
+            this.nameFileEl = this.el.find("#knockFileEl");
+            this.nameEndBtn = this.el.find("#knockNameEndBtn");
+            this.recordings = this.el.find("#knockRecordings");
+            this.nameForm = this.el.find("#knockNameForm");
+            this.nameMessages = this.el.find("#knockNameMessages");
+            this.recs = [];
+            this.nameAlert = null;
+
+            var self = this;
+            new MBP.fastButton(this.nameBtn, _bind(transEl, this, this.selector, this.nameContainer, 400, this.beginName));
+            new MBP.fastButton(this.moodBtn, function(){
+                config.knockout = 'mood';
+                self.end();
+            });
+            this.skipBtn.on('touchstart', this.end);
+
+            
+            this.nameFileEl.addEventListener("change", this.handleAddRecording);
+            this.nameAddBtn.on('touchstart', function(){ self.nameFileEl.value = null; self.nameFileEl.click(); });
+            new MBP.fastButton(this.nameEndBtn, this.end);
+
+            this.render();
+        },
+
+        end: function(){
+            this.recs = shuffle(this.recs);
+            PageController.transition("calibration", function(){
+                this.begin("setup");
+            });            
+        },
+
+        render: function(){
+            this.recs = [];
+            this.selector.style.display = "block";
+            this.selector.style.opacity = 1;
+            this.nameContainer.style.display = "none";
+            this.nameContainer.style.opacity = 0;
+            this.recordings.innerHTML = '<div class="page page-center" style="width:60px;height:64px"><div class="big-loader"></div></div>'
+            this.nameMessages.innerHTML = '';
+        },
+
+        handleAddRecording: function(){
+            if(this.nameAlert){
+                $(this.nameAlert).remove();
+                this.nameAlert = null;
+            }
+            $(this.nameAddBtn).prop("disabled", true);
+            $(this.nameAddBtn).text("Processing");
+            var formData = new FormData(this.nameForm);
+            var self = this;
+            $.ajax({
+                url: this.serverUrl + '/convert?q=' + encodeURIComponent(config.name),  //Server script to process data
+                type: 'POST',
+                timeout:20000,
+                // xhr: function() {  // Custom XMLHttpRequest
+                //     var myXhr = $.ajaxSettings.xhr();
+                //     // if(myXhr.upload){ // Check if upload property exists
+                //     //     myXhr.upload.addEventListener('progress',progressHandlingFunction, false); // For handling the progress of the upload
+                //     // }
+                //     return myXhr;
+                // },
+                //Ajax events
+                success: function(e){
+                    if(e.error){
+                        self.showNameError('There was an error processing the recording.');
+                    }
+                    else{
+                        self.createRecording(e.path);
+                    }
+                },
+                error: function( jqXHR, textStatus, errorThrown){
+                    self.showNameError('There was an error contacting the server.');
+                },
+                complete: function(){
+                    $(self.nameAddBtn).text("Add");
+                    $(self.nameAddBtn).prop("disabled", false);
+                },
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false
+            }); 
+        },
+
+        showNameError: function(msg){
+            var error = $('<div class="knock-msg msg-error">' + msg + '</div>');
+            error.css('height', '0');
+            $(this.nameMessages).append(error);
+            setTimeout(function(){error.velocity({height: '42px'}, [80, 12]);},5);
+            setTimeout(function(){
+                error.velocity({height: 0}, 300, function(){
+                    error.remove();
+                });
+            }, 3000);
+        },
+
+        createRecording: function(url){
+            var howl = new Howl({urls:[(this.serverUrl + '/' + url)]});
+            howl.__path = url;
+            this.recs.push(howl);
+
+            var rec = $('<div class="knock-rec row"><span class="rec-btn col"></span><span class="rec-remove-btn col-right"></span></div>');
+            rec.css('height', '0');
+            $(this.recordings).append(rec);
+            setTimeout(function(){$(rec).velocity({height: '75px'}, [ 80, 8 ]);},5);
+            (rec.find('.rec-btn')[0]).on('touchstart', this.handleRecordPlay);
+            (rec.find('.rec-remove-btn')[0]).on('touchstart', this.handleRecordRemove);
+        },
+
+        beginName: function(){
+            config.knockout = 'name';
+            var self = this;
+            $.ajax({
+                url: this.serverUrl + '/converted?q=' + encodeURIComponent(config.name), 
+                type: 'GET',
+                success: function(recs){
+                    self.recordings.innerHTML = '';
+                    if(recs.length > 0){
+                        for(var i = 0; i<recs.length; i++){
+                            self.createRecording(recs[i]);
+                        }
+
+                        self.nameAlert = $('<div class="knock-msg msg-alert row"> \
+                            <div class="col"><span style="font-weight:bold">' + recs.length + '</span> recording' + ((recs.length == 1) ? ' was' : 's were') + ' found for your name.</div> \
+                            <div class="knock-msg-btn col-right">clear all</div> \
+                            </div>');  
+                        self.nameAlert.css('bottom', '-42px');
+                        $(self.nameMessages).append(self.nameAlert);
+                        setTimeout(function(){self.nameAlert.velocity({bottom: 0}, [80, 12]);},5);
+                        (self.nameAlert.find('.knock-msg-btn')[0]).on('touchstart', _bind(self.clearRecordings, self, function(){
+                            self.nameAlert.velocity({bottom: '-42px'}, [80, 12], function(){
+                                $(self.nameAlert).remove();
+                                self.nameAlert = null;                                
+                            });
+                        }));      
+                    }
+                },
+
+                error: function(){
+                    self.recordings.innerHTML = '';
+                    self.showNameError('There was an error contacting the server.');
+                },
+
+            });
+        },
+
+        clearRecordings: function(cb){
+            var self = this;
+            $.post(this.serverUrl + '/remove?type=all&name=' + encodeURIComponent(config.name), function(){
+                self.recordings.innerHTML = '';
+                self.recs = [];
+                cb();
+            });
+        },
+
+
+        handleRecordPlay: function(e){
+            var $el = $(e.target);
+            var rec = this.recs[$el.parent().index()];
+
+            if($el.hasClass('rec-pause')){
+                $el.removeClass('rec-pause');
+                rec.stop();
+            }
+            else{
+                $el.addClass('rec-pause');
+                rec.on('end', function(){
+                    rec.off('end');
+                    $el.removeClass('rec-pause');
+                });
+                rec.play();
+            }
+        },
+
+        handleRecordRemove: function(e){
+            e.preventDefault();
+            if(this.nameAlert){
+                $(this.nameAlert).remove();
+                this.nameAlert = null;
+            }
+            var $rec = $(e.target).parent();
+            var index = $rec.index();
+            var self = this;
+            $.post(this.serverUrl + '/remove?type=one&name=' + encodeURIComponent(this.recs[index].__path), function(){
+                $rec.velocity({height: 0}, 200, function(){
+                    $rec.remove();
+                    self.recs.splice(index,1);
+                });
+            });
+        },
+
+
+        playRecordings: function(i){
+            if(i >= this.recs.length) return;
+            var self = this;
+            var rec = this.recs[i];
+            //rec.pos(0);
+            rec.on('end', function(){
+                rec.off('end');
+                self.playRecordings(i+1);
+            });
+            rec.play();
+        },
+
+        stopRecordings: function(){
+            for(var i = 0; i<this.recs.length; i++){
+                var rec = this.recs[i];
+                rec.off('end');
+                rec.stop();
+            }
+        }
+
+    });
+
+    var moodPage = Page.extend({
+        id: 'moodPage',
+
+        init: function(){
+            this._super();
+            _bindAll(this, 'onTap', 'onEnd', 'abort', 'showTitle');
+
+            this.titles = [
+                'Make yourself comfortable, and focus your attention on the instructions you are about to see.',
+                'Imagine a situation that you think would make you feel sad. It could be a hypothetical situation, or a real event in your past.',
+                'Imagine the situation as vividly as you can. Picture the events happening to you.',
+                'See all the details of the situation. See the people or the objects; hear the sounds; think the thoughts you would actually think in this situation.',
+                'Feel the same sad feelings you would feel. Let yourself react as if you were actually there.',
+                'Keep imagining the situation until i say "Done"'];
+            this.titleIndex = 0;
+
+            this.tap = this.el.find('#moodTap');
+            this.titlesText = this.el.find('#moodTitles');
+            this.timeout = null;
+                
+        },
+
+        render: function(){
+            this.titlesText.style.opacity = 0;
+            this.tap.style.opacity = 0;
+            this.titleIndex = 0;
+            this.showTitle();
+        },
+
+        end: function(){
+            PageController.transition("experiment", function(){
+                this.begin();
+            });           
+        },
+
+        onTap: function(e){
+            e.preventDefault();
+            var self = this;
+            document.removeEventListener('touchstart', this.onTap);
+
+            $(this.tap).velocity({opacity:0}, 100);
+            $(this.titlesText).velocity({opacity:0}, 100, function(){
+                self.titleIndex++;
+                
+                if(self.titleIndex == self.titles.length ){  
+                    self.timeout = setTimeout(self.onEnd, 180000);   // 3 minutes
+                    document.addEventListener('touchstart', self.abort);
+                }
+                else{
+                    self.showTitle();
+                }
+            });
+        },
+
+        abort: function(e){
+            e.preventDefault();
+            if(e.touches.length == 3){
+                document.removeEventListener('touchstart', this.abort);
+                this.end();
+            }
+        },
+
+        onEnd: function(){
+            clearTimeout(this.timeout);
+            this.titlesText.innerHTML = '<span class="strong" style="font-size:2em;font-weight:normal">Done</span>';
+            
+            var self = this;
+            notifier.play("done");
+            $(self.titlesText).velocity({opacity:1}, 200, function(){
+                setTimeout(function(){
+                    self.end();
+                }, 1000);
+            });
+
+        },
+
+        showTitle: function(){
+            var self = this;
+            this.titlesText.innerHTML = this.titles[this.titleIndex];
+            $(this.titlesText).velocity({opacity:1}, 150, function(){
+                setTimeout(function(){
+                    $(self.tap).velocity({opacity: 1}, 300, function(){
+                        document.addEventListener('touchstart', self.onTap);
+                    });
+                }, 800);                    
+            });
+        }, 
+    });
+
+
 
     var getOrientation = function(){
         if(Math.abs(window.orientation) === 90 || window.innerWidth > window.innerHeight){
@@ -798,9 +1144,14 @@
                     ],
                     end: [],
                     onEnd: function(){
-                       PageController.transition("experiment", function(){
-                            this.begin();
-                        }); 
+                        if(config.knockout == 'mood'){
+                            PageController.transition("mood"); 
+                        }
+                        else{
+                            PageController.transition("experiment", function(){
+                                this.begin();
+                            }); 
+                        }
                     }
                 },
                 'post':{
@@ -1225,7 +1576,7 @@
             this.context = Howler.ctx;
             this.oscillator = this.context.createOscillator();
             this.oscillator.type = 0;
-            this.gainNode = this.context.createGainNode();
+            this.gainNode = this.context.createGain();
         },
 
         getFrequencyFromRating: function(rating){
@@ -1400,7 +1751,7 @@
             if(e.touches.length == 5){
                 this.status.canceled = true;
                 this.close();
-                config.feltPleasure = ',ABORTED!';
+                config.experiment += ',ABORTED!';
                 var finalData = config.generateData();
                 mailDataMandrill(finalData, function(){
                     PageController.transition("start");
@@ -1479,6 +1830,7 @@
             else{
                 config.durationActual = config.totalDuration;
             }
+            PageController.pages.knockout.stopRecordings();
             this.feedbacks.disableAll();
 
             this.sampleRating();
@@ -1493,7 +1845,7 @@
             this.close();
 
             notifier.play("done");
-            this.titleText.innerHTML = '<span class="strong" style="font-size:1.8em">Done</span>';
+            this.titleText.innerHTML = '<span class="strong" style="font-size:1.8em;font-weight:normal">Done</span>';
             var self = this;
             $(this.titleText).fadeIn(200).delay(1500).fadeOut(200, function(){
                 self.postStop();
@@ -1532,6 +1884,10 @@
 
                 config.experimentTime = new Date();
                 config.absoluteTime = config.experimentTime.getTime();
+
+                if(config.knockout == 'name'){
+                    PageController.pages.knockout.playRecordings(0);
+                }
                 document.addEventListener('touchstart', this.abort);
             }
         },
@@ -1642,6 +1998,8 @@
         pages: {
             "start" : new startPage(),
             "calibration": new calibrationPage(),
+            "knockout": new knockoutPage(),
+            "mood": new moodPage(),
             //"stimulus" : new stimulusPage(),
             "experiment": new experimentPage(),
             "complete": new completePage()

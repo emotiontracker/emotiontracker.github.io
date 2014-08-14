@@ -810,6 +810,7 @@ function drawTimer(el, dur){
 
         playRecordings: function(i){
             if(i >= this.recs.length){
+                this.recs = shuffle(this.recs);
                 i = 0;
             }
             var self = this;

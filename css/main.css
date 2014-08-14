@@ -150,6 +150,14 @@ h2{
   z-index:100;
 }
 
+#knockNameInstructions{
+  position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  z-index:9999;
+  background:#fff;
+  padding:30px;
+}
+
 .knock-msg{
   padding:0 20px;
   font-size:12px;
@@ -193,15 +201,20 @@ h2{
   background:#e8f0ff;  
 }
 
+#knockSelector{
+  padding:0 25px;
+  box-sizing:border-box;
+}
+
 
 #knockSelector .btn{
-  width:50%;
+  width:33.33%;
   padding: 18px 0;
-  font-size:20px;
+  font-size:16px;
   background:#fff;
   border-color:#383fc4;
   color:#6e65b0;
-  margin: 20px 0 40px -5px;
+  margin: 20px 0 40px -6px;
   box-sizing:border-box;
   border-radius:0;
 }
@@ -212,12 +225,14 @@ h2{
 }
 
 #knockSelector .btn:first-child{
-  border-left:none;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
   margin-left:-1px;
 }
 
 #knockSelector .btn:last-child{
-  border-right:none;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 
@@ -336,27 +351,110 @@ input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:fo
   opacity:0.6;
 }
 
-#songList, #stimulusOther{
-  margin-left: 10px;  
+#songInput{
+  border:none;
+  border-bottom:1px solid #bbb;
+  width:100%;
+  padding:15px;
+  padding-right:65px;
+  font-size:18px;
+  line-height:24px;
+  margin:0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+#songInput:focus,#songInput:active{
+  outline:0;
+  border:none !important;
+  border-bottom:1px solid #aaa !important;
+}
+
+.song-info{
+  width:100%;
+  font-size:13px;
+  color:#888;
+  padding: 25px 15px;
+  box-sizing:border-box;
+}
+
+
+.ico-loader{
+  width: 24px;
+  height: 24px;
+  position: relative;
+  top:5px;
+  background-image: url(../img/loader.gif);
+  display: inline-block;
+}
+
+.stimulusWrapper{
+  width: 400px; 
+  margin:50px auto 50px;
+}
+
+#stimulusSelect{
+  font-size:14px;
+  line-height:24px;
+  padding: 10px 15px;
+  position:fixed;
+  bottom:0;left:0;right:0;
+  border-top:1px solid #ccc;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+  background-color:rgba(255,255,255,0.9)
+}
+
+#stimulusSelect .row{
+  padding: 0 0 10px;
+}
+
+#stimulusFinal{
+  margin: 30px 0 0;
+}
+
+#stimulusSubmit{
+  margin:0;
 }
 
 #stimulusOther{
-  border-top:1px solid #ddd;
   margin-top:20px; 
+  padding-bottom:85px;
 }
 
 #stimulusOther::before{
-  content: 'or';
+  content: 'OR TRY ONE OF THESE';
+  font-size:12px;
+  color:#888;
   background:#fff;
   padding: 0 10px;
-  top:-12px; left:49%;
+  top:-5px; left:5px;
   position: relative;
 }
 
+
+.stimulus-final-text{
+  width: 60%;
+  line-height:20px;
+  font-size:13px;
+  color:#888;
+}
+
+
+.stimulus-final-text > span.stimulus-final-warning{
+  display:none;
+}
+
+.stimulus-final-text.stimulus-warning > span.stimulus-final-warning{
+  display:block;
+}
+
+#stimulusFinalDuration{
+  font-weight:bold;
+  color:#444;
+}
+
 .song{
-  padding: 12px 10px 10px;
-  border-radius:2px;
-  border-top:1px solid #ddd;
+  padding: 12px 15px 10px;
+  border-top:1px solid #eee;
 }
 
 .song:first-child{
@@ -369,9 +467,16 @@ input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:fo
   border-color: transparent;
 }
 
+.song-duration{
+  display:none;
+}
+
 .song-title{
-  font-weight:bold;
-  line-height:16px;
+  color:#000;
+  white-space: nowrap;
+  width: 100%;                   
+  overflow: hidden; 
+  text-overflow: ellipsis;
 }
 
 .song-artist{
@@ -380,9 +485,9 @@ input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:fo
 }
 
 .song-album{
-  font-size:10px;
-  text-transform: uppercase;
+  font-size:11px;
   margin-left:10px;
+  text-transform: uppercase;
 }
 
 .song-album::before{
@@ -391,16 +496,69 @@ input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:fo
   top:0;left:-6px;
 }
 
+.song-meta{
+  white-space: nowrap;
+  width: 100%;                   
+  overflow: hidden;              /* "overflow" value must be different from "visible" */ 
+  text-overflow: ellipsis;
+}
+
 .song-artist, .song-album{
-  opacity:0.6;
+  color:#888;
 }
 
 .song.selected{
   background-color:#6e65b0;
 }
 
-.song.selected > *{
+.song.selected-warning{
+  background-color:#bf002f;
+}
+
+.song.selected *, .song.selected-warning *{
   color:#fff;
+}
+
+#songSearchBtn, #songLoader{
+  background-repeat: no-repeat;
+  background-position: 15px 15px;
+  position: absolute;
+  top:0;right:0;
+  padding: 15px;
+}
+
+#songSearchBtn{
+  width:24px;
+  height:24px;
+  background-image:url(../img/search.png);
+  background-size: 24px 24px;
+  opacity:0.7;
+}
+
+.loader-small{
+  width:23px;height:24px;
+  background-image:url(../img/loader_small.gif);
+  background-size:23px 24px;
+}
+
+#songLoader{
+  display:none;
+}
+
+#musicTime{
+  font-size:14px;
+  margin-top:10px;
+  display:none;
+}
+
+#musicTime::before{
+  content:'Approximate wait time ';
+  color:#666;
+}
+
+#musicTime::after{
+  content:' mins';
+  color:#666;
 }
 
 .lbl{
@@ -598,7 +756,11 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
 
 #completeSurvey div.strong{
   text-align:left;
-  margin-bottom:30px;
+  font-size:17px;
+  margin-bottom:20px;
+  font-weight:normal;
+  letter-spacing: 0;
+  color:#000;
 }
 
 .survey-wrapper{
@@ -617,6 +779,19 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   color:#aaa;
 }
 
+.timer {
+  display: none;
+  margin: 50px auto;
+}
+
+#loader 
+{ fill: #928DB5 }
+
+#border 
+{ fill: #736E99 }
+  
+
+
 #completeSurveyTap{
   padding:0;
   position: fixed;
@@ -627,47 +802,35 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   background: transparent;
 }
 
-input[type=radio] {
-    display:none; 
-    margin:10px;
-}
 
-input[type="radio"] + label {
-  display:inline-block;
+.survey-btn{
+  display: inline-block;
   margin-left:-1px;
-  padding: 8px 16px;
-  background-color: #fafafa;
-  border:1px solid #ccc;
-  color:#777;
+  padding: 10px 16px;
+  background-color: #fff;
+  border:1px solid #6e65b0;
+  border-radius: 0;
+  color:#6e65b0;
   letter-spacing: 0px;
   position: relative;
   float:left;
 }
 
-input[type=radio]:checked + label { 
+.survey-btn.selected{ 
   background-image: none;
   background-color:#6e65b0;
   color:#fff;
   border-color:#6e65b0;
 }
 
-input[type="radio"]:first-child + label{
+.survey-btn:first-child{
   border-top-left-radius: 3px;
   border-bottom-left-radius: 3px;
 }
 
-input[type="radio"] + label:last-child{
+.survey-btn:last-child{
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
-}
-
-input[type="radio"]:hover{
-  cursor: pointer;
-}
-
-input[type="radio"]:hover + label{
-  cursor: pointer;
-  
 }
 
 
@@ -793,6 +956,14 @@ input[type="radio"]:hover + label{
     background-image:url(../img/loader@2x.gif);
   }
 
+  #songSearchBtn{
+    background-image:url(../img/search@2x.png);
+  }
+
+  .loader-small{
+    background-image:url(../img/loader_small@2x.gif);
+  }
+
 }
 
 .landscapeText{
@@ -868,20 +1039,22 @@ input[type="radio"]:hover + label{
     padding: 0 25px;
   }
 
-  input[type="radio"] + label {
+  .survey-btn {
     display:block;
     float:none;
     margin: -1px 0;
-  padding: 11px 16px;
+    padding: 11px 16px;
+    float:none;
+    width:100%;
   }
 
-  input[type="radio"]:first-child + label{
+  .survey-btn:first-child{
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border-bottom-left-radius: 0;
   }
 
-  input[type="radio"] + label:last-child{
+  .survey-btn:last-child{
     border-top-right-radius: 0;
     border-bottom-right-radius: 3px;
     border-bottom-left-radius: 3px;
@@ -1013,7 +1186,10 @@ textarea[contenteditable] {
    Modify as content requires.
    ========================================================================== */
 
-@media only screen and (min-width: 800px) {
+@media only screen and (min-width: 420px) {
+  .stimulus-final-text{
+    line-height:46px;
+  }
     /* Style adjustments for viewports that meet the condition */
 }
 

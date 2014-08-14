@@ -1,5 +1,35 @@
 window.URL = window.URL || window.webkitURL;
 
+function drawTimer(el, dur){
+
+    var loader = el.find('#loader')
+      , border = el.find('#border')
+      , alpha = 0
+      , pi = Math.PI
+      , t = ( dur * 1000 ) / 360;
+
+    (function draw() {
+      alpha++;
+      alpha %= 360;
+      var r = ( alpha * pi / 180 )
+        , x = Math.sin( r ) * 50
+        , y = Math.cos( r ) * - 50
+        , mid = ( alpha > 180 ) ? 1 : 0
+        , anim = 'M 0 0 v -50 A 50 50 1 ' 
+               + mid + ' 1 ' 
+               +  x  + ' ' 
+               +  y  + ' z';
+     
+      loader.setAttribute( 'd', anim );
+      border.setAttribute( 'd', anim );
+      
+      if(alpha !== 0){
+        setTimeout(draw, t); // Redraw
+      }
+      
+    })();    
+}
+
 (function(){
 
     function utf8_to_b64( str ) {
@@ -31,12 +61,14 @@ window.URL = window.URL || window.webkitURL;
             if(!this.shown){
                 this.shown = true;
 
-                this.render();
-                $(this.el).css('display', 'block');
-                $(this.el).animate({opacity:1}, 300, _bind(function(){
-                    this.post_render();
-                    callback();
-                }, this));              
+                if(!this.render()){
+                    $(this.el).css('display', 'block');
+                    $(this.el).animate({opacity:1}, 300, _bind(function(){
+                        this.post_render();
+                        callback();
+                    }, this));                      
+                }
+            
             }
 
         },
@@ -251,11 +283,20 @@ window.URL = window.URL || window.webkitURL;
                 return (this.barbell || this.range || this.numeric || this.auditory || this.tactile);
             }
         },
-        postInMedian: JSON.parse(localStorage["pltrckr-postInMedian"] || "false") ,
+        postInMedian: JSON.parse(localStorage["pltrckr-postInMedian"] || "false"),
+        musicSelect: JSON.parse(localStorage["pltrckr-musicSelect"] || "true"),
         feltPleasure: '',
         postStimulusDuration: +(localStorage["pltrckr-postStimulusDuration"] || 120),
         totalDuration: (+localStorage["pltrckr-duration"] || 30) + (+localStorage["pltrckr-postStimulusDuration"] || 120),
         knockout: '',
+        songUri: 'whitenoise',
+        songName: '',
+        songArtist: '',
+        songAlbum: '',
+        songDuration: '',
+        songDurationMax: 600,
+        durationWhiteNoise: localStorage["pltrckr-durationWhiteNoise"] || 120,
+        moodDuration: localStorage["pltrckr-moodDuration"] || 3,
 
         generateData: function(){
 
@@ -366,6 +407,9 @@ window.URL = window.URL || window.webkitURL;
             this.feedBarVaries = $(this.el.find('#feedBarVaries')).prop('checked', config.feedback.barVaries);
 
             this.postInMedian = $(this.el.find('#postInMedian')).prop('checked', config.postInMedian);
+            this.musicSelect = $(this.el.find('#musicSelect')).prop('checked', config.musicSelect);
+            this.durationWhiteNoise = $(this.el.find('#durationWhiteNoise')).val(config.durationWhiteNoise);
+            this.moodDuration = $(this.el.find('#moodDuration')).val(config.moodDuration);
 
             this.header = this.el.find('#settingsHeader');
 
@@ -376,6 +420,12 @@ window.URL = window.URL || window.webkitURL;
                 if(+$(this).val().trim() === 0){
                     $(this).val(1);
                 }
+            });
+
+            $(this.moodDuration).on('change', function(){
+                var moodDur = $(this).val().trim();
+                moodDur = (!isNaN(moodDur)) ? (+moodDur) : 3;
+                $(this).val(moodDur);
             });
 
             $(this.el).on('focus', 'input[type="text"]', this.unFloatButtons);
@@ -401,6 +451,9 @@ window.URL = window.URL || window.webkitURL;
             localStorage["pltrckr-feedBarVaries"] = config.feedback.barVaries = $(this.feedBarVaries).prop('checked');
 
             localStorage["pltrckr-postInMedian"] = config.postInMedian = $(this.postInMedian).prop('checked');
+            localStorage["pltrckr-musicSelect"] = config.musicSelect = $(this.musicSelect).prop('checked');
+            localStorage["pltrckr-durationWhiteNoise"] = config.durationWhiteNoise = +$(this.durationWhiteNoise).val().trim();
+            localStorage["pltrckr-moodDuration"] = config.moodDuration = +$(this.moodDuration).val().trim();
 
             this.showStart(e);
         },
@@ -527,6 +580,11 @@ window.URL = window.URL || window.webkitURL;
             config.ratingsPx = [];
             config.feltPleasure = '';
             config.totalDuration = (+config.duration) + (+config.postStimulusDuration);
+
+            config.songName = '';
+            config.songArtist = '';
+            config.songAlbum = '';
+            config.songDuration = '';
             config.knockout = '';
             rater = { getRating: function(){} };
         }
@@ -584,9 +642,14 @@ window.URL = window.URL || window.webkitURL;
 
         end: function(){
             this.recs = shuffle(this.recs);
-            PageController.transition("calibration", function(){
-                this.begin("setup");
-            });            
+            if(config.musicSelect){
+                PageController.transition("stimulus");                    
+            }
+            else{
+                PageController.transition("calibration", function(){
+                    this.begin("setup");
+                });                    
+            }     
         },
 
         render: function(){
@@ -597,6 +660,9 @@ window.URL = window.URL || window.webkitURL;
             this.nameContainer.style.opacity = 0;
             this.recordings.innerHTML = '<div class="page page-center" style="width:60px;height:64px"><div class="big-loader"></div></div>'
             this.nameMessages.innerHTML = '';
+            setTimeout(function () {
+                window.scrollTo(0, 0);
+            }, 1);
         },
 
         handleAddRecording: function(){
@@ -612,14 +678,6 @@ window.URL = window.URL || window.webkitURL;
                 url: this.serverUrl + '/convert?q=' + encodeURIComponent(config.name),  //Server script to process data
                 type: 'POST',
                 timeout:20000,
-                // xhr: function() {  // Custom XMLHttpRequest
-                //     var myXhr = $.ajaxSettings.xhr();
-                //     // if(myXhr.upload){ // Check if upload property exists
-                //     //     myXhr.upload.addEventListener('progress',progressHandlingFunction, false); // For handling the progress of the upload
-                //     // }
-                //     return myXhr;
-                // },
-                //Ajax events
                 success: function(e){
                     if(e.error){
                         self.showNameError('There was an error processing the recording.');
@@ -751,7 +809,9 @@ window.URL = window.URL || window.webkitURL;
 
 
         playRecordings: function(i){
-            if(i >= this.recs.length) return;
+            if(i >= this.recs.length){
+                i = 0;
+            }
             var self = this;
             var rec = this.recs[i];
             //rec.pos(0);
@@ -785,9 +845,9 @@ window.URL = window.URL || window.webkitURL;
                 'Imagine the situation as vividly as you can. Picture the events happening to you.',
                 'See all the details of the situation. See the people or the objects; hear the sounds; think the thoughts you would actually think in this situation.',
                 'Feel the same sad feelings you would feel. Let yourself react as if you were actually there.',
-                'Keep imagining the situation until i say "Done"'];
+                'Keep imagining the situation until i say <b>"Done"</b>'];
             this.titleIndex = 0;
-
+            this.timer = this.el.find('.timer');
             this.tap = this.el.find('#moodTap');
             this.titlesText = this.el.find('#moodTitles');
             this.timeout = null;
@@ -795,6 +855,7 @@ window.URL = window.URL || window.webkitURL;
         },
 
         render: function(){
+            this.timer.style.display = 'none';
             this.titlesText.style.opacity = 0;
             this.tap.style.opacity = 0;
             this.titleIndex = 0;
@@ -816,8 +877,10 @@ window.URL = window.URL || window.webkitURL;
             $(this.titlesText).velocity({opacity:0}, 100, function(){
                 self.titleIndex++;
                 
-                if(self.titleIndex == self.titles.length ){  
-                    self.timeout = setTimeout(self.onEnd, 180000);   // 3 minutes
+                if(self.titleIndex == self.titles.length ){ 
+                    self.timer.style.display = 'block';
+                    drawTimer(self.timer, config.moodDuration * 60);
+                    self.timeout = setTimeout(self.onEnd, config.moodDuration * 60 * 1000);   // 3 minutes
                     document.addEventListener('touchstart', self.abort);
                 }
                 else{
@@ -829,13 +892,15 @@ window.URL = window.URL || window.webkitURL;
         abort: function(e){
             e.preventDefault();
             if(e.touches.length == 3){
+                clearTimeout(this.timeout);
+                this.timer.style.display = 'none';
                 document.removeEventListener('touchstart', this.abort);
                 this.end();
             }
         },
 
         onEnd: function(){
-            clearTimeout(this.timeout);
+            this.timer.style.display = 'none';
             this.titlesText.innerHTML = '<span class="strong" style="font-size:2em;font-weight:normal">Done</span>';
             
             var self = this;
@@ -856,9 +921,332 @@ window.URL = window.URL || window.webkitURL;
                     $(self.tap).velocity({opacity: 1}, 300, function(){
                         document.addEventListener('touchstart', self.onTap);
                     });
-                }, 800);                    
+                }, 100);                    
             });
         }, 
+    });
+
+    var bufSource;
+
+    var musicPlayer = Page.extend({
+        id:'musicPage',
+        limitOrient: false,
+
+        init: function(){
+            this._super();
+            _bindAll(this, 'playWhiteNoise', 'stop', 'onMessage', 'playSong', 'stopSong', 'updateWaitTime', 'startBuffering');
+            this.catcher = new Worker('js/audiocatcher.js');
+            this.audioContext = new webkitAudioContext();
+
+            this.waitTime = this.el.find("#musicTime");
+            this.timeTimeout = null;
+
+            this.catcher.addEventListener('message', this.onMessage);
+        },
+
+        render: function(){
+            this.buffcb = null;
+            this.soundNode = null;
+            this.playing = false;
+            this.started = false;
+            this.ended = false;
+            this.playQueue = [];
+            if(config.songUri == 'whitenoise'){
+                PageController.transition("experiment", function(){
+                    this.begin();
+                }); 
+                return true;
+            }
+            this.catcher.postMessage({type:'req', url: config.songUri, dur: config.duration, _dur: config.duration + ((config.knockout == 'mood') ? config.moodDuration : 0) });
+        },
+
+        onMessage: function(e){
+            var data = e.data;
+
+            if(data.type == 'audio'){
+                var buffer = this.audioContext.createBuffer(2, data.left.length, 44100);
+                buffer.getChannelData(0).set(data.left, 0);
+                buffer.getChannelData(1).set(data.right, 0);
+                this.playQueue.push(buffer);
+                if(!this.started){
+                    if(this.playQueue.length >= 4 && this.buffcb){
+                        this.buffcb();
+                        this.buffcb = null;
+                    }
+                }
+                else if(!this.playing && !this.ended){
+                    this.playSong();
+                }        
+            }
+            else{
+                if(data.type == "error"){
+                }
+                else if(data.type == "warn"){;
+                }
+                else if(data.type == "end"){
+                    this.ended = true;
+                    this.started = false;
+                }
+                else if(data.type == "status"){
+                    if(data.msg == 'canplay' && PageController.curPageName === 'music'){
+                        if(config.knockout == 'mood'){
+                            PageController.transition("mood"); 
+                        }
+                        else{
+                            PageController.transition("experiment", function(){
+                                this.begin();
+                            }); 
+                        }
+                    }
+                    else if(data.msg == 'inqueue'){
+                        clearTimeout(this.timeTimeout);
+                        this.updateWaitTime(data.dur);
+                        this.waitTime.style.display = "block";
+                    }
+                }
+            }         
+        },
+
+        updateWaitTime: function(time){
+            if(time == 0){
+                this.catcher.postMessage({type:'status'});
+            }
+            var minutes = Math.floor(time / 60);
+            var seconds = time - minutes * 60;
+            this.waitTime.innerHTML = minutes + ':' + ("0" + seconds).slice(-2);
+            this.timeTimeout = setTimeout(_bind(this.updateWaitTime, this, ((time <= 0) ? 0 : time-1 )),1000);          
+        },
+
+        playWhiteNoise: function(){
+
+            var bufferSize = 2 * this.audioContext.sampleRate,
+                noiseBuffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate),
+                output = noiseBuffer.getChannelData(0);
+            for (var i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+
+            var whiteNoise = this.audioContext.createBufferSource();
+            whiteNoise.buffer = noiseBuffer;
+            whiteNoise.loop = true;
+            whiteNoise.start(0);
+
+            whiteNoise.connect(this.audioContext.destination);
+            this.playing = true;
+            this.soundNode = whiteNoise;     
+        },
+
+        startBuffering: function(cb){
+            this.buffcb = cb;
+            this.catcher.postMessage({type:'play'});
+        },
+
+        playSong: function(trackURI){
+            if(this.playQueue.length === 0 ) return;
+            if(!this.started){
+                this.started = true;
+                this.ended = false;
+            }
+            var buf = this.playQueue.shift();
+            bufSource = this.audioContext.createBufferSource();
+            bufSource.buffer = buf;
+            var self = this;
+            bufSource.onended = function(){
+                self.playing = false;
+                self.playSong();  
+            }
+            bufSource.connect(this.audioContext.destination);
+            bufSource.noteOn(0);
+            this.playing = true;
+        },
+
+        playMusic: function(trackURI, duration){
+            if(this.playing){
+                this.stop();
+            }    
+
+            if(trackURI == "whitenoise"){
+                this.playWhiteNoise();
+            }
+            else{
+                this.playSong();
+            }
+
+            if(duration){
+                var self = this;
+                setTimeout(function(){
+                    self.stop();
+                }, duration * 1000);
+            }
+
+        },
+
+        stopSong: function(){
+            if(!this.ended){
+                this.catcher.postMessage({type:'stop'});
+            }   
+            bufSource.disconnect();
+            bufSource = null;
+            this.playQueue = [];
+            this.ended = true;
+            this.started = false;
+        },
+
+        stop: function(){
+            if(!this.playing) return;
+
+            this.playing = false;
+
+            if(this.soundNode){
+                this.soundNode.disconnect();
+                this.soundNode = null;
+            }
+            else{
+                this.stopSong();
+            }
+        }
+    });
+
+
+    var stimulusPage = Page.extend({
+        id: 'stimulusPage',
+        limitOrient: false,
+
+        init: function(){
+            this._super();
+
+            _bindAll(this, 'findSongs', 'submitSong', 'selectSong');
+
+            this.songInput = this.el.find('#songInput');
+            this.songList = this.el.find('#songList');
+            this.searchBtn = this.el.find("#songSearchBtn");
+            this.submit = this.el.find('#stimulusSubmit');
+            this.loader = this.el.find('#songLoader');
+            this.select = this.el.find("#stimulusSelect");
+            this.finalText = this.el.find(".stimulus-final-text");
+            this.instructions = '<div class="song-info">Type in the title of your favorite music above and hit the search button. Narrow down the results by adding the name of the artist/album.</div>';
+
+            this.curSong = null;
+
+            new MBP.fastButton(this.searchBtn, this.findSongs);
+            var self = this;
+            $(this.el).on('touchstart', '.song', this.selectSong);
+            $(this.songInput).on('focus', function(){
+                self.select.style.position = 'static';
+            });
+            $(this.songInput).on('blur', function(){
+                self.select.style.position = 'fixed';
+            });
+            new MBP.fastButton(this.submit, this.submitSong);
+
+            this.render();
+        },
+
+        render: function(){
+            $(this.submit).prop('disabled', true);
+            this.songList.innerHTML = this.instructions;
+            if(this.curSong){
+                $(this.curSong).removeClass('selected selected-warning');
+                this.curSong = null;
+            }
+            // $(this.select).css({opacity:0, 'display':'none'});
+            this.loader.style.display = 'none';
+            setTimeout(function () {
+                window.scrollTo(0, 0);
+            }, 1);
+            //this.songList.innerHTML = '';
+        },
+
+        selectSong: function(e){
+            if(this.curSong){
+                $(this.curSong).removeClass('selected selected-warning');
+            }
+
+            this.curSong = e.currentTarget;
+            var curSongDuration = ($(this.curSong).data("uri") == "whitenoise") ? config.durationWhiteNoise : +(this.curSong.find('.song-duration').innerHTML);
+
+            if( curSongDuration > config.duration ){
+                $(this.finalText).addClass('stimulus-warning');
+                $(this.curSong).addClass("selected-warning");
+            }
+            else{
+                $(this.finalText).removeClass('stimulus-warning');
+                $(this.curSong).addClass("selected");
+            }
+            $(this.submit).prop('disabled', false);
+        },
+
+        findSongs: function(e){
+            e.preventDefault();
+
+            var self = this;
+            var query = $(this.songInput).val().trim();
+
+            $(this.curSong).removeClass('selected selected-warning');
+            this.curSong = null;
+            $(this.submit).prop('disabled', true);
+
+            //$(this.select).velocity({opacity:0}, 100, function(){$(this).css('display', 'none')});
+            
+            if( query === '' ){
+                self.songList.innerHTML = this.instructions;
+                return false;
+            } 
+
+            this.searchBtn.style.display = "none";
+            this.loader.style.display = "block";
+            $.ajax({
+                type: "GET",
+                url: "https://api.spotify.com/v1/search?q=" + encodeURIComponent(query) + "&type=track&limit=5",
+                success: function(res){
+                    self.loader.style.display = "none";
+                    self.searchBtn.style.display = "block";
+
+                    var tracks = res.tracks.items;
+                    if(tracks.length == 0){
+                        self.songList.innerHTML = '<span class="song-info">No tracks found for <b>' + query + '</b>.</span>';
+                    }
+                    else{
+                        self.songList.innerHTML = '';
+                        for(var i = 0; i < tracks.length; i++){
+                            $(self.songList).append('<div class="song" data-uri="' +  tracks[i].uri + '"> <div class="song-duration">' + Math.round(tracks[i].duration_ms/1000) + '</div><div class="song-title">' + tracks[i].name + '</div> <div class="song-meta"> <span class="song-artist">' + tracks[i].artists[0].name + '</span>  <span class="song-album">' + tracks[i].album.name + '</span></div></div>');
+                        }                        
+                    }
+                },
+                error: function(res) {
+                    self.loader.style.display = "none";
+                    self.searchBtn.style.display = "block";
+                    self.songList.innerHTML = '<span class="song-info">There was an error finding songs.</span>';
+                }
+            }); 
+        },
+
+        submitSong: function(e){
+            e.preventDefault();
+
+            var uri = $(this.curSong).data("uri");
+            if(uri === 'whitenoise'){
+                config.songUri = 'whitenoise';
+                config.songName = 'White Noise';
+                config.songArtist = '';
+                config.songAlbum = '';
+                config.songDuration = +config.durationWhiteNoise;
+            }
+            else{
+                config.songUri = uri;
+                config.songName = this.curSong.find('.song-title').innerHTML;
+                config.songArtist = this.curSong.find('.song-artist').innerHTML;
+                config.songAlbum = this.curSong.find('.song-album').innerHTML;
+                config.songDuration = +this.curSong.find('.song-duration').innerHTML;
+            }
+
+            //var allowedDuration = (config.songDuration > config.duration) ? config.duration : config.songDuration;
+            config.totalDuration = config.duration + (+config.postStimulusDuration);
+            PageController.transition("calibration", function(){
+                this.begin("setup");
+            });
+        }
+
     });
 
 
@@ -1144,13 +1532,18 @@ window.URL = window.URL || window.webkitURL;
                     ],
                     end: [],
                     onEnd: function(){
-                        if(config.knockout == 'mood'){
-                            PageController.transition("mood"); 
+                        if(config.musicSelect){
+                            PageController.transition("music");                    
                         }
                         else{
-                            PageController.transition("experiment", function(){
-                                this.begin();
-                            }); 
+                            if(config.knockout == 'mood'){
+                                PageController.transition("mood"); 
+                            }
+                            else{
+                                PageController.transition("experiment", function(){
+                                    this.begin();
+                                }); 
+                            }                   
                         }
                     }
                 },
@@ -1643,73 +2036,13 @@ window.URL = window.URL || window.webkitURL;
             this.stop();
         }
     }))();
-/*
-    var stimulusPage = Page.extend({
-        id: 'stimulusPage',
-
-        init: function(){
-            this._super();
-
-            _bindAll(this, 'findSongs');
-
-            this.songInput = this.el.find("#songInput");
-            this.songList = this.el.find("#songList");
-            this.submit = this.el.find("#stimulusSubmit");
-            this.curSong = null;
-
-            $(this.songInput).on("keyup", _debounce(this.findSongs, 500) );
-
-            var self = this;
-            $(this.el).on('click', '.song', function(e){
-                if(self.curSong){
-                    $(self.curSong).removeClass('selected');
-                }
-
-                $(this).addClass('selected');
-                self.curSong = this;
-                $(self.submit).css('display', 'block');
-            });
-        },
-
-        findSongs: function(e){
-            var self = this;
-            var query = $(this.songInput).val().trim();
-
-            $(this.curSong).removeClass('selected');
-            this.curSong = null;
-            $(this.submit).css('display', 'none');
-
-            $.ajax({
-                type: "GET",
-                url: "https://api.spotify.com/v1/search?q=" + encodeURIComponent(query) + "&type=track&limit=5",
-                success: function(res){
-                    var tracks = res.tracks.items;
-                    self.songList.innerHTML = '';
-                    console.log(tracks);
-                    if(tracks.length == 0){
-                        self.songList.innerHTML = '<span style="font-size:12px;margin-left:10px">No tracks found for <b>' + query + '</b>.</span>';
-                    }
-                    else{
-                        for(var i = 0; i < tracks.length; i++){
-                            $(self.songList).append('<div class="song" data-uri="' +  tracks[i].uri + '"> <div class="song-title">' + tracks[i].name + '</div> <span class="song-artist">' + tracks[i].artists[0].name + '</span> <span class="song-album">' + tracks[i].album.name.slice(0, 40) + ((tracks[i].album.name.length > 40) ? '...' : '') + '</span></div>');
-                        }                        
-                    }
-                },
-                error: function(res) {
-                    self.songList.innerHTML = 'There was an error finding songs.';
-                }
-            }); 
-        }
-
-    });
-*/
 
     var experimentPage = DoubleTouchPage.extend({
         id: 'experimentPage',
 
         init: function(){
             this._super();
-            _bindAll(this, 'begin', 'stop', 'sampleRating', 'onTap', 'close', 'abort');
+            _bindAll(this, 'begin', 'stop', 'sampleRating', 'onTap', 'close', 'abort', 'showReadyTitle');
             
             this.titleText = this.el.find('#expTitle');
             this.tapText = this.el.find('#expTap');
@@ -1718,7 +2051,8 @@ window.URL = window.URL || window.webkitURL;
             this.titleTexts = [
                 'Soon, you will continuously rate your pleasure. You\'ll spread your fingers to indicate how much pleasure you are getting from the object at that moment.',
                 'While your fingers are on the screen, keep rating pleasure, even after the object goes away, until I say, <b>"Done"</b>.',
-                '<span class="strong">When you\'re ready, place two fingers to begin.</span>'
+                ''
+                //'<span class="strong">When you\'re ready, place two fingers to begin.</span>'
             ];
 
         },
@@ -1772,19 +2106,29 @@ window.URL = window.URL || window.webkitURL;
             });
         },
 
+        showReadyTitle: function(){
+            this.titleText.innerHTML = '<span class="strong">When you\'re ready, place two fingers to begin.</span>';
+            this.feedbacks.enable();
+
+            document.addEventListener('touchstart', this.handleTouchStart);
+            document.addEventListener('touchmove', this.handleTouchMove);
+            document.addEventListener('touchend', this.handleTouchEnd);
+            document.addEventListener('touchcancel', this.handleTouchEnd);   
+        },
+
         showTitle: function(){
             var self = this;
             this.titleText.innerHTML = this.titleTexts[this.titleIndex];
             $(this.titleText).show();
             $(this.titleText).velocity({opacity:1}, 150, function(){
-                if(self.titleIndex == self.titleTexts.length - 1){                    
-                    // End case
-                    self.feedbacks.enable();
-
-                    document.addEventListener('touchstart', self.handleTouchStart);
-                    document.addEventListener('touchmove', self.handleTouchMove);
-                    document.addEventListener('touchend', self.handleTouchEnd);
-                    document.addEventListener('touchcancel', self.handleTouchEnd);             
+                if(self.titleIndex == self.titleTexts.length - 1){  
+                    if(config.songUri !== '' && config.songUri !== 'whitenoise'){
+                        self.titleText.innerHTML = 'Buffering your music...';
+                        PageController.pages.music.startBuffering(self.showReadyTitle);
+                    } 
+                    else{
+                        self.showReadyTitle();
+                    }            
                 }
                 else{
                     //setTimeout(function(){
@@ -1817,6 +2161,7 @@ window.URL = window.URL || window.webkitURL;
         },
 
         close: function(){
+            PageController.pages.music.stop();
             this.timers.clearAll();
             document.removeEventListener('touchstart', this.abort);
             document.removeEventListener('touchstart', this.handleTouchStart);
@@ -1885,8 +2230,14 @@ window.URL = window.URL || window.webkitURL;
                 config.experimentTime = new Date();
                 config.absoluteTime = config.experimentTime.getTime();
 
+                if(config.musicSelect){
+                    PageController.pages.music.playMusic(config.songUri, config.duration);
+                }
+
                 if(config.knockout == 'name'){
                     PageController.pages.knockout.playRecordings(0);
+                    
+                    setTimeout(PageController.pages.knockout.stopRecordings, config.duration * 1000);
                 }
                 document.addEventListener('touchstart', this.abort);
             }
@@ -1910,7 +2261,7 @@ window.URL = window.URL || window.webkitURL;
 
         init: function(){
             this._super();
-             _bindAll(this, 'showFinal');
+             _bindAll(this, 'showFinal', 'onSelect');
 
             this.survey = this.el.find("#completeSurvey");
             this.surveyTap = this.el.find("#completeSurveyTap");
@@ -1919,7 +2270,9 @@ window.URL = window.URL || window.webkitURL;
             this.buttons = this.el.find("#completeButtons");
             this.sendButton = this.buttons.find('#btnReSend');
             this.restartButton = this.buttons.find('#btnRestart');
+            this.selected = false;
 
+            $(this.el).on('touchstart', '.survey-btn', this.onSelect);
             new MBP.fastButton(this.surveyTap, this.showFinal);
             new MBP.fastButton(this.restartButton, function(){
                 $(PageController.pages.start.name).val('');
@@ -1930,6 +2283,10 @@ window.URL = window.URL || window.webkitURL;
         },
 
         render: function(){
+            if(this.selected){
+                $(this.selected).removeClass('selected');
+            }
+            this.selected = false;
             this.surveyChange = false;
             this.survey.style.opacity = 1;
             this.survey.style.display = 'block';
@@ -1942,22 +2299,21 @@ window.URL = window.URL || window.webkitURL;
             this.buttons.style.display = 'none';
         },
 
-        post_render: function(){
-            var self = this;
-
-            this.surveyRadio.change(function(){
-                if(!self.surveyChange){
-                    self.surveyChange = true;
-
-                    $(self.surveyTap).css({display: 'block'}).velocity({opacity:1}, 300);
-                }
-            });
+        onSelect: function(e){
+            e.preventDefault();
+            if(this.selected){
+                $(this.selected).removeClass('selected');
+            }
+            else{
+                $(this.surveyTap).css({display: 'block'}).velocity({opacity:1}, 300);
+            }
+            $(e.target).addClass('selected');
+            this.selected = e.target;
         },
 
         showFinal: function(){
             var self = this;
-            config.feltPleasure = $(self.el).find('input[name="pleasureSurvey"]:checked').val();
-            $(self.el).find('input[name="pleasureSurvey"]:checked').prop('checked', false);
+            config.feltPleasure = $(this.selected).val();
 
             $(self.survey).velocity({opacity:0}, 150, function(){
                 $(this).css({display: 'none'});
@@ -2000,7 +2356,8 @@ window.URL = window.URL || window.webkitURL;
             "calibration": new calibrationPage(),
             "knockout": new knockoutPage(),
             "mood": new moodPage(),
-            //"stimulus" : new stimulusPage(),
+            "music": new musicPlayer(),
+            "stimulus" : new stimulusPage(),
             "experiment": new experimentPage(),
             "complete": new completePage()
         },

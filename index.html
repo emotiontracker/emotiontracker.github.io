@@ -44,8 +44,15 @@
     </head>
     <body>
 
-
-        <div id="startPage" >
+        
+        <div id="welcomePage" style="background-color:#7a6ed1;position:absolute;top:0;left:0;right:0;bottom:0;color:#fff;display:none;opacity:0">
+            <div class="page page-center" style="width:800px;text-align:center;height:520px;">
+                <div class="logo-welcome"></div>
+                <div style="font-size:24px;margin:40px 0">Your device is not touch friendly :(</div>
+                <div style="color:#c9cdff;font-size:16px;padding:10px 20px;border:2px solid #c9cdff;border-radius:3px;display:inline-block">Try opening this page on a touch-screen device such as a smartphone or tablet.</div>
+            </div>
+        </div>
+        <div id="startPage" style="display:none;opacity:0">
             <div class="page page-center start-wrapper" >
                 <div id="logo"></div>
                 <div>
@@ -103,12 +110,19 @@
                 </div>
 
                 <div class="field">
+                    <div class="field-check">
+                        <label for="postInMedian" class="lbl">Include practice in reference</label>
+                        <span class="chkbox"><input id="postInMedian" type="checkbox" /></span>
+                    </div>
+                </div> 
+
+                <div class="field">
                     <label for="ratingInterval" class="lbl">Sampling interval <span class="light"> (in seconds)</span></label>
                     <input id="ratingInterval" type="text" value="1" class="inpt" pattern="[0-9]*" />
                 </div>
 
                 <div class="field">
-                    <label class="lbl">Feedback</label>
+                    <label class="lbl lbl-title">Feedback</label>
                     <div class="field-check">
                         <label for="feedBarbell" class="lbl">Barbell</label>
                         <span class="chkbox"><input id="feedBarbell" type="checkbox" /></span>
@@ -135,47 +149,73 @@
                     </div>
 
                 </div>    
+ 
 
                 <div class="field">
-                    <div class="field-check">
-                        <label for="postInMedian" class="lbl">Include practice in reference</label>
-                        <span class="chkbox"><input id="postInMedian" type="checkbox" /></span>
+                    <label class="lbl lbl-title">Condition</label>
+                    <div>
+                        <div class="field-check">
+                            <label for="nameSelect" class="lbl">Enable name condition</label>
+                            <span class="chkbox"><input id="nameSelect" type="checkbox" /></span>
+                        </div>
+
+
+                        <div class="field-check">
+                            <label for="moodSelect" class="lbl">Enable sad mood condition</label>
+                            <span class="chkbox"><input id="moodSelect" type="checkbox" /></span>
+                        </div>
                     </div>
-                </div>  
 
-
-                <div class="field">
                     <label for="moodDuration" class="lbl">Duration of mood induction <span class="light"> (in minutes)</span></label>
                     <input id="moodDuration" type="text" value="3" class="inpt"/>
                 </div>
 
                 <div class="field">
-                    <div class="field-check">
-                        <label for="musicSelect" class="lbl">Enable music selection</label>
-                        <span class="chkbox"><input id="musicSelect" type="checkbox" /></span>
+                    <label class="lbl lbl-title">Music</label>
+                    <div>
+                        <div class="field-check">
+                            <label for="musicSelect" class="lbl">Enable music selection</label>
+                            <span class="chkbox"><input id="musicSelect" type="checkbox" /></span>
+                        </div>
                     </div>
-                </div>  
-
-                <div class="field">
                     <label for="durationWhiteNoise" class="lbl">Duration of white noise <span class="light"> (in seconds)</span></label>
                     <input id="durationWhiteNoise" type="text" value="120" class="inpt" pattern="[0-9]*"/>
-                </div>
+                </div>  
 
             </div>            
                          
         </div>
 
         <div id="knockoutPage" style="display:none;opacity:0">
-            <div id="knockSelector" class="page page-center" style="height:180px;text-align:center">
-                <div style="font-size:22px;">Select a <span class="strong">condition</span></div>
-                <div>
+            <div id="knockSelector" class="page page-center" style="height:180px;text-align:center;display:none;opacity:0">
+                <div style="font-size:22px;">Please select a condition</div>
+                <div class="knockSelBtns">
                     <button class="btn" id="knockSkipBtn">Regular</button>
                     <button class="btn" id="knockNameBtn">Name</button>
                     <button class="btn" id="knockMoodBtn">Mood</button>
                 </div>              
             </div>
 
+            <div id="moodWarn" style="display:none;opacity:0">
+                <div class="center-text-wrapper">
+                    <div class="center-text" style="padding:30px;">Please use sad mood induction with care.</div>
+                </div>
+                <div>
+                    <button class="btn btn-primary btn-full" id="moodWarnYes" style="bottom:0;border-width: 1px 0 0 0">Continue</button>
+                    <button class="btn btn-full" id="moodWarnNo" style="top:0">Cancel</button>
+                </div>
+            </div>
+
             <div id="knockNameContainer">
+                <div id="knockNameTitlesCont">
+                    <div class="center-text-wrapper" style="max-width:600px;margin:0 auto;padding:30px;box-sizing:border-box;">
+                        <div class="center-text">
+                            <div id="knockNameTitles"></div>
+                            <div id="knockNameTap">Tap to continue</div>
+                        </div>
+                    </div>
+                </div>
+
                 <form id="knockNameForm" enctype="multipart/form-data" style="display:none">
                     <input id="knockFileEl" name="file" type="file" accept="video/*" style="display:none"/>
                 </form>
@@ -251,45 +291,62 @@
         </div>
 
         <div id="musicPage" style="display:none;opacity:0">
-            <div class="center-text-wrapper">
+            <div class="center-text-wrapper"> 
                 <div class="center-text">
-                    Queueing your music... 
+                    <span class="loader-small"></span>
+                    <span class="light-emph">Queueing your music...</span>
                     <div id="musicTime">0:0</div>
                 </div>
             </div>            
         </div>
 
-            <div id="experimentPage" style="display:none; opacity:0">
-                <div class="feedbacks">
-                    <div class="barbellFeedback"></div>
-                    <div class="rangeFeedback"></div>
-                    <div class="numericFeedback"></div>
-                </div>
-
-                <div class="center-text-wrapper">
-                    <div class="center-text">
-                        <div id="expTitle"></div>
-                        <div id="expTap">Tap to continue.</div>   
-                    </div>
-                </div>
+        <div id="experimentPage" style="display:none; opacity:0">
+            <div class="feedbacks">
+                <div class="barbellFeedback"></div>
+                <div class="rangeFeedback"></div>
+                <div class="numericFeedback"></div>
             </div>
 
-            <div id="completePage" class="page page-center" style="display:none; opacity:0">
-                <div id="completeSurvey">
-                    <div class="strong survey-wrapper">During this trial, did you get the feeling of beauty from the object?</div>
-                    <div class="survey-wrapper">
-                        <button id="pleasureSurvey3" class="survey-btn" value="3">Yes, definitely</button>
-                        <button id="pleasureSurvey2" class="survey-btn" value="2">Perhaps yes</button>
-                        <button id="pleasureSurvey1" class="survey-btn" value="1">Perhaps no</button>
-                        <button id="pleasureSurvey0" class="survey-btn" value="0">Definitely not</button>
-                    </div>
-
-                    <button id="completeSurveyTap">Tap here to continue</button>
+            <div class="center-text-wrapper">
+                <div class="center-text">
+                    <div id="expTitle"></div>
+                    <div id="expTap">Tap to continue.</div>   
                 </div>
-                <div id="completeMessage" style="height:40px; opacity:0;display:none">Thank you.</div>
-                <div id="completeButtons" style="height:45px;">
-                    <a id="btnReSend" class="btn" href="#" style="padding: 11px 26px;">Resend data</a>
-                    <button id="btnRestart" class="btn btn-primary">New experiment</button>
+            </div>
+        </div>
+
+            <div id="completePage" style="display:none; opacity:0">
+                <div class="center-text-wrapper">
+                    <div class="center-text">
+                        <div id="completeSurvey">
+                            <div class="strong survey-wrapper">During this trial, did you get the feeling of beauty from the object?</div>
+                            <div class="survey-wrapper">
+                                <button id="pleasureSurvey3" class="survey-btn" value="3">Yes, definitely</button>
+                                <button id="pleasureSurvey2" class="survey-btn" value="2">Perhaps yes</button>
+                                <button id="pleasureSurvey1" class="survey-btn" value="1">Perhaps no</button>
+                                <button id="pleasureSurvey0" class="survey-btn" value="0">Definitely not</button>
+                            </div>
+
+                            <button id="completeSurveyTap">Tap here to continue</button>
+                        </div>
+
+                        <div id="completeMessages" style="display:none;opacity:0">
+                            <div id="completeThank" class="emph" style="opacity:0">Thank You!</div>
+                            <div id="completeStatusContainer">
+                                <span class="loader-small"></span>
+                                <span id="completeStatus">Sending data...</span>                 
+                            </div>                           
+                        </div>
+
+<!--                         <div id="completeMessage" style="display:none; opacity:0">
+                            <div class="emph">Thank you!</div>
+                            <div id="completeStatus"></div>
+                        </div> -->
+                    </div>
+                </div>
+                <div id="completeButtons" style="display:none">
+                    <a id="btnReSend" class="btn btn-full" href="#">Re-send data as e-mail</a>
+                    <a id="btnRestart" class="btn btn-full btn-success">Start new experiment</a>
                 </div>
             </div>
 

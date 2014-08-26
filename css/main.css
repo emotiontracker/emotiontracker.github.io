@@ -136,6 +136,21 @@ h2{
   width:40%;
 }
 
+#welcomeHeader{
+  position:relative;
+  width:100%;
+  height:90%;
+  background-color:#7a6ed1;
+  padding: 50px 0 0 0;
+  color:#fff;
+  text-align: center;
+}
+
+.welcome-message{
+  position:bottom;
+  bottom:50px;
+}
+
 #knockRecordings{
   position:absolute;
   top:0;left:0;right:0;bottom:74px;
@@ -144,20 +159,61 @@ h2{
   background-color: #EBEBEB
 }
 
+h3{
+  color:#6e65b2;
+  font-weight:normal;
+  font-size: 22px;
+}
+
+#knockNameTitlesCont{
+  position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  background:#fff;
+  z-index:9999;
+}
+
+#knockNameTitles{
+  line-height:24px;
+}
+
+.instr-green, .instr-purple{
+  padding:2px 6px;
+  color:#fff;
+  border-radius:3px;
+}
+
+.instr-green{
+  background-color:#4DDE8C;
+}
+
+.instr-purple{
+  background-color: #8C80E5;
+}
+.instr-slide{
+  font-size:20px;
+  color:#000;
+}
+
+.instr-wrapper{
+  max-width:600px;
+  padding: 20px;
+  margin: 0 auto;
+}
+
 #knockNameMessages{
   position:fixed;
   bottom:74px;left:0;right:0;
   z-index:100;
 }
 
-#knockNameInstructions{
+/*#knockNameInstructions{
   position:absolute;
   top:0;left:0;right:0;bottom:0;
   z-index:9999;
   background:#fff;
   padding:30px;
 }
-
+*/
 .knock-msg{
   padding:0 20px;
   font-size:12px;
@@ -187,7 +243,7 @@ h2{
 }
 
 .knock-rec{
-  border-bottom:1px solid #aaacbf;
+  border-bottom:1px solid #d0dcf2;
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   overflow:hidden;
 }
@@ -224,7 +280,15 @@ h2{
   color:#fff;
 }
 
-#knockSelector .btn:first-child{
+#moodWarn{
+  position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  background:#fff;
+  z-index:9999;
+  font-size:20px;
+}
+
+/*#knockSelector .btn:first-child{
   border-top-left-radius: 3px;
   border-bottom-left-radius: 3px;
   margin-left:-1px;
@@ -234,7 +298,7 @@ h2{
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }
-
+*/
 
 .rec-btn, .rec-remove-btn{
   width:24px;
@@ -536,6 +600,7 @@ input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:fo
 }
 
 .loader-small{
+  display: inline-block;
   width:23px;height:24px;
   background-image:url(../img/loader_small.gif);
   background-size:23px 24px;
@@ -547,18 +612,18 @@ input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:fo
 
 #musicTime{
   font-size:14px;
-  margin-top:10px;
+  margin-top:15px;
   display:none;
 }
 
 #musicTime::before{
-  content:'Approximate wait time ';
-  color:#666;
+  content:'Approximate wait time  ';
+  color:#aaa;
 }
 
 #musicTime::after{
   content:' mins';
-  color:#666;
+  color:#aaa;
 }
 
 .lbl{
@@ -568,6 +633,10 @@ input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:fo
   margin: 8px 0;
   display: inline-block;
   line-height:30px;
+}
+
+.lbl-title{
+  font-size:22px;
 }
 
 .field-check, .inpt{
@@ -665,7 +734,7 @@ input[type="text"]{
 }
 
 
-.btn:active{
+.btn:active,.btn:focus{
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
 }
 
@@ -691,6 +760,18 @@ input[type="text"]{
   background-image: linear-gradient(to bottom, #4DDE8C 0%, #44BD79 100%);  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 1px 2px rgba(0,0,0,0.1);
 }
 
+
+.btn-error{
+  background-color:#E6003D;
+  color:#fff;
+  border:1px solid #A8002D;
+  background-image: -o-linear-gradient(bottom, #E6003D 0%, #CC0036 100%);
+  background-image: -moz-linear-gradient(bottom, #E6003D 0%, #CC0036 100%);
+  background-image: -webkit-linear-gradient(bottom, #E6003D 0%, #CC0036 100%);
+  background-image: -ms-linear-gradient(bottom, #E6003D 0%, #CC0036 100%);
+  background-image: linear-gradient(to bottom, #E6003D 0%, #CC0036 100%);
+}
+
 .btn:disabled{
 background-image: -o-linear-gradient(bottom, #C2C2C2 0%, #D9D9D9 100%);
 background-image: -moz-linear-gradient(bottom, #C2C2C2 0%, #D9D9D9 100%);
@@ -713,8 +794,33 @@ a.btn, a.btn:visited, a.btn:hover{
   color:#444;
 }
 
-a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
+a.btn-primary, a.btn-primary:visited, a.btn-primary:hover, 
+a.btn-success, a.btn-success:visited, a.btn-success:hover, 
+a.btn-error, a.btn-error:visited, a.btn-error:hover{
   color:#fff;
+}
+
+
+.btn-full{
+  width:100%;
+  padding: 15px;
+  text-align:center;
+  text-decoration:none;
+  position:absolute;
+  left:0;right:0;
+  box-sizing:border-box;
+  margin:0;
+  border-width: 0 0 1px 0;
+  border-radius:0;
+}
+
+#btnReSend{
+  top:-53px;
+}
+
+#btnRestart{
+  bottom:-53px;
+  border-width: 1px 0 0 0;
 }
 
 .title, #calibInstr{
@@ -754,6 +860,25 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
 }
 
 
+.txt-error{
+  color:#ce0000;
+}
+
+.txt-success{
+  color:#45c67d;
+}
+
+#completeStatusContainer .loader-small, #musicPage .loader-small, #expTitle .loader-small{
+  position:relative;
+  top:6px;
+  margin-right:10px;
+}
+
+.light-emph{
+  font-size:1.1em;
+  color:#888;
+}
+
 #completeSurvey div.strong{
   text-align:left;
   font-size:17px;
@@ -761,6 +886,37 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   font-weight:normal;
   letter-spacing: 0;
   color:#000;
+}
+
+#completeMessages{
+  position:relative;
+  height:60px;
+}
+
+#completeThank, #completeStatusContainer{
+  position: absolute;
+  width:100%;
+  text-align:center;
+  top:0;
+}
+
+#completeStatus{
+  font-size:1.1em;
+  color:#888;
+}
+
+#completeStatusContainer{
+  -webkit-transform: scale(1,1);
+  transition: all 0.4s;
+}
+
+#completeStatusContainer.min{
+  top:30px;
+  -webkit-transform: scale(0.85,0.85);
+}
+
+#completeStatus.error{
+  color:#d60000;
 }
 
 .survey-wrapper{
@@ -772,7 +928,7 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   width:100%;
 }
 
-#expTap, #calibTap, #completeSurveyTap, #moodTap{
+#expTap, #calibTap, #completeSurveyTap, #moodTap, #knockNameTap{
   font-size:12px;
   text-transform:uppercase;
   padding-top:25px;
@@ -912,6 +1068,14 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   opacity: 0.6;
 }
 
+.logo-welcome{
+  background-image:url(../img/logo_welcome.png);
+  width:256px;
+  height:256px;
+  background-size: 256px 256px;
+  margin: 50px auto 5px; 
+}
+
 .inpt.invalid{
   border: 1px solid #ea385b;
   background-color:#ffefef;
@@ -999,7 +1163,11 @@ a.btn-primary, a.btn-primary:visited,a.btn-primary:hover{
   font-size:1.1em;
   color:#6e65b0;
   letter-spacing:-0.05em;  
+}
 
+.emph{
+color:#6e65b0; 
+font-size:1.1em; 
 }
 
 .bubble{

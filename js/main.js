@@ -30,6 +30,17 @@ function drawTimer(el, dur){
     })();    
 }
 
+function is_touch_device() {
+    return (('ontouchstart' in window)
+      || (navigator.MaxTouchPoints > 0)
+      || (navigator.msMaxTouchPoints > 0));
+}
+
+if(!is_touch_device()){
+    $("#welcomePage").css({display:'block'}).velocity({opacity:1}, 600);
+}
+else{
+    $("#startPage").css({display:'block', opacity:1});
 (function(){
 
     function utf8_to_b64( str ) {
@@ -88,7 +99,7 @@ function drawTimer(el, dur){
 
         conceal: function(){},
         pre_conceal: function(){},
-        handleResize: function(){ }
+        handleResize: function(){}
 
     });
 
@@ -196,7 +207,7 @@ function drawTimer(el, dur){
         currentPlaying: null,
 
         sounds: {
-            contactLoss: new Howl({urls:['alerts/contact_loss.mp3'], volume: 0.3}),
+            contactLoss: new Howl({urls:['alerts/contact_loss.mp3'], volume: 0.2}),
             contact: new Howl({urls:['alerts/contact.mp3'], volume: 0.5}),
             done: new Howl({urls:['alerts/done.mp3']}),
             click: new Howl({urls:['alerts/click.mp3'], volume: 0.9}) 
@@ -285,6 +296,8 @@ function drawTimer(el, dur){
         },
         postInMedian: JSON.parse(localStorage["pltrckr-postInMedian"] || "false"),
         musicSelect: JSON.parse(localStorage["pltrckr-musicSelect"] || "true"),
+        nameSelect: JSON.parse(localStorage["pltrckr-nameSelect"] || "false"),
+        moodSelect: JSON.parse(localStorage["pltrckr-moodSelect"] || "false"),
         feltPleasure: '',
         postStimulusDuration: +(localStorage["pltrckr-postStimulusDuration"] || 120),
         totalDuration: (+localStorage["pltrckr-duration"] || 30) + (+localStorage["pltrckr-postStimulusDuration"] || 120),
@@ -371,9 +384,9 @@ function drawTimer(el, dur){
         config.location.long = location.coords.longitude;
         config.location.accuracy = location.coords.accuracy;
 
-        $.get('http://maps.googleapis.com/maps/api/geocode/json?latlng=' + config.location.lat + ',' + config.location.long, function(data) { 
-            var addr = data.results[1] || data.results[0];
-            config.location.near = addr.formatted_address;
+        $.get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + config.location.lat + ',' + config.location.long + '&key=AIzaSyB_fvbdKS675ZptvH62faLD5IuG7sbrEb0', function(data) { 
+            var addr = data.results[0];
+            //config.location.near = addr.formatted_address;
         });
     }
 
@@ -408,6 +421,8 @@ function drawTimer(el, dur){
 
             this.postInMedian = $(this.el.find('#postInMedian')).prop('checked', config.postInMedian);
             this.musicSelect = $(this.el.find('#musicSelect')).prop('checked', config.musicSelect);
+            this.nameSelect = $(this.el.find('#nameSelect')).prop('checked', config.nameSelect);
+            this.moodSelect = $(this.el.find('#moodSelect')).prop('checked', config.moodSelect);
             this.durationWhiteNoise = $(this.el.find('#durationWhiteNoise')).val(config.durationWhiteNoise);
             this.moodDuration = $(this.el.find('#moodDuration')).val(config.moodDuration);
 
@@ -452,6 +467,8 @@ function drawTimer(el, dur){
 
             localStorage["pltrckr-postInMedian"] = config.postInMedian = $(this.postInMedian).prop('checked');
             localStorage["pltrckr-musicSelect"] = config.musicSelect = $(this.musicSelect).prop('checked');
+            localStorage["pltrckr-nameSelect"] = config.nameSelect = $(this.nameSelect).prop('checked');
+            localStorage["pltrckr-moodSelect"] = config.moodSelect = $(this.moodSelect).prop('checked');
             localStorage["pltrckr-durationWhiteNoise"] = config.durationWhiteNoise = +$(this.durationWhiteNoise).val().trim();
             localStorage["pltrckr-moodDuration"] = config.moodDuration = +$(this.moodDuration).val().trim();
 
@@ -603,10 +620,11 @@ function drawTimer(el, dur){
         id: 'knockoutPage',
         limitOrient: false,
         serverUrl: 'http://pleasure-back-env-pgjp3eennr.elasticbeanstalk.com',
+        //serverUrl: 'http://10.0.0.24:8081',
 
         init: function(){
             this._super();
-            _bindAll(this, "beginName", "showNameError", "handleAddRecording", "handleRecordPlay", "handleRecordRemove", "clearRecordings", "playRecordings", "stopRecordings", "end");
+            _bindAll(this, "beginName", "showNameError", "handleAddRecording", "handleRecordPlay", "handleRecordRemove", "clearRecordings", "playRecordings", "stopRecordings", "end", "onTap", "showTitle");
 
             this.selector = this.el.find("#knockSelector");
             this.nameContainer = this.el.find("#knockNameContainer");
@@ -623,12 +641,36 @@ function drawTimer(el, dur){
             this.nameMessages = this.el.find("#knockNameMessages");
             this.recs = [];
             this.nameAlert = null;
+            this.titles = [
+                'In the following screen, you will be prompted to select atleast 5 recordings of yourself speaking your name. Try and vary your tone in each recording (ex. happy, sad, angry, excited, funny).',
+                'Tap the <span class="instr-green">Add</span> button to select an existing recording from your device, or simply record a new video.',
+                'Wait for a second after hitting the record button. Then speak your name as clearly as possible into the microphone of your device.',
+                'Once you select a recording, it will be converted and saved under your name for your own use in future trials.',
+                'After your recording is processed, it will show up in a list, where you can play or delete each inidividual recording. Once you\'re happy with your selections, tap the <span class="instr-purple">Continue</span> button to proceed.'
+                //'<span class="strong">When you\'re ready, place two fingers to begin.</span>'
+            ];
+            this.titleIndex = 0;
+            this.titleCont = this.el.find("#knockNameTitlesCont");
+            this.titlesText = this.el.find("#knockNameTitles");
+            this.tap = this.el.find("#knockNameTap");
+
+            this.moodWarn = this.el.find("#moodWarn");
 
             var self = this;
             new MBP.fastButton(this.nameBtn, _bind(transEl, this, this.selector, this.nameContainer, 400, this.beginName));
             new MBP.fastButton(this.moodBtn, function(){
-                config.knockout = 'mood';
-                self.end();
+                $(self.moodWarn).css({display:'block'}).velocity({opacity:1}, 300, function(){
+                    $("#moodWarnYes").on('touchstart', function(){
+                        config.knockout = 'mood';
+                        self.end();                        
+                    });
+
+                    $("#moodWarnNo").on('touchstart', function(){
+                        $(self.moodWarn).velocity({opacity:0}, 100, function(){
+                            $(self.moodWarn).css({display:'none'});
+                        });
+                    });
+                });
             });
             this.skipBtn.on('touchstart', this.end);
 
@@ -636,8 +678,75 @@ function drawTimer(el, dur){
             this.nameFileEl.addEventListener("change", this.handleAddRecording);
             this.nameAddBtn.on('touchstart', function(){ self.nameFileEl.value = null; self.nameFileEl.click(); });
             new MBP.fastButton(this.nameEndBtn, this.end);
+        },
 
-            this.render();
+        render: function(){
+            this.recs = [];
+            $(this.selector).find(".btn").each(function(i,e){
+                $(e).css({display:'none', 'border-radius': 0});
+            });
+            var btns = ["#knockSkipBtn"];
+
+            if(config.nameSelect === true){btns.push("#knockNameBtn")}
+            if(config.moodSelect === true){btns.push("#knockMoodBtn")}
+
+            if(btns.length == 1){
+                return this.end();
+            }
+
+            btns.forEach(function(b){
+                $(b).css({display:'inline-block', width: (100/btns.length) + '%'});
+            })
+
+            $(btns[0]).css({'border-radius': '3px 0 0 3px'});
+            $(btns[btns.length - 1]).css({'border-radius': '0 3px 3px 0'});
+
+            this.moodWarn.style.display = 'none';
+            this.moodWarn.style.opacity = 0;
+            this.selector.style.display = "block";
+            this.selector.style.opacity = 1;
+            this.nameContainer.style.display = "none";
+            this.nameContainer.style.opacity = 0;
+            this.recordings.innerHTML = '<div class="page page-center" style="width:60px;height:64px"><div class="big-loader"></div></div>'
+            this.nameMessages.innerHTML = '';
+            setTimeout(function () {
+                window.scrollTo(0, 0);
+            }, 1);
+            $(this.titleCont).css({display:'block', opacity:1});
+            this.titleIndex = 0;
+            this.showTitle();
+        },
+
+        onTap: function(e){
+            e.preventDefault();
+            var self = this;
+            document.removeEventListener('touchstart', this.onTap);
+
+            $(this.tap).velocity({opacity:0}, 100);
+            $(this.titlesText).velocity({opacity:0}, 100, function(){
+                self.titleIndex++;
+                
+                if(self.titleIndex == self.titles.length){ 
+                    $(self.titleCont).velocity({opacity:0}, 300, function(){
+                        $(self.titleCont).css({display:'none'});
+                    });
+                }
+                else{
+                    self.showTitle();
+                }
+            });
+        },
+
+        showTitle: function(){
+            var self = this;
+            this.titlesText.innerHTML = this.titles[this.titleIndex];
+            $(this.titlesText).velocity({opacity:1}, 150, function(){
+                //setTimeout(function(){
+                    $(self.tap).velocity({opacity: 1}, 300, function(){
+                        document.addEventListener('touchstart', self.onTap);
+                    });
+                //}, 50);                    
+            });
         },
 
         end: function(){
@@ -650,19 +759,6 @@ function drawTimer(el, dur){
                     this.begin("setup");
                 });                    
             }     
-        },
-
-        render: function(){
-            this.recs = [];
-            this.selector.style.display = "block";
-            this.selector.style.opacity = 1;
-            this.nameContainer.style.display = "none";
-            this.nameContainer.style.opacity = 0;
-            this.recordings.innerHTML = '<div class="page page-center" style="width:60px;height:64px"><div class="big-loader"></div></div>'
-            this.nameMessages.innerHTML = '';
-            setTimeout(function () {
-                window.scrollTo(0, 0);
-            }, 1);
         },
 
         handleAddRecording: function(){
@@ -713,7 +809,7 @@ function drawTimer(el, dur){
         },
 
         createRecording: function(url){
-            var howl = new Howl({urls:[(this.serverUrl + '/' + url)]});
+            var howl = new Howl({urls:[(this.serverUrl + '/' + url)] });
             howl.__path = url;
             this.recs.push(howl);
 
@@ -924,7 +1020,7 @@ function drawTimer(el, dur){
                     });
                 }, 100);                    
             });
-        }, 
+        }
     });
 
     var bufSource;
@@ -937,7 +1033,7 @@ function drawTimer(el, dur){
             this._super();
             _bindAll(this, 'playWhiteNoise', 'stop', 'onMessage', 'playSong', 'stopSong', 'updateWaitTime', 'startBuffering');
             this.catcher = new Worker('js/audiocatcher.js');
-            this.audioContext = new webkitAudioContext();
+            this.audioContext = Howler.ctx;
 
             this.waitTime = this.el.find("#musicTime");
             this.timeTimeout = null;
@@ -1032,7 +1128,12 @@ function drawTimer(el, dur){
             whiteNoise.loop = true;
             whiteNoise.start(0);
 
-            whiteNoise.connect(this.audioContext.destination);
+            var gainNode = this.audioContext.createGainNode();
+            gainNode.gain.value = 0.1;
+
+            whiteNoise.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+
             this.playing = true;
             this.soundNode = whiteNoise;     
         },
@@ -2124,7 +2225,7 @@ function drawTimer(el, dur){
             $(this.titleText).velocity({opacity:1}, 150, function(){
                 if(self.titleIndex == self.titleTexts.length - 1){  
                     if(config.songUri !== '' && config.songUri !== 'whitenoise'){
-                        self.titleText.innerHTML = 'Buffering your music...';
+                        self.titleText.innerHTML = '<span class="loader-small"></span><span class="light-emph">Buffering your music...</span>';
                         PageController.pages.music.startBuffering(self.showReadyTitle);
                     } 
                     else{
@@ -2231,6 +2332,7 @@ function drawTimer(el, dur){
                 config.experimentTime = new Date();
                 config.absoluteTime = config.experimentTime.getTime();
 
+
                 if(config.musicSelect){
                     PageController.pages.music.playMusic(config.songUri, config.duration);
                 }
@@ -2267,10 +2369,14 @@ function drawTimer(el, dur){
             this.survey = this.el.find("#completeSurvey");
             this.surveyTap = this.el.find("#completeSurveyTap");
             this.surveyRadio = $(this.el).find('input[name="pleasureSurvey"]');
-            this.message = this.el.find("#completeMessage");
+            this.messages = this.el.find("#completeMessages");
             this.buttons = this.el.find("#completeButtons");
             this.sendButton = this.buttons.find('#btnReSend');
             this.restartButton = this.buttons.find('#btnRestart');
+            this.loader = this.el.find(".loader-small");
+            this.thank = this.el.find("#completeThank");
+            this.status = this.el.find("#completeStatus");
+            this.statusContainer = this.el.find("#completeStatusContainer");
             this.selected = false;
 
             $(this.el).on('touchstart', '.survey-btn', this.onSelect);
@@ -2293,10 +2399,19 @@ function drawTimer(el, dur){
             this.survey.style.display = 'block';
             this.surveyTap.style.opacity = 0;
             this.surveyTap.style.display = 'none';
+            this.messages.style.display = 'none';
+            this.messages.style.opacity = 0;
+            this.thank.style.opacity = 0;
+            this.status.innerHTML = 'Sending data...';
+            this.status.className = '';
+            this.statusContainer.className = '';
+            this.sendButton.style.top = '-53px';
+            this.restartButton.style.bottom = '-53px';
+            //this.loader.style.opacity = 0;
+            //this.loader.style.display = 'none';
 
-            $(this.message).html("Thank you.");
+            //$(this.message).html("Thank you.");
 
-            this.buttons.style.opacity = 0;
             this.buttons.style.display = 'none';
         },
 
@@ -2316,35 +2431,38 @@ function drawTimer(el, dur){
             var self = this;
             config.feltPleasure = $(this.selected).val();
 
-            $(self.survey).velocity({opacity:0}, 150, function(){
-                $(this).css({display: 'none'});
+            transEl(self.survey, self.messages, 400, function(){
 
-                $(self.message).css({display: 'block'}).velocity({opacity:1}, 300, function(){
+                var finalData = config.generateData();
+                $(self.sendButton).attr("href", generateMailLink(finalData));
+                mailDataMandrill(finalData, function(res){
 
-                    var finalData = config.generateData();
-                    $(self.sendButton).attr("href", generateMailLink(finalData));
-                    mailDataMandrill(finalData, function(res){
-                        setTimeout(_bind(function(){
+                    $(self.loader).css({display:'none'});
 
-                            $(self.message).velocity({opacity:0}, 300, function(){
-                                if( res[0] == undefined  || res[0].status === undefined || 
-                                    res[0].status === "rejected" || 
-                                    res[0].status === "invalid"){
-                                    $(self.message).html('Unable to send data.');
-                                }
-                                else{
-                                    $(self.message).html('Data sent successfully.');
-                                }
+                    if( res[0] == undefined  
+                        || res[0].status === undefined 
+                        || res[0].status === "rejected" 
+                        || res[0].status === "invalid"){
+                        $(self.status).html('Unable to send data.');
+                        $(self.status).addClass('error');
+                        $(self.sendButton).html('Send data as e-mail');
+                    }
+                    else{
+                        $(self.status).html('Data sent successfully.');
+                        $(self.sendButton).html('Re-send data as e-mail');
+                    };
 
-                                $(self.message).velocity({opacity:1},300).delay(1000).velocity({opacity:0},300, function(){
-                                    $(this).css({display: 'none'});
-                                    $(self.buttons).css({display: 'block'}).velocity({opacity:1}, 300);
-                                });
-                            });
+                    setTimeout(function(){
+                        $(self.buttons).css({display: 'block'});
+                        $(self.sendButton).velocity({top:0}, {duration: 1000, easing: [80,12]});
+                        $(self.restartButton).velocity({bottom:0}, {duration:1000, easing: [80,12]});
 
-                        }, this), 800);
-                    });                                
-                })
+                        $(self.statusContainer).addClass('min');
+                        $(self.thank).velocity({opacity:1}, 1000);
+
+                    }, 800);
+
+                });
             });
         }
 
@@ -2390,7 +2508,6 @@ function drawTimer(el, dur){
             if(this.curPage.limitOrient){ 
 
                 setTimeout(function(){
-                    //console.log("scrolling");
                     window.scrollTo(0, 1);
                 }, 0);
 
@@ -2412,3 +2529,5 @@ function drawTimer(el, dur){
     //PageController.init();
 
 })();
+
+}

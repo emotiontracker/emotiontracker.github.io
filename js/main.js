@@ -1118,7 +1118,7 @@ else{
             whiteNoise.loop = true;
             whiteNoise.start(0);
 
-            var gainNode = this.audioContext.createGainNode();
+            var gainNode = this.audioContext.createGain();
             gainNode.gain.value = 0.1;
 
             whiteNoise.connect(gainNode);

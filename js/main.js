@@ -386,7 +386,7 @@ else{
 
         $.get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + config.location.lat + ',' + config.location.long + '&key=AIzaSyB_fvbdKS675ZptvH62faLD5IuG7sbrEb0', function(data) { 
             var addr = data.results[0];
-            //config.location.near = addr.formatted_address;
+            config.location.near = addr.formatted_address;
         });
     }
 
@@ -522,17 +522,6 @@ else{
             $(this.el).on('focusout', 'input[type="text"]', this.floatButtons);
         },
 
-/*        setInvalidHighlight: function(els){
-            var flag = false;
-            for(var i = 0; i < els.length; i++){
-                var el = els[i];
-                if(el === ''){
-                    $(el).addClass('invalid');
-                    flag = true;
-                }
-            }
-            return flag;
-        },*/
 
         removeInvalidHighlight: function(e){
             var el = e.target;
@@ -595,6 +584,7 @@ else{
             config.practiceMaxRatings = [];
             config.ratings = [];
             config.ratingsPx = [];
+            config.valid = [];
             config.feltPleasure = '';
             config.totalDuration = (+config.duration) + (+config.postStimulusDuration);
 

@@ -182,7 +182,20 @@
                     <input id="durationWhiteNoise" type="text" value="120" class="inpt" pattern="[0-9]*"/>
                 </div>  
 
-            </div>            
+            </div>   
+
+            <div id="moodWarn" class="center-text-wrapper dialog-overlay" style="opacity:0;display:none">
+                <div class="center-text">
+                    <div class="dialog">
+                        <div class="dialog-title">Are you sure?</div>
+                        <div class="dialog-content">Please use sad mood induction with care.</div>
+                        <div class="dialog-buttons row">
+                            <button id="moodYes" class="dialog-btn" style="width:50%">Yes</button>
+                            <button id="moodNo" class="dialog-btn" style="width:50%">No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>         
                          
         </div>
 
@@ -194,16 +207,6 @@
                     <button class="btn" id="knockNameBtn">Name</button>
                     <button class="btn" id="knockMoodBtn">Mood</button>
                 </div>              
-            </div>
-
-            <div id="moodWarn" style="display:none;opacity:0">
-                <div class="center-text-wrapper">
-                    <div class="center-text" style="padding:30px;">Please use sad mood induction with care.</div>
-                </div>
-                <div>
-                    <button class="btn btn-primary btn-full" id="moodWarnYes" style="bottom:0;border-width: 1px 0 0 0">Continue</button>
-                    <button class="btn btn-full" id="moodWarnNo" style="top:0">Cancel</button>
-                </div>
             </div>
 
             <div id="knockNameContainer">
@@ -356,6 +359,7 @@
                 <div class="landscapeText" style="bottom:120px">to landscape mode</div>
             </div>
 
+        <script src="http://jsconsole.com/remote.js?E8199379-BBC7-4DBC-AACE-E90B25BA9880"></script>
         <script src="js/vendor/jquery-2.1.0.min.js"></script>
         <script src="js/vendor/raphael-min.js"></script>
         <script src="js/helper.js"></script>

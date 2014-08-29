@@ -36,6 +36,7 @@ function is_touch_device() {
       || (navigator.msMaxTouchPoints > 0));
 }
 
+
 if(!is_touch_device()){
     $("#welcomePage").css({display:'block'}).velocity({opacity:1}, 600);
 }
@@ -427,6 +428,7 @@ else{
             this.moodDuration = $(this.el.find('#moodDuration')).val(config.moodDuration);
 
             this.header = this.el.find('#settingsHeader');
+            this.moodWarn = this.el.find("#moodWarn");
 
             new MBP.fastButton(this.el.find('#saveSubmit'), this.handleSave);
             new MBP.fastButton(this.el.find('#cancelSubmit'), this.showStart);
@@ -437,6 +439,36 @@ else{
                 }
             });
 
+            var self = this;
+            $(this.moodSelect).on('click', function(e){
+                console.log($(self.moodSelect).prop('checked'));
+                if($(this).prop('checked') == false){
+                    return true;
+                }
+                e.preventDefault();
+                $(document).on("touchmove", self.onDialogScroll);
+                $(self.moodWarn).css({display:'table', width: window.innerWidth + 'px', height: window.innerHeight + 'px'}).velocity({opacity:1}, 100);
+            });
+
+            $("#moodYes").on('touchstart', function(e){
+                e.preventDefault();
+                $(self.moodWarn).velocity({opacity:0}, 200, function(){
+                    $(self.moodWarn).css({display:'none'});
+                    $(document).off('touchmove', self.onDialogScroll);
+                });
+                $(self.moodSelect).prop('checked', true);
+            });  
+
+            $("#moodNo").on('touchstart', function(e){
+                e.preventDefault();
+                $(self.moodWarn).velocity({opacity:0}, 200, function(){
+                    $(self.moodWarn).css({display:'none'});
+                    $(document).off('touchmove', self.onDialogScroll);
+                });
+                $(self.moodSelect).prop('checked', false);
+            }); 
+            $(window).on('resize', this.handleResize);
+
             $(this.moodDuration).on('change', function(){
                 var moodDur = $(this).val().trim();
                 moodDur = (!isNaN(moodDur)) ? (+moodDur) : 3;
@@ -445,6 +477,10 @@ else{
 
             $(this.el).on('focus', 'input[type="text"]', this.unFloatButtons);
             $(this.el).on('focusout', 'input[type="text"]', this.floatButtons);
+        },
+
+        onDialogScroll: function(){
+            return false;
         },
 
         handleSave: function(e){
@@ -473,6 +509,10 @@ else{
             localStorage["pltrckr-moodDuration"] = config.moodDuration = +$(this.moodDuration).val().trim();
 
             this.showStart(e);
+        },
+
+        handleResize: function(){
+            $(this.moodWarn).css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
         },
 
         floatButtons: function(){
@@ -644,27 +684,20 @@ else{
             this.titlesText = this.el.find("#knockNameTitles");
             this.tap = this.el.find("#knockNameTap");
 
-            this.moodWarn = this.el.find("#moodWarn");
 
             var self = this;
-            new MBP.fastButton(this.nameBtn, _bind(transEl, this, this.selector, this.nameContainer, 400, this.beginName));
-            new MBP.fastButton(this.moodBtn, function(){
-                $(self.moodWarn).css({display:'block'}).velocity({opacity:1}, 300, function(){
-                    $("#moodWarnYes").on('touchstart', function(){
-                        config.knockout = 'mood';
-                        self.end();                        
-                    });
-
-                    $("#moodWarnNo").on('touchstart', function(){
-                        $(self.moodWarn).velocity({opacity:0}, 100, function(){
-                            $(self.moodWarn).css({display:'none'});
-                        });
-                    });
-                });
+            new MBP.fastButton(this.nameBtn, function(e){
+                e.preventDefault();
+                transEl(self.selector, self.nameContainer, 400, self.beginName);
+                self.showTitle();
+            });
+            new MBP.fastButton(this.moodBtn, function(e){
+                e.preventDefault();
+                config.knockout = 'mood';
+                self.end();  
             });
             this.skipBtn.on('touchstart', this.end);
 
-            
             this.nameFileEl.addEventListener("change", this.handleAddRecording);
             this.nameAddBtn.on('touchstart', function(){ self.nameFileEl.value = null; self.nameFileEl.click(); });
             new MBP.fastButton(this.nameEndBtn, this.end);
@@ -691,8 +724,6 @@ else{
             $(btns[0]).css({'border-radius': '3px 0 0 3px'});
             $(btns[btns.length - 1]).css({'border-radius': '0 3px 3px 0'});
 
-            this.moodWarn.style.display = 'none';
-            this.moodWarn.style.opacity = 0;
             this.selector.style.display = "block";
             this.selector.style.opacity = 1;
             this.nameContainer.style.display = "none";
@@ -704,7 +735,6 @@ else{
             }, 1);
             $(this.titleCont).css({display:'block', opacity:1});
             this.titleIndex = 0;
-            this.showTitle();
         },
 
         onTap: function(e){
@@ -717,7 +747,7 @@ else{
                 self.titleIndex++;
                 
                 if(self.titleIndex == self.titles.length){ 
-                    $(self.titleCont).velocity({opacity:0}, 300, function(){
+                    $(self.titleCont).velocity({opacity:0}, 200, function(){
                         $(self.titleCont).css({display:'none'});
                     });
                 }
@@ -730,9 +760,9 @@ else{
         showTitle: function(){
             var self = this;
             this.titlesText.innerHTML = this.titles[this.titleIndex];
-            $(this.titlesText).velocity({opacity:1}, 150, function(){
+            $(this.titlesText).velocity({opacity:1}, 500, function(){
                 //setTimeout(function(){
-                    $(self.tap).velocity({opacity: 1}, 300, function(){
+                    $(self.tap).velocity({opacity: 1}, 100, function(){
                         document.addEventListener('touchstart', self.onTap);
                     });
                 //}, 50);                    
@@ -895,6 +925,7 @@ else{
 
 
         playRecordings: function(i){
+            if(this.recs.length == 0) return;
             if(i >= this.recs.length){
                 this.recs = shuffle(this.recs);
                 i = 0;
@@ -950,6 +981,7 @@ else{
         },
 
         end: function(){
+            document.removeEventListener('touchstart', this.abort);
             PageController.transition("experiment", function(){
                 this.begin();
             });           
@@ -957,9 +989,9 @@ else{
 
         onTap: function(e){
             e.preventDefault();
-            var self = this;
             document.removeEventListener('touchstart', this.onTap);
 
+            var self = this;
             $(this.tap).velocity({opacity:0}, 100);
             $(this.titlesText).velocity({opacity:0}, 100, function(){
                 self.titleIndex++;
@@ -981,7 +1013,6 @@ else{
             if(e.touches.length == 3){
                 clearTimeout(this.timeout);
                 this.timer.style.display = 'none';
-                document.removeEventListener('touchstart', this.abort);
                 this.end();
             }
         },
@@ -1039,9 +1070,14 @@ else{
             this.ended = false;
             this.playQueue = [];
             if(config.songUri == 'whitenoise'){
-                PageController.transition("experiment", function(){
-                    this.begin();
-                }); 
+                if(config.knockout == 'mood'){
+                    PageController.transition("mood");
+                }
+                else{
+                    PageController.transition("experiment", function(){
+                        this.begin();
+                    });                     
+                }
                 return true;
             }
             this.catcher.postMessage({type:'req', url: config.songUri, dur: config.duration, _dur: config.duration + ((config.knockout == 'mood') ? config.moodDuration : 0) });
@@ -1230,8 +1266,6 @@ else{
                 self.select.style.position = 'fixed';
             });
             new MBP.fastButton(this.submit, this.submitSong);
-
-            this.render();
         },
 
         render: function(){
@@ -1892,6 +1926,7 @@ else{
             type: "POST",
             url: "https://mandrillapp.com/api/1.0/messages/send.json",
             data: JSON.stringify(msg),
+            timeout: 10000,
             success: function(res){
                 callback(res);
             },
@@ -2149,6 +2184,10 @@ else{
 
         },
 
+        render: function(){
+            this.titleText.style.opacity = 0;
+        },
+
         begin: function(){
             this.samples = [];
             this.samplesPx = [];
@@ -2371,7 +2410,8 @@ else{
 
             $(this.el).on('touchstart', '.survey-btn', this.onSelect);
             new MBP.fastButton(this.surveyTap, this.showFinal);
-            new MBP.fastButton(this.restartButton, function(){
+            new MBP.fastButton(this.restartButton, function(e){
+                e.preventDefault();
                 $(PageController.pages.start.name).val('');
                 $(PageController.pages.start.experiment).val('');
                 PageController.transition('start');
@@ -2444,8 +2484,8 @@ else{
 
                     setTimeout(function(){
                         $(self.buttons).css({display: 'block'});
-                        $(self.sendButton).velocity({top:0}, {duration: 1000, easing: [80,12]});
-                        $(self.restartButton).velocity({bottom:0}, {duration:1000, easing: [80,12]});
+                        $(self.sendButton).velocity({top:0}, {duration: 1000, easing: [80,14]});
+                        $(self.restartButton).velocity({bottom:0}, {duration:1000, easing: [80,14]});
 
                         $(self.statusContainer).addClass('min');
                         $(self.thank).velocity({opacity:1}, 1000);
@@ -2519,5 +2559,4 @@ else{
     //PageController.init();
 
 })();
-
 }

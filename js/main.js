@@ -38,6 +38,9 @@ function is_touch_device() {
 
 
 if(!is_touch_device()){
+    if(navigator.platform.toUpperCase().indexOf('MAC')>=0){
+        $("#macDownload").css({display:'block'});
+    }
     $("#welcomePage").css({display:'block'}).velocity({opacity:1}, 600);
 }
 else{

@@ -816,6 +816,27 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
   border-width: 1px 0 0 0;
 }
 
+#welcomePage .btn-success{
+  border-radius:3px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.5);
+  border:none;
+  padding: 15px 40px;
+  display:inline-block;
+  transition: background 0.5s;
+}
+
+#welcomePage .btn-success:hover{
+  background-position: 0 20px;
+}
+
+#macDownload{
+  display:none;
+}
+
+#welcomePage .btn-success:active{
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
 .title, #calibInstr{
   height:30px;
   margin: auto;
@@ -1130,6 +1151,13 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
   height:256px;
   background-size: 256px 256px;
   margin: 50px auto 5px; 
+}
+
+#macDownload{
+  padding: 20px 0;
+  position: absolute;
+  bottom:0;left:0;right:0;
+  text-align:center;
 }
 
 .inpt.invalid{

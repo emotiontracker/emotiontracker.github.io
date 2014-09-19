@@ -1949,6 +1949,79 @@ else{
         return ('mailto:' + config.email + '?subject=' + subject + '&body=' + body);    
     }
 
+    var AuditoryFeedback = new (View.extend({
+        init: function(){
+            this.context = Howler.ctx;
+            this.oscillator = this.context.createOscillator();
+            this.oscillator.type = 0;
+            this.gainNode = this.context.createGain();
+        },
+
+        getFrequencyFromRating: function(rating){
+            rating += 1;
+            return ( 440 * Math.pow(10, (0.1 * rating * (Math.log(4186.1/440) / Math.log(10) ) ) ) );
+            //return Math.log(rating) * 1000;
+            //return 27.5;
+        },
+
+        onStart: function(t, rating){
+            this.oscillator.frequency.value = this.getFrequencyFromRating(rating);
+            this.oscillator.connect(this.gainNode); 
+            this.gainNode.connect(this.context.destination); 
+            this.gainNode.gain.value = .01; 
+            this.oscillator.noteOn(0);
+        },
+
+        onMove: function(t, rating){
+            this.oscillator.frequency.value = this.getFrequencyFromRating(rating);
+        },
+
+        onEnd: function(){
+            this.oscillator.disconnect(); 
+        }
+    }))();
+
+    var TactileFeedback = new (View.extend({
+        init: function(){
+            _bindAll(this, 'start', 'stop', 'play');
+            this.frequency = 800;
+            this.timeout = null;
+            this.audio = null;
+        },
+
+        getFrequencyFromRating: function(rating){
+            return 800 - (rating * 40);
+        },
+
+        start: function(){
+            this.play();
+        },
+
+        stop: function(){
+            clearTimeout(this.timeout);
+            notifier.stop('click');
+        },
+
+        play: function(){
+            notifier.play('click');
+            this.timeout = setTimeout(this.play, this.frequency);
+        },
+
+        onStart: function(t, rating){
+            this.stop();
+            this.frequency = this.getFrequencyFromRating(rating);
+            this.start();
+        },
+
+        onMove:function(t, rating){
+            this.frequency = this.getFrequencyFromRating(rating);
+        },
+
+        onEnd: function(t, rating){
+            this.stop();
+        }
+    }))();
+
 
     var Feedbacks = View.extend({
         enabled: [],
@@ -2093,79 +2166,6 @@ else{
             this.bubbles.el.style.opacity = 0;
         }
     });
-
-    var AuditoryFeedback = new (View.extend({
-        init: function(){
-            this.context = Howler.ctx;
-            this.oscillator = this.context.createOscillator();
-            this.oscillator.type = 0;
-            this.gainNode = this.context.createGain();
-        },
-
-        getFrequencyFromRating: function(rating){
-            rating += 1;
-            return ( 440 * Math.pow(10, (0.1 * rating * (Math.log(4186.1/440) / Math.log(10) ) ) ) );
-            //return Math.log(rating) * 1000;
-            //return 27.5;
-        },
-
-        onStart: function(t, rating){
-            this.oscillator.frequency.value = this.getFrequencyFromRating(rating);
-            this.oscillator.connect(this.gainNode); 
-            this.gainNode.connect(this.context.destination); 
-            this.gainNode.gain.value = .01; 
-            this.oscillator.noteOn(0);
-        },
-
-        onMove: function(t, rating){
-            this.oscillator.frequency.value = this.getFrequencyFromRating(rating);
-        },
-
-        onEnd: function(){
-            this.oscillator.disconnect(); 
-        }
-    }))();
-
-    var TactileFeedback = new (View.extend({
-        init: function(){
-            _bindAll(this, 'start', 'stop', 'play');
-            this.frequency = 800;
-            this.timeout = null;
-            this.audio = null;
-        },
-
-        getFrequencyFromRating: function(rating){
-            return 800 - (rating * 40);
-        },
-
-        start: function(){
-            this.play();
-        },
-
-        stop: function(){
-            clearTimeout(this.timeout);
-            notifier.stop('click');
-        },
-
-        play: function(){
-            notifier.play('click');
-            this.timeout = setTimeout(this.play, this.frequency);
-        },
-
-        onStart: function(t, rating){
-            this.stop();
-            this.frequency = this.getFrequencyFromRating(rating);
-            this.start();
-        },
-
-        onMove:function(t, rating){
-            this.frequency = this.getFrequencyFromRating(rating);
-        },
-
-        onEnd: function(t, rating){
-            this.stop();
-        }
-    }))();
 
     var experimentPage = DoubleTouchPage.extend({
         id: 'experimentPage',

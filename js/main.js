@@ -307,7 +307,7 @@ else{
             moodSelect: JSON.parse(localStorage["c_moodSelect"] || "false"),
             postStimulusDuration: +(localStorage["c_postStimulusDuration"] || 120),
             durationWhiteNoise: +(localStorage["c_durationWhiteNoise"] || 120),
-            moodDuration: +(localStorage["c_moodDuration"] || 3),        
+            moodDuration: +(localStorage["c_moodDuration"] || 180),        
         },
 
         totalDuration: (+localStorage["c_duration"] || 30) + (+localStorage["c_postStimulusDuration"] || 120),
@@ -498,7 +498,7 @@ else{
 
             $(this.moodDuration).on('change', function(){
                 var moodDur = $(this).val().trim();
-                moodDur = (!isNaN(moodDur)) ? (+moodDur) : 3;
+                moodDur = (!isNaN(moodDur)) ? (+moodDur) : 180;
                 $(this).val(moodDur);
             });
 
@@ -1038,8 +1038,8 @@ else{
                 
                 if(self.titleIndex == self.titles.length ){ 
                     self.timer.style.display = 'block';
-                    drawTimer(self.timer, config.options.moodDuration * 60);
-                    self.timeout = setTimeout(self.onEnd, config.options.moodDuration * 60 * 1000);   // 3 minutes
+                    drawTimer(self.timer, config.options.moodDuration);
+                    self.timeout = setTimeout(self.onEnd, config.options.moodDuration * 1000);   // 3 minutes
                     document.addEventListener('touchstart', self.abort);
                 }
                 else{

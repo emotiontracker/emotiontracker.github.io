@@ -120,7 +120,7 @@
                 </div> 
 
                 <div class="field">
-                    <label for="ratingInterval" class="lbl">Sampling interval <span class="light"> (in seconds)</span></label>
+                    <label for="ratingInterval" class="lbl">Sampling interval <span class="light"> (s)</span></label>
                     <input id="ratingInterval" type="text" value="1" class="inpt" pattern="[0-9]*" />
                 </div>
 
@@ -169,7 +169,7 @@
                         </div>
                     </div>
 
-                    <label for="moodDuration" class="lbl">Duration of mood induction <span class="light"> (in minutes)</span></label>
+                    <label for="moodDuration" class="lbl">Duration of mood induction <span class="light"> (m)</span></label>
                     <input id="moodDuration" type="text" value="3" class="inpt"/>
                 </div>
 
@@ -181,7 +181,7 @@
                             <span class="chkbox"><input id="musicSelect" type="checkbox" /></span>
                         </div>
                     </div>
-                    <label for="durationWhiteNoise" class="lbl">Duration of white noise <span class="light"> (in seconds)</span></label>
+                    <label for="durationWhiteNoise" class="lbl">Duration of white noise <span class="light"> (s)</span></label>
                     <input id="durationWhiteNoise" type="text" value="120" class="inpt" pattern="[0-9]*"/>
                 </div>  
 
@@ -383,7 +383,7 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nApp:,<%=url%>\nApp creation date:,Tuesday September 9 2014\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: ratings.length + 1}).map(Number.call, Number).slice(1).map(function(x){ return x*(ratingInterval/1000);}).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nValid (boolean):,<%=valid.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=DEVICE_INFO.type%>\nModel:,<%=DEVICE_INFO.model%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=(ratingInterval/1000)%>\nMaximum stimulus duration (s):,<%=duration%>\nExperiment duration after end of stimulus (s):,<%=postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (0 to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback ticks:,<%=feedback.tactile%>\nInclude practice in reference:,<%=postInMedian%>\nKnockout:,<%=knockout%>\nEnable music selection:,<%=musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\n
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nApp:,<%=url%>\nApp creation date:,Tuesday September 9 2014\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: ratings.length + 1}).map(Number.call, Number).slice(1).map(function(x){ return x*(ratingInterval/1000);}).join(",")%>\nRating (0 to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nValid (boolean):,<%=valid.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=deviceInfo.type%>\nModel:,<%=DEVICE_INFO.model%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=(ratingInterval/1000)%>\nMaximum stimulus duration (s):,<%=duration%>\nExperiment duration after end of stimulus (s):,<%=postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (0 to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nFeedback barbell:,<%=feedback.barbell%>\nFeedback bar:,<%=feedback.range%>\nFeedback bar color varies:,<%=feedback.barVaries%>\nFeedback number:,<%=feedback.numeric%>\nFeedback tone:,<%=feedback.auditory%>\nFeedback ticks:,<%=feedback.tactile%>\nInclude practice in reference:,<%=postInMedian%>\nKnockout:,<%=knockout%>\nEnable music selection:,<%=musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\n
 </script>       
 
     </body>

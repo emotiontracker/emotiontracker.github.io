@@ -1,12 +1,12 @@
 window.URL = window.URL || window.webkitURL;
 
-function drawTimer(el, dur){
+function drawTimer(el, dur) {
 
-    var loader = el.find('#loader')
-      , border = el.find('#border')
-      , alpha = 0
-      , pi = Math.PI
-      , t = ( dur * 1000 ) / 360;
+    var loader = el.find('#loader'), 
+        border = el.find('#border'), 
+        alpha = 0,
+        pi = Math.PI, 
+        t = ( dur * 1000 ) / 360;
 
     (function draw() {
       alpha++;
@@ -252,10 +252,7 @@ else{
         experiment: '',
         experimentTime: '',
         absoluteTime: 0,
-        email: localStorage["c_email"] || 'lauren.vale@nyu.edu',
-        duration: +(localStorage["c_duration"] || 30),
         durationActual: 0,
-        ratingInterval: localStorage["c_ratingInterval"] || 1000,
         setupMaxDist: [],
         setupMinDist: [],
         preMaxDist: [],
@@ -266,7 +263,6 @@ else{
         medianMinDist: 0,
         medianMaxRating: 0,
         medianMinRating: 0,
-        touchFeedback: true,
         ratings: [],
         ratingsPx: [],
         valid: [],
@@ -284,30 +280,38 @@ else{
         screenHeight: window.screen.height,
         windowWidth: window.innerWidth,
         windowHeight: window.innerHeight,
+        deviceInfo: DEVICE_INFO,
 
-        DEVICE_INFO: DEVICE_INFO,
+        options:{
+            email: localStorage["c_email"] || 'lauren.vale@nyu.edu',
+            duration: +(localStorage["c_duration"] || 30),
+            ratingInterval: +(localStorage["c_ratingInterval"] || 1000),
+            setupSteps: +(localStorage["c_setupSteps"] || 2),
+            preSteps: +(localStorage["c_preSteps"] || 2),
+            postSteps: +(localStorage["c_postSteps"] || 1),
+            feedback:{
+                barbell: JSON.parse(localStorage["c_feedBarbell"] || "false"),
+                range: JSON.parse(localStorage["c_feedRange"] || "false"),
+                numeric: JSON.parse(localStorage["c_feedNumeric"] || "false"),
+                auditory: JSON.parse(localStorage["c_feedAuditory"] || "false"),
+                tactile: JSON.parse(localStorage["c_feedTactile"] || "false"),
+                barVaries: JSON.parse(localStorage["c_feedBarVaries"] || "false"),
+                isEnabled: function(){
+                    return (this.barbell || this.range || this.numeric || this.auditory || this.tactile);
+                }
+            },
 
-        setupSteps: localStorage["c_setupSteps"] || 2,
-        preSteps: localStorage["c_preSteps"] || 2,
-        postSteps: localStorage["c_postSteps"] || 1,
-        feedback:{
-            barbell: JSON.parse(localStorage["c_feedBarbell"] || "false"),
-            range: JSON.parse(localStorage["c_feedRange"] || "false"),
-            numeric: JSON.parse(localStorage["c_feedNumeric"] || "false"),
-            auditory: JSON.parse(localStorage["c_feedAuditory"] || "false"),
-            tactile: JSON.parse(localStorage["c_feedTactile"] || "false"),
-            barVaries: JSON.parse(localStorage["c_feedBarVaries"] || "false"),
-            isEnabled: function(){
-                return (this.barbell || this.range || this.numeric || this.auditory || this.tactile);
-            }
+            postInMedian: JSON.parse(localStorage["c_postInMedian"] || "false"),
+            musicSelect: JSON.parse(localStorage["c_musicSelect"] || "true"),
+            nameSelect: JSON.parse(localStorage["c_nameSelect"] || "false"),
+            moodSelect: JSON.parse(localStorage["c_moodSelect"] || "false"),
+            postStimulusDuration: +(localStorage["c_postStimulusDuration"] || 120),
+            durationWhiteNoise: +(localStorage["c_durationWhiteNoise"] || 120),
+            moodDuration: +(localStorage["c_moodDuration"] || 3),        
         },
-        postInMedian: JSON.parse(localStorage["c_postInMedian"] || "false"),
-        musicSelect: JSON.parse(localStorage["c_musicSelect"] || "true"),
-        nameSelect: JSON.parse(localStorage["c_nameSelect"] || "false"),
-        moodSelect: JSON.parse(localStorage["c_moodSelect"] || "false"),
-        feltPleasure: '',
-        postStimulusDuration: +(localStorage["c_postStimulusDuration"] || 120),
+
         totalDuration: (+localStorage["c_duration"] || 30) + (+localStorage["c_postStimulusDuration"] || 120),
+        feltPleasure: '',
         knockout: '',
         songUri: 'whitenoise',
         songName: '',
@@ -315,8 +319,10 @@ else{
         songAlbum: '',
         songDuration: '',
         songDurationMax: 600,
-        durationWhiteNoise: localStorage["c_durationWhiteNoise"] || 120,
-        moodDuration: localStorage["c_moodDuration"] || 3,
+
+        generateOptionsJSON: function(){
+            return JSON.stringify(this.options);
+        },
 
         generateData: function(){
 
@@ -355,8 +361,8 @@ else{
 
         rater = (function(){
 
-        var minDist = (config.postInMedian) ? findMedian(config.setupMinDist.concat(config.preMinDist, config.postMinDist)) : findMedian(config.setupMinDist),
-            maxDist = (config.postInMedian) ? findMedian(config.setupMaxDist.concat(config.preMaxDist, config.postMaxDist)) : findMedian(config.setupMaxDist);
+        var minDist = (config.options.postInMedian) ? findMedian(config.setupMinDist.concat(config.preMinDist, config.postMinDist)) : findMedian(config.setupMinDist),
+            maxDist = (config.options.postInMedian) ? findMedian(config.setupMaxDist.concat(config.preMaxDist, config.postMaxDist)) : findMedian(config.setupMaxDist);
 
             var ratingRange = maxDist - minDist,
                 ratingStep = ratingRange / 10;
@@ -411,35 +417,35 @@ else{
             _bindAll(this, 'handleSave', 'showStart', 'floatButtons', 'unFloatButtons', 'showAudioWarn');
 
             if(!AUDIOCTX){
-                localStorage["c_feedAuditory"] = config.feedback.auditory = false;
-                localStorage["c_musicSelect"] = config.musicSelect = false;
+                localStorage["c_feedAuditory"] = config.options.feedback.auditory = false;
+                localStorage["c_musicSelect"] = config.options.musicSelect = false;
 
                 $(this.el.find('#feedAuditory')).on('click', this.showAudioWarn);
                 $(this.el.find('#musicSelect')).on('click', this.showAudioWarn);                
             }
 
-            this.email = $(this.el.find('#email')).val(config.email);
-            this.duration = $(this.el.find('#duration')).val(config.duration);
-            this.postStimulusDuration = $(this.el.find('#postStimulusDuration')).val(config.postStimulusDuration);
+            this.email = $(this.el.find('#email')).val(config.options.email);
+            this.duration = $(this.el.find('#duration')).val(config.options.duration);
+            this.postStimulusDuration = $(this.el.find('#postStimulusDuration')).val(config.options.postStimulusDuration);
 
-            this.setupSteps = $(this.el.find('#setupSteps')).val(config.setupSteps);
-            this.preSteps = $(this.el.find('#preSteps')).val(config.preSteps);
-            this.postSteps = $(this.el.find('#postSteps')).val(config.postSteps);
-            this.ratingInterval = $(this.el.find('#ratingInterval')).val(config.ratingInterval/1000);
+            this.setupSteps = $(this.el.find('#setupSteps')).val(config.options.setupSteps);
+            this.preSteps = $(this.el.find('#preSteps')).val(config.options.preSteps);
+            this.postSteps = $(this.el.find('#postSteps')).val(config.options.postSteps);
+            this.ratingInterval = $(this.el.find('#ratingInterval')).val(config.options.ratingInterval/1000);
 
-            this.feedBarbell = $(this.el).find('#feedBarbell').prop('checked', config.feedback.barbell);
-            this.feedRange = $(this.el.find('#feedRange')).prop('checked', config.feedback.range);
-            this.feedNumeric = $(this.el.find('#feedNumeric')).prop('checked', config.feedback.numeric);
-            this.feedAuditory = $(this.el.find('#feedAuditory')).prop('checked', config.feedback.auditory);
-            this.feedTactile = $(this.el.find('#feedTactile')).prop('checked', config.feedback.tactile);
-            this.feedBarVaries = $(this.el.find('#feedBarVaries')).prop('checked', config.feedback.barVaries);
+            this.feedBarbell = $(this.el).find('#feedBarbell').prop('checked', config.options.feedback.barbell);
+            this.feedRange = $(this.el.find('#feedRange')).prop('checked', config.options.feedback.range);
+            this.feedNumeric = $(this.el.find('#feedNumeric')).prop('checked', config.options.feedback.numeric);
+            this.feedAuditory = $(this.el.find('#feedAuditory')).prop('checked', config.options.feedback.auditory);
+            this.feedTactile = $(this.el.find('#feedTactile')).prop('checked', config.options.feedback.tactile);
+            this.feedBarVaries = $(this.el.find('#feedBarVaries')).prop('checked', config.options.feedback.barVaries);
 
-            this.postInMedian = $(this.el.find('#postInMedian')).prop('checked', config.postInMedian);
-            this.musicSelect = $(this.el.find('#musicSelect')).prop('checked', config.musicSelect);
-            this.nameSelect = $(this.el.find('#nameSelect')).prop('checked', config.nameSelect);
-            this.moodSelect = $(this.el.find('#moodSelect')).prop('checked', config.moodSelect);
-            this.durationWhiteNoise = $(this.el.find('#durationWhiteNoise')).val(config.durationWhiteNoise);
-            this.moodDuration = $(this.el.find('#moodDuration')).val(config.moodDuration);
+            this.postInMedian = $(this.el.find('#postInMedian')).prop('checked', config.options.postInMedian);
+            this.musicSelect = $(this.el.find('#musicSelect')).prop('checked', config.options.musicSelect);
+            this.nameSelect = $(this.el.find('#nameSelect')).prop('checked', config.options.nameSelect);
+            this.moodSelect = $(this.el.find('#moodSelect')).prop('checked', config.options.moodSelect);
+            this.durationWhiteNoise = $(this.el.find('#durationWhiteNoise')).val(config.options.durationWhiteNoise);
+            this.moodDuration = $(this.el.find('#moodDuration')).val(config.options.moodDuration);
 
             this.header = this.el.find('#settingsHeader');
             this.moodWarn = this.el.find("#moodWarn");
@@ -517,29 +523,29 @@ else{
         handleSave: function(e){
             e.preventDefault();
 
-            localStorage["c_email"] = config.email = $(this.email).val().trim();
-            localStorage["c_duration"] = config.duration = +$(this.duration).val().trim();
-            localStorage["c_postStimulusDuration"] = config.postStimulusDuration = +$(this.postStimulusDuration).val().trim();
-            config.totalDuration = (+config.duration) + (+config.postStimulusDuration);
+            localStorage["c_email"] = config.options.email = $(this.email).val().trim();
+            localStorage["c_duration"] = config.options.duration = +$(this.duration).val().trim();
+            localStorage["c_postStimulusDuration"] = config.options.postStimulusDuration = +$(this.postStimulusDuration).val().trim();
+            config.totalDuration = (+config.options.duration) + (+config.options.postStimulusDuration);
 
-            localStorage["c_setupSteps"] = config.setupSteps = $(this.setupSteps).val().trim();
-            localStorage["c_preSteps"] = config.preSteps = $(this.preSteps).val().trim();
-            localStorage["c_postSteps"] = config.postSteps = $(this.postSteps).val().trim();
-            localStorage["c_ratingInterval"] = config.ratingInterval = +($(this.ratingInterval).val().trim())*1000;
+            localStorage["c_setupSteps"] = config.options.setupSteps = $(this.setupSteps).val().trim();
+            localStorage["c_preSteps"] = config.options.preSteps = $(this.preSteps).val().trim();
+            localStorage["c_postSteps"] = config.options.postSteps = $(this.postSteps).val().trim();
+            localStorage["c_ratingInterval"] = config.options.ratingInterval = +($(this.ratingInterval).val().trim())*1000;
 
-            localStorage["c_feedBarbell"] = config.feedback.barbell = $(this.feedBarbell).prop('checked');
-            localStorage["c_feedRange"] = config.feedback.range = $(this.feedRange).prop('checked');
-            localStorage["c_feedNumeric"] = config.feedback.numeric = $(this.feedNumeric).prop('checked');
-            localStorage["c_feedAuditory"] = config.feedback.auditory = $(this.feedAuditory).prop('checked');
-            localStorage["c_feedTactile"] = config.feedback.tactile = $(this.feedTactile).prop('checked');
-            localStorage["c_feedBarVaries"] = config.feedback.barVaries = $(this.feedBarVaries).prop('checked');
+            localStorage["c_feedBarbell"] = config.options.feedback.barbell = $(this.feedBarbell).prop('checked');
+            localStorage["c_feedRange"] = config.options.feedback.range = $(this.feedRange).prop('checked');
+            localStorage["c_feedNumeric"] = config.options.feedback.numeric = $(this.feedNumeric).prop('checked');
+            localStorage["c_feedAuditory"] = config.options.feedback.auditory = $(this.feedAuditory).prop('checked');
+            localStorage["c_feedTactile"] = config.options.feedback.tactile = $(this.feedTactile).prop('checked');
+            localStorage["c_feedBarVaries"] = config.options.feedback.barVaries = $(this.feedBarVaries).prop('checked');
 
-            localStorage["c_postInMedian"] = config.postInMedian = $(this.postInMedian).prop('checked');
-            localStorage["c_musicSelect"] = config.musicSelect = $(this.musicSelect).prop('checked');
-            localStorage["c_nameSelect"] = config.nameSelect = $(this.nameSelect).prop('checked');
-            localStorage["c_moodSelect"] = config.moodSelect = $(this.moodSelect).prop('checked');
-            localStorage["c_durationWhiteNoise"] = config.durationWhiteNoise = +$(this.durationWhiteNoise).val().trim();
-            localStorage["c_moodDuration"] = config.moodDuration = +$(this.moodDuration).val().trim();
+            localStorage["c_postInMedian"] = config.options.postInMedian = $(this.postInMedian).prop('checked');
+            localStorage["c_musicSelect"] = config.options.musicSelect = $(this.musicSelect).prop('checked');
+            localStorage["c_nameSelect"] = config.options.nameSelect = $(this.nameSelect).prop('checked');
+            localStorage["c_moodSelect"] = config.options.moodSelect = $(this.moodSelect).prop('checked');
+            localStorage["c_durationWhiteNoise"] = config.options.durationWhiteNoise = +$(this.durationWhiteNoise).val().trim();
+            localStorage["c_moodDuration"] = config.options.moodDuration = +$(this.moodDuration).val().trim();
 
             this.showStart(e);
         },
@@ -660,7 +666,7 @@ else{
             config.ratingsPx = [];
             config.valid = [];
             config.feltPleasure = '';
-            config.totalDuration = (+config.duration) + (+config.postStimulusDuration);
+            config.totalDuration = (+config.options.duration) + (+config.options.postStimulusDuration);
 
             config.songName = '';
             config.songArtist = '';
@@ -744,8 +750,8 @@ else{
             });
             var btns = ["#knockSkipBtn"];
 
-            if(config.nameSelect === true){btns.push("#knockNameBtn")}
-            if(config.moodSelect === true){btns.push("#knockMoodBtn")}
+            if(config.options.nameSelect === true){btns.push("#knockNameBtn")}
+            if(config.options.moodSelect === true){btns.push("#knockMoodBtn")}
 
             if(btns.length == 1){
                 return this.end();
@@ -805,7 +811,7 @@ else{
 
         end: function(){
             this.recs = shuffle(this.recs);
-            if(config.musicSelect){
+            if(config.options.musicSelect){
                 PageController.transition("stimulus");                    
             }
             else{
@@ -1032,8 +1038,8 @@ else{
                 
                 if(self.titleIndex == self.titles.length ){ 
                     self.timer.style.display = 'block';
-                    drawTimer(self.timer, config.moodDuration * 60);
-                    self.timeout = setTimeout(self.onEnd, config.moodDuration * 60 * 1000);   // 3 minutes
+                    drawTimer(self.timer, config.options.moodDuration * 60);
+                    self.timeout = setTimeout(self.onEnd, config.options.moodDuration * 60 * 1000);   // 3 minutes
                     document.addEventListener('touchstart', self.abort);
                 }
                 else{
@@ -1113,7 +1119,7 @@ else{
                 }
                 return true;
             }
-            this.catcher.postMessage({type:'req', url: config.songUri, dur: config.duration, _dur: config.duration + ((config.knockout == 'mood') ? config.moodDuration : 0) });
+            this.catcher.postMessage({type:'req', url: config.songUri, dur: config.options.duration, _dur: config.options.duration + ((config.knockout == 'mood') ? config.options.moodDuration : 0) });
         },
 
         onMessage: function(e){
@@ -1322,9 +1328,9 @@ else{
             }
 
             this.curSong = e.currentTarget;
-            var curSongDuration = ($(this.curSong).data("uri") == "whitenoise") ? config.durationWhiteNoise : +(this.curSong.find('.song-duration').innerHTML);
+            var curSongDuration = ($(this.curSong).data("uri") == "whitenoise") ? config.options.durationWhiteNoise : +(this.curSong.find('.song-duration').innerHTML);
 
-            if( curSongDuration > config.duration ){
+            if( curSongDuration > config.options.duration ){
                 $(this.finalText).addClass('stimulus-warning');
                 $(this.curSong).addClass("selected-warning");
             }
@@ -1389,7 +1395,7 @@ else{
                 config.songName = 'White Noise';
                 config.songArtist = '';
                 config.songAlbum = '';
-                config.songDuration = +config.durationWhiteNoise;
+                config.songDuration = +config.options.durationWhiteNoise;
             }
             else{
                 config.songUri = uri;
@@ -1399,8 +1405,7 @@ else{
                 config.songDuration = +this.curSong.find('.song-duration').innerHTML;
             }
 
-            //var allowedDuration = (config.songDuration > config.duration) ? config.duration : config.songDuration;
-            config.totalDuration = config.duration + (+config.postStimulusDuration);
+            config.totalDuration = config.options.duration + (+config.options.postStimulusDuration);
             PageController.transition("calibration", function(){
                 this.begin("setup");
             });
@@ -1665,11 +1670,11 @@ else{
             var self = this;
 
             this.trialParams = {
-                queue: self.generateQueue(config[phase + 'Steps']),
+                queue: self.generateQueue(config.options[phase + 'Steps']),
                 cur: -1,
                 step: 1,
                 index: 1,
-                maxSteps: config[phase + 'Steps'],
+                maxSteps: config.options[phase + 'Steps'],
                 phase: phase,
                 verify: (phase == 'post') ? false : true,
             }
@@ -1691,7 +1696,7 @@ else{
                     ],
                     end: [],
                     onEnd: function(){
-                        if(config.musicSelect){
+                        if(config.options.musicSelect){
                             PageController.transition("music");                    
                         }
                         else{
@@ -1715,11 +1720,11 @@ else{
                 }
             };
 
-            if(config[phase + 'Steps'] == 0){
+            if(config.options[phase + 'Steps'] == 0){
                 return this.titleTexts[phase].onEnd();
             }
 
-            if(config.feedback.auditory || config.feedback.tactile){
+            if(config.options.feedback.auditory || config.options.feedback.tactile){
                 this.titleTexts['pre'].start[1] += ' Adjust the volume of your device to be comfortable.';
             }
 
@@ -1937,7 +1942,7 @@ else{
                     "from_name": "Pleasure Tracker",
                     "to": [
                         {
-                            "email": config.email,
+                            "email": config.options.email,
                             "name": "Experimenter",
                             "type": "to"
                         }
@@ -1976,7 +1981,7 @@ else{
         body = body.replace(/\n/g, "%0D%0A");
         body = body.replace(/&/g, "%26");
         
-        return ('mailto:' + config.email + '?subject=' + subject + '&body=' + body);    
+        return ('mailto:' + config.options.email + '?subject=' + subject + '&body=' + body);    
     }
 
     var AuditoryFeedback = new (View.extend({
@@ -2063,19 +2068,19 @@ else{
 
         enable: function(){
             this.enabled = [];
-            if(config.feedback.numeric){
+            if(config.options.feedback.numeric){
                 this.enabled.push(new NumericFeedback({el:this.el.find('.numericFeedback')}));
             }
-            if(config.feedback.range){
+            if(config.options.feedback.range){
                 this.enabled.push(new RangeFeedback({el:this.el.find('.rangeFeedback')}));
             }
-            if(config.feedback.barbell && !this.disableBarbell){
+            if(config.options.feedback.barbell && !this.disableBarbell){
                 this.enabled.push(new BarbellFeedback({el:this.el.find('.barbellFeedback')}));
             }
-            if(config.feedback.auditory){
+            if(config.options.feedback.auditory){
                 this.enabled.push(AuditoryFeedback);
             }
-            if(config.feedback.tactile){
+            if(config.options.feedback.tactile){
                 this.enabled.push(TactileFeedback);
             }
             this.numEnabled = this.enabled.length;
@@ -2151,7 +2156,7 @@ else{
         },
 
         colorFromRating: function(rating){
-            return ((config.feedback.barVaries) ? this.colors[Math.round(rating)] : '#736baf');
+            return ((config.options.feedback.barVaries) ? this.colors[Math.round(rating)] : '#736baf');
         },
 
         onStart: function(t, rating){ 
@@ -2307,7 +2312,7 @@ else{
 
 
         sampleRating: function(){
-            this.timers.sample = setTimeout(this.sampleRating, config.ratingInterval);
+            this.timers.sample = setTimeout(this.sampleRating, config.options.ratingInterval);
 
             var touches = this.touches,
                 rating = rater.getRating(touches).toFixed(1),
@@ -2344,7 +2349,7 @@ else{
             this.feedbacks.disableAll();
 
             this.sampleRating();
-            var numSamples = Math.floor(config.durationActual/(config.ratingInterval/1000));
+            var numSamples = Math.floor(config.durationActual/(config.options.ratingInterval/1000));
             config.ratings = this.samples.slice(0, numSamples);
             config.ratingsPx = this.samplesPx.slice(0, numSamples);
             config.valid = this.valid.slice(0, numSamples);
@@ -2389,21 +2394,21 @@ else{
             if(!this.status.started){
                 this.status.started = true;
                 $(this.titleText).hide();
-                this.timers.sample = setTimeout(this.sampleRating, config.ratingInterval);
+                this.timers.sample = setTimeout(this.sampleRating, config.options.ratingInterval);
                 this.timers.end = setTimeout(this.stop, (config.totalDuration * 1000) );
 
                 config.experimentTime = new Date();
                 config.absoluteTime = config.experimentTime.getTime();
 
 
-                if(config.musicSelect){
-                    PageController.pages.music.playMusic(config.songUri, config.duration);
+                if(config.options.musicSelect){
+                    PageController.pages.music.playMusic(config.songUri, config.options.duration);
                 }
 
                 if(config.knockout == 'name'){
                     PageController.pages.knockout.playRecordings(0);
                     
-                    setTimeout(PageController.pages.knockout.stopRecordings, config.duration * 1000);
+                    setTimeout(PageController.pages.knockout.stopRecordings, config.options.duration * 1000);
                 }
                 document.addEventListener('touchstart', this.abort);
             }

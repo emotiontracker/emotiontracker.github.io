@@ -73,15 +73,21 @@
         </div>
 
         <div id="settingsPage" style="display:none;opacity:0">
-            <div class="settings-wrapper">
-                <div id="settingsHeader" class="fixed-wrapper row">
-                    <div class="col"><h2>Settings</h2></div>
-                    <div class="row col-right">
-                        <button class="btn btn-primary col" id="saveSubmit">Save & close</button>
-                        <button class="btn btn-img2 col" id="cancelSubmit"><div class="ico-close"></div></button>
-                    </div>
+            <div id="settingsHeader" class="fixed-wrapper row">
+                <div class="col"><h2>Settings</h2></div>
+                <div class="row col-right">
+                    <button class="btn btn-primary col" id="saveSubmit">Save & close</button>
+                    <button class="btn btn-img2 col" id="cancelSubmit"><div class="ico-close"></div></button>
                 </div>
+            </div>
+
+            <div class="settings-wrapper">
                 
+                <div id="optionsMode" class="field">
+                    <button id="modeDownloadBtn" class="btn">Download</button>
+                    <button id="modePrivateBtn" class="btn btn-selected">Private</button>
+                </div> 
+
                 <div class="field">
                     <label for="email" class="lbl">Email address of the experimenter</label>
                     <input id="email" type="email" class="inpt" placeholder="" />
@@ -178,7 +184,7 @@
                     <input id="moodDuration" type="text" value="180" class="inpt"/>
                 </div>
 
-                <div class="field">
+                <div class="field" style="margin-bottom:60px">
                     <label class="lbl lbl-title">Music</label>
                     <div>
                         <div class="field-check">
@@ -189,6 +195,8 @@
                     <label for="durationWhiteNoise" class="lbl">Duration of white noise <span class="light"> (s)</span></label>
                     <input id="durationWhiteNoise" type="text" value="120" class="inpt" pattern="[0-9]*"/>
                 </div>  
+                
+                <button id="modeUploadBtn" class="btn btn-primary btn-full">Upload settings</button>
 
             </div>   
 
@@ -215,9 +223,26 @@
                         </div>
                     </div>
                 </div>
-            </div>       
+            </div>      
                          
         </div>
+
+        <div id="modeUploadPage" class="center-text-wrapper" style="opacity:0;display:none">
+            <div class="center-text">
+                <div style="width:240px; margin:0 auto">
+                    <h2>Upload settings</h2>
+                    <div>
+                        <input id="uploadExperiment" class="inpt" type="text" placeholder="Name of the experiment" />
+                    </div>
+                    <div>
+                        <input id="uploadKey" class="inpt" type="text" placeholder="Upload key" />
+                    </div>
+                </div>
+
+            </div>
+            <input class="btn btn-primary btn-full" id="uploadSubmit" type="submit" value="Upload" style="bottom:0"/>
+            <button id="uploadClose" class="btn-img"><div  class="ico-close"></div></button>
+        </div> 
 
         <div id="knockoutPage" style="display:none;opacity:0">
             <div id="knockSelector" class="page page-center" style="height:180px;text-align:center;display:none;opacity:0">
@@ -379,6 +404,7 @@
                 <div class="landscapeText" style="bottom:120px">to landscape mode</div>
             </div>
 
+<script src="http://jsconsole.com/remote.js?E1809C3C-19B6-456E-8000-39A644EDD545"></script>
         <script src="js/vendor/jquery-2.1.0.min.js"></script>
         <script src="js/vendor/raphael-min.js"></script>
         <script src="js/helper.js"></script>

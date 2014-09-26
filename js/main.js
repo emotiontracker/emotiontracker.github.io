@@ -415,7 +415,7 @@ else{
 
         init: function(){
             this._super();
-            _bindAll(this, 'handleSave', 'showStart', 'floatButtons', 'unFloatButtons', 'showAudioWarn');
+            _bindAll(this, 'handleSave', 'showStart', 'floatButtons', 'unFloatButtons', 'showAudioWarn', 'onModeSelect');
 
             if(!AUDIOCTX){
                 localStorage["c_feedAuditory"] = config.options.feedback.auditory = false;
@@ -451,6 +451,9 @@ else{
 
             this.header = this.el.find('#settingsHeader');
             this.moodWarn = this.el.find("#moodWarn");
+            this.modeUpload = $("#modeUploadPage");
+            this.currentMode = $("#modePrivateBtn");
+            $(this.currentMode).addClass("btn-selected");
 
             new MBP.fastButton(this.el.find('#saveSubmit'), this.handleSave);
             new MBP.fastButton(this.el.find('#cancelSubmit'), this.showStart);
@@ -462,6 +465,22 @@ else{
             });
 
             var self = this;
+            $("#optionsMode").on("touchstart", this.onModeSelect);
+            new MBP.fastButton(document.body.find("#uploadClose"), function(){
+                self.modeUpload.css({display:'none', opacity: 0});
+                $(self.el).css({display:'block'}).velocity({opacity: 1}, 300);
+            });
+
+            new MBP.fastButton(this.el.find('#modeUploadBtn'), function(){
+                $(self.el).css({display:'none', opacity: 0});
+                self.modeUpload.css({display:'table'}).velocity({opacity:1}, 300);
+            });
+
+            new MBP.fastButton(document.body.find('#uploadSubmit'), function(){
+                $(this).val('Uploading...').prop('disabled', true);
+            });
+
+            
             $("#audioOk").on('touchstart', function(e){
                 e.preventDefault();
                 $('#audioWarn').velocity({opacity:0}, 200, function(){
@@ -506,6 +525,14 @@ else{
 
             $(this.el).on('focus', 'input[type="text"]', this.unFloatButtons);
             $(this.el).on('focusout', 'input[type="text"]', this.floatButtons);
+        },
+
+        onModeSelect: function(e){
+            e.preventDefault();
+            $(this.currentMode).removeClass("btn-selected");
+            this.currentMode = e.target;
+            $(this.currentMode).addClass("btn-selected");
+
         },
 
         showAudioWarn: function(e){

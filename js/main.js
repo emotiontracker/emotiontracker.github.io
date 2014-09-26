@@ -243,6 +243,7 @@ else{
 
     var DEVICE_INFO = getDeviceInfo();
     DEVICE_INFO.pixToMm = _bind(DEVICE_INFO.pixToMm, DEVICE_INFO);
+    var ua_parser = new UAParser();
 
     var pixelRatio = window.devicePixelRatio || 1;
     var rater = { getRating: function(){} };
@@ -281,35 +282,11 @@ else{
         windowWidth: window.innerWidth,
         windowHeight: window.innerHeight,
         deviceInfo: DEVICE_INFO,
-
-        options:{
-            email: localStorage["c_email"] || 'lauren.vale@nyu.edu',
-            duration: +(localStorage["c_duration"] || 30),
-            ratingInterval: +(localStorage["c_ratingInterval"] || 1000),
-            minRating: +(localStorage["c_minRating"] || 1),
-            setupSteps: +(localStorage["c_setupSteps"] || 2),
-            preSteps: +(localStorage["c_preSteps"] || 2),
-            postSteps: +(localStorage["c_postSteps"] || 1),
-            feedback:{
-                barbell: JSON.parse(localStorage["c_feedBarbell"] || "false"),
-                range: JSON.parse(localStorage["c_feedRange"] || "false"),
-                numeric: JSON.parse(localStorage["c_feedNumeric"] || "false"),
-                auditory: JSON.parse(localStorage["c_feedAuditory"] || "false"),
-                tactile: JSON.parse(localStorage["c_feedTactile"] || "false"),
-                barVaries: JSON.parse(localStorage["c_feedBarVaries"] || "false"),
-                isEnabled: function(){
-                    return (this.barbell || this.range || this.numeric || this.auditory || this.tactile);
-                }
-            },
-
-            postInMedian: JSON.parse(localStorage["c_postInMedian"] || "false"),
-            musicSelect: JSON.parse(localStorage["c_musicSelect"] || "true"),
-            nameSelect: JSON.parse(localStorage["c_nameSelect"] || "false"),
-            moodSelect: JSON.parse(localStorage["c_moodSelect"] || "false"),
-            postStimulusDuration: +(localStorage["c_postStimulusDuration"] || 120),
-            durationWhiteNoise: +(localStorage["c_durationWhiteNoise"] || 120),
-            moodDuration: +(localStorage["c_moodDuration"] || 180),        
-        },
+        os: ua_parser.getOS().name + ' ' + ua_parser.getOS().version,
+        browser: ua_parser.getBrowser().name + ' ' + ua_parser.getBrowser().major,
+        
+        optionsMode: "download",
+        options:{},
 
         totalDuration: (+localStorage["c_duration"] || 30) + (+localStorage["c_postStimulusDuration"] || 120),
         feltPleasure: '',
@@ -320,6 +297,34 @@ else{
         songAlbum: '',
         songDuration: '',
         songDurationMax: 600,
+
+        initOptions: function(){
+            this.options = {
+                email: localStorage["c_email"] || 'lauren.vale@nyu.edu',
+                duration: +(localStorage["c_duration"] || 30),
+                ratingInterval: +(localStorage["c_ratingInterval"] || 1000),
+                minRating: +(localStorage["c_minRating"] || 1),
+                setupSteps: +(localStorage["c_setupSteps"] || 2),
+                preSteps: +(localStorage["c_preSteps"] || 2),
+                postSteps: +(localStorage["c_postSteps"] || 1),
+                feedback:{
+                    barbell: JSON.parse(localStorage["c_feedBarbell"] || "false"),
+                    range: JSON.parse(localStorage["c_feedRange"] || "false"),
+                    numeric: JSON.parse(localStorage["c_feedNumeric"] || "false"),
+                    auditory: JSON.parse(localStorage["c_feedAuditory"] || "false"),
+                    tactile: JSON.parse(localStorage["c_feedTactile"] || "false"),
+                    barVaries: JSON.parse(localStorage["c_feedBarVaries"] || "false")
+                },
+
+                postInMedian: JSON.parse(localStorage["c_postInMedian"] || "false"),
+                musicSelect: JSON.parse(localStorage["c_musicSelect"] || "true"),
+                nameSelect: JSON.parse(localStorage["c_nameSelect"] || "false"),
+                moodSelect: JSON.parse(localStorage["c_moodSelect"] || "false"),
+                postStimulusDuration: +(localStorage["c_postStimulusDuration"] || 120),
+                durationWhiteNoise: +(localStorage["c_durationWhiteNoise"] || 120),
+                moodDuration: +(localStorage["c_moodDuration"] || 180)       
+            }
+        },
 
         generateOptionsJSON: function(){
             return JSON.stringify(this.options);
@@ -357,6 +362,7 @@ else{
             return tmpl("data_tmpl", this);       
         }
     };
+    config.initOptions();
 
     function updateRater(config){
 
@@ -415,7 +421,7 @@ else{
 
         init: function(){
             this._super();
-            _bindAll(this, 'handleSave', 'showStart', 'floatButtons', 'unFloatButtons', 'showAudioWarn', 'onModeSelect');
+            _bindAll(this, 'handleSave', 'showStart', 'floatButtons', 'unFloatButtons', 'showAudioWarn', 'onModeSelect', 'generateOptions');
 
             if(!AUDIOCTX){
                 localStorage["c_feedAuditory"] = config.options.feedback.auditory = false;
@@ -452,8 +458,6 @@ else{
             this.header = this.el.find('#settingsHeader');
             this.moodWarn = this.el.find("#moodWarn");
             this.modeUpload = $("#modeUploadPage");
-            this.currentMode = $("#modePrivateBtn");
-            $(this.currentMode).addClass("btn-selected");
 
             new MBP.fastButton(this.el.find('#saveSubmit'), this.handleSave);
             new MBP.fastButton(this.el.find('#cancelSubmit'), this.showStart);
@@ -464,20 +468,68 @@ else{
                 }
             });
 
+            if(config.optionsMode == "download"){
+                this.currentMode = $("#modeDownloadBtn").addClass("btn-selected");
+            }
+            else{
+                this.currentMode = $("#modePrivateBtn").addClass("btn-selected");
+            }
+
             var self = this;
             $("#optionsMode").on("touchstart", this.onModeSelect);
-            new MBP.fastButton(document.body.find("#uploadClose"), function(){
+
+            this.uploadSubmit = document.body.find('#uploadSubmit');
+            this.uploadExp = document.body.find("#uploadExperiment");
+            this.uploadKey = document.body.find("#uploadKey");
+
+            new MBP.fastButton(document.body.find("#uploadClose"), function(e){
+                e.preventDefault();
                 self.modeUpload.css({display:'none', opacity: 0});
                 $(self.el).css({display:'block'}).velocity({opacity: 1}, 300);
+                $(self.uploadSubmit).val('Upload').prop('disabled', false).removeClass('btn-success btn-error');
             });
 
             new MBP.fastButton(this.el.find('#modeUploadBtn'), function(){
                 $(self.el).css({display:'none', opacity: 0});
+                $(self.uploadKey).val('');
                 self.modeUpload.css({display:'table'}).velocity({opacity:1}, 300);
             });
 
-            new MBP.fastButton(document.body.find('#uploadSubmit'), function(){
+            var resetUploadButton = function(){
+                $(self.uploadSubmit).val('Upload').prop('disabled', false).removeClass('btn-success btn-error');
+            }
+            $(this.uploadExp).on('change', resetUploadButton);
+            $(this.uploadKey).on('change', resetUploadButton);
+
+            new MBP.fastButton(this.uploadSubmit, function(e){
+                e.preventDefault();
+                if($(this).prop('disabled')) return false;
+                var exp = $(self.uploadExp).val().trim(),
+                    key = $(self.uploadKey).val().trim();
+
+                if(exp == '' || key == '') return false;
+
                 $(this).val('Uploading...').prop('disabled', true);
+                $.ajax({
+                    url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/upload',
+                    type: 'POST',
+                    data: JSON.stringify({e: exp, k: key, o: self.generateOptions()}),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    timeout: 8000,
+                    success: function(msg) {
+                        if(msg && msg.error){
+                           $(self.uploadSubmit).val(msg.error).addClass('btn-error'); 
+                        }
+                        else{
+                           $(self.uploadSubmit).val('Upload successful').addClass('btn-success'); 
+                        }
+                        
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                        $(self.uploadSubmit).val('Error contacting server').addClass('btn-error') 
+                    }
+                });
             });
 
             
@@ -527,10 +579,13 @@ else{
             $(this.el).on('focusout', 'input[type="text"]', this.floatButtons);
         },
 
+
+
         onModeSelect: function(e){
             e.preventDefault();
             $(this.currentMode).removeClass("btn-selected");
             this.currentMode = e.target;
+            config.optionsMode = $(this.currentMode).data("name");
             $(this.currentMode).addClass("btn-selected");
 
         },
@@ -580,6 +635,36 @@ else{
             this.showStart(e);
         },
 
+        generateOptions: function(){
+            var options = {
+                email: $(this.email).val().trim(),
+                duration: +$(this.duration).val().trim(),
+                ratingInterval: +($(this.ratingInterval).val().trim())*1000,
+                minRating: +($(this.minRating).val().trim()),
+                setupSteps: +($(this.setupSteps).val().trim()),
+                preSteps: +($(this.preSteps).val().trim()),
+                postSteps: +($(this.postSteps).val().trim()),
+                feedback:{
+                    barbell: $(this.feedBarbell).prop('checked'),
+                    range: $(this.feedRange).prop('checked'),
+                    numeric: $(this.feedNumeric).prop('checked'),
+                    auditory: $(this.feedAuditory).prop('checked'),
+                    tactile: $(this.feedTactile).prop('checked'),
+                    barVaries: $(this.feedBarVaries).prop('checked')
+                },
+
+                postInMedian: $(this.postInMedian).prop('checked'),
+                musicSelect: $(this.musicSelect).prop('checked'),
+                nameSelect: $(this.nameSelect).prop('checked'),
+                moodSelect: $(this.moodSelect).prop('checked'),
+                postStimulusDuration: +$(this.postStimulusDuration).val().trim(),
+                durationWhiteNoise: +$(this.durationWhiteNoise).val().trim(),
+                moodDuration: +$(this.moodDuration).val().trim(),        
+            };
+
+            return options;
+        },
+
         handleResize: function(){
             $(this.moodWarn).css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
             $("#audioWarn").css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
@@ -594,6 +679,30 @@ else{
         },
 
         render: function(){
+            $(this.email).val(config.options.email);
+            $(this.duration).val(config.options.duration);
+            $(this.postStimulusDuration).val(config.options.postStimulusDuration);
+
+            $(this.setupSteps).val(config.options.setupSteps);
+            $(this.preSteps).val(config.options.preSteps);
+            $(this.postSteps).val(config.options.postSteps);
+            $(this.ratingInterval).val(config.options.ratingInterval/1000);
+            $(this.minRating).val(config.options.minRating);
+
+            $(this.feedBarbell).prop('checked', config.options.feedback.barbell);
+            $(this.feedRange).prop('checked', config.options.feedback.range);
+            $(this.feedNumeric).prop('checked', config.options.feedback.numeric);
+            $(this.feedAuditory).prop('checked', config.options.feedback.auditory);
+            $(this.feedTactile).prop('checked', config.options.feedback.tactile);
+            $(this.feedBarVaries).prop('checked', config.options.feedback.barVaries);
+
+            $(this.postInMedian).prop('checked', config.options.postInMedian);
+            $(this.musicSelect).prop('checked', config.options.musicSelect);
+            $(this.nameSelect).prop('checked', config.options.nameSelect);
+            $(this.moodSelect).prop('checked', config.options.moodSelect);
+            $(this.durationWhiteNoise).val(config.options.durationWhiteNoise);
+            $(this.moodDuration).val(config.options.moodDuration);
+
             this.floatButtons();
         },
 
@@ -625,7 +734,8 @@ else{
             this.experiment.on("change", this.removeInvalidHighlight);
 
             this.settingsButton = this.el.find('#btnSettings');
-            new MBP.fastButton(this.el.find('#startSubmit'), this.handleSubmit);
+            this.submitButton = this.el.find('#startSubmit');
+            new MBP.fastButton(this.submitButton, this.handleSubmit);
             new MBP.fastButton(this.settingsButton, this.showSettings);
 
             $(this.el).on('focus', 'input[type="text"]', this.unFloatButtons);
@@ -664,7 +774,28 @@ else{
             $(this.experiment).blur();
 
             if(flag === false){
-                PageController.transition("knockout");
+                if(config.optionsMode == "download"){
+                    $(this.submitButton).prop("disabled", true).val("Configuring...");
+
+                    $.ajax({
+                        url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/download?e='+config.experiment,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(msg) {
+                            console.log("SUCCESS");
+                            if(msg && msg.options){
+                                config.options = msg.options;
+                            }
+                        },
+                        complete: function(){
+                            PageController.transition("knockout");
+                        }
+                    });
+                }
+                else{
+                    PageController.transition("knockout");
+                }
+                
             }
 
         },
@@ -684,6 +815,8 @@ else{
         },
 
         render: function(){
+            $(this.submitButton).prop("disabled", false).val("Continue");
+            config.initOptions();
             config.setupMaxDist = [];
             config.setupMinDist = [];
             config.preMaxDist = [];

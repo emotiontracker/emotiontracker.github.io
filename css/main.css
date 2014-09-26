@@ -803,6 +803,21 @@ color:#777;
 box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);   
 }
 
+.btn-success:disabled, .btn-error:disabled{
+  box-shadow: none !important;
+  background-image: none !important; 
+  color:#fff !important; 
+  opacity:1 !important;
+}
+
+.btn-success:disabled{
+  background-color:#4DDE8C !important;
+}
+
+.btn-error:disabled{
+  background-color:#E6003D !important;
+}
+
 .btn-wide{
   width:220px;
 }
@@ -1273,8 +1288,7 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
 .strong{
   font-weight:bold;
   font-size:1.1em;
-  color:#6e65b0;
-  letter-spacing:-0.05em;  
+  color:#6e65b0; 
 }
 
 .emph{

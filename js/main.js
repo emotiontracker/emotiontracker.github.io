@@ -781,8 +781,8 @@ else{
                         url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/download?e='+config.experiment,
                         type: 'GET',
                         dataType: 'json',
+                        timeout: 8000,
                         success: function(msg) {
-                            console.log("SUCCESS");
                             if(msg && msg.options){
                                 config.options = msg.options;
                             }

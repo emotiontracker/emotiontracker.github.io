@@ -286,6 +286,7 @@ else{
             email: localStorage["c_email"] || 'lauren.vale@nyu.edu',
             duration: +(localStorage["c_duration"] || 30),
             ratingInterval: +(localStorage["c_ratingInterval"] || 1000),
+            minRating: +(localStorage["c_minRating"] || 1),
             setupSteps: +(localStorage["c_setupSteps"] || 2),
             preSteps: +(localStorage["c_preSteps"] || 2),
             postSteps: +(localStorage["c_postSteps"] || 1),
@@ -365,7 +366,7 @@ else{
             maxDist = (config.options.postInMedian) ? findMedian(config.setupMaxDist.concat(config.preMaxDist, config.postMaxDist)) : findMedian(config.setupMaxDist);
 
             var ratingRange = maxDist - minDist,
-                ratingStep = ratingRange / 10;
+                ratingStep = ratingRange / (10 - config.options.minRating);
 
             return {
                 getRatingFromDist: function(distance){
@@ -377,7 +378,7 @@ else{
                         distance = maxDist;
                     }
 
-                    return (distance - minDist) / ratingStep;                      
+                    return ((distance - minDist) / ratingStep) + config.options.minRating;                      
                 },
 
                 getRating: function(touches){
@@ -432,6 +433,7 @@ else{
             this.preSteps = $(this.el.find('#preSteps')).val(config.options.preSteps);
             this.postSteps = $(this.el.find('#postSteps')).val(config.options.postSteps);
             this.ratingInterval = $(this.el.find('#ratingInterval')).val(config.options.ratingInterval/1000);
+            this.minRating = $(this.el.find('#minRating')).val(config.options.minRating);
 
             this.feedBarbell = $(this.el).find('#feedBarbell').prop('checked', config.options.feedback.barbell);
             this.feedRange = $(this.el.find('#feedRange')).prop('checked', config.options.feedback.range);
@@ -528,10 +530,11 @@ else{
             localStorage["c_postStimulusDuration"] = config.options.postStimulusDuration = +$(this.postStimulusDuration).val().trim();
             config.totalDuration = (+config.options.duration) + (+config.options.postStimulusDuration);
 
-            localStorage["c_setupSteps"] = config.options.setupSteps = $(this.setupSteps).val().trim();
-            localStorage["c_preSteps"] = config.options.preSteps = $(this.preSteps).val().trim();
-            localStorage["c_postSteps"] = config.options.postSteps = $(this.postSteps).val().trim();
+            localStorage["c_setupSteps"] = config.options.setupSteps = +($(this.setupSteps).val().trim());
+            localStorage["c_preSteps"] = config.options.preSteps = +($(this.preSteps).val().trim());
+            localStorage["c_postSteps"] = config.options.postSteps = +($(this.postSteps).val().trim());
             localStorage["c_ratingInterval"] = config.options.ratingInterval = +($(this.ratingInterval).val().trim())*1000;
+            localStorage["c_minRating"] = config.options.minRating = +($(this.minRating).val().trim());
 
             localStorage["c_feedBarbell"] = config.options.feedback.barbell = $(this.feedBarbell).prop('checked');
             localStorage["c_feedRange"] = config.options.feedback.range = $(this.feedRange).prop('checked');
@@ -1732,7 +1735,7 @@ else{
                 rater = (function(){
                     return{
                         getRating: function(){
-                            return (self.trialParams.cur == 0) ? 10 : 0;
+                            return (self.trialParams.cur == 0) ? 10 : config.options.minRating;
                         }
                     };
                 })();
@@ -2101,7 +2104,7 @@ else{
         },
 
         onEnd: function(touches){
-            var rating = (touches) ? rater.getRating(touches) : 0;
+            var rating = (touches) ? rater.getRating(touches) : config.options.minRating;
             for(var i = 0; i<this.numEnabled; i++){
                 this.enabled[i].onEnd(touches, rating);
             }
@@ -2224,6 +2227,7 @@ else{
         },
 
         render: function(){
+            this._super();
             this.titleText.style.opacity = 0;
         },
 

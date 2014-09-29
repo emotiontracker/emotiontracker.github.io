@@ -919,7 +919,8 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
 
 .dialog{
   width:70%;
-  max-width:400px;
+  min-width: 280px;
+  max-width:350px;
   margin:0 auto;
   background:#fff;
   border-radius:3px;
@@ -932,7 +933,7 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
  color:#605899; 
  padding: 10px 0;
  background:#f4f4f4;
- border-bottom: 1px solid #ccc; 
+ border-bottom: 1px solid #ddd; 
  border-top-left-radius:3px;
  border-top-right-radius:3px;
 }
@@ -947,7 +948,7 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
 }
 
 .dialog-buttons{
-  border-top: 1px solid #6e65b0;
+  border-top: 1px solid #D4D1EB;
   overflow:hidden;
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
@@ -956,9 +957,9 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
 .dialog-btn{
   padding: 12px 0;
   float:left;
-  color:#6e65b0;
+  color:#5C4EC7;
   border:0;
-  border-right:1px solid #6e65b0;
+  border-right:1px solid #D4D1EB;
 }
 
 .dialog-btn:last-child{

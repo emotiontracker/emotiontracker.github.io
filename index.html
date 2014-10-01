@@ -6,7 +6,7 @@
         <meta name="description" content="">
         <meta name="HandheldFriendly" content="True">
         <meta name="MobileOptimized" content="320">
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0, minimal-ui">
+        <meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0">
         <meta http-equiv="cleartype" content="on">
 
         <link rel="apple-touch-icon-precomposed" sizes="144x144" href="img/touch/apple-touch-icon-144x144-precomposed.png">
@@ -76,17 +76,28 @@
             <div id="settingsHeader" class="fixed-wrapper row">
                 <div class="col"><h2>Settings</h2></div>
                 <div class="row col-right">
-                    <button class="btn btn-primary col" id="saveSubmit">Save & close</button>
+                    <button class="btn btn-primary col" id="saveSubmit" style="display:none">Save & close</button>
                     <button class="btn btn-img2 col" id="cancelSubmit"><div class="ico-close"></div></button>
                 </div>
             </div>
 
             <div class="settings-wrapper">
-                
-                <div id="optionsMode" class="field">
-                    <button id="modeDownloadBtn" class="btn" data-name="download">Download</button>
-                    <button id="modePrivateBtn" class="btn" data-name="private">Private</button>
-                </div> 
+                <div class="field">
+                    <label class="lbl">Use settings from</label>
+                    <div id="optionsMode">
+                        <button id="modeDownloadBtn" class="btn btn-selected" data-name="download">Server</button>
+                        <button id="modePrivateBtn" class="btn" data-name="private">Here</button>
+                    </div> 
+                </div>
+
+
+                <div class="field">
+                    <label for="optExp" class="lbl">Name of experiment</label>
+                    <input id="optExp" type="text" class="inpt" placeholder="" style="display:none"/>
+                    <select id="optExpSel" class="inpt">
+                        <option value="" selected disabled style="display:none">Choose an experiment</option>
+                    </select>
+                </div>
 
                 <div class="field">
                     <label for="email" class="lbl">Email address of the experimenter</label>
@@ -184,7 +195,7 @@
                     <input id="moodDuration" type="text" value="180" class="inpt"/>
                 </div>
 
-                <div class="field" style="margin-bottom:60px">
+                <div class="field">
                     <label class="lbl lbl-title">Music</label>
                     <div>
                         <div class="field-check">
@@ -196,6 +207,13 @@
                     <input id="durationWhiteNoise" type="text" value="120" class="inpt" pattern="[0-9]*"/>
                 </div>  
                 
+                <div class="field" style="margin-bottom:60px">
+                    <div class="field-check">
+                        <label for="storeData" class="lbl">Store data on server</label>
+                        <span class="chkbox"><input id="storeData" type="checkbox" /></span>
+                    </div>
+                </div>
+
                 <button id="modeUploadBtn" class="btn btn-primary btn-full">Upload settings</button>
 
             </div>   
@@ -413,7 +431,7 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nApp:,<%=url%>\nApp creation date:,Friday September 26 2014\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: ratings.length + 1}).map(Number.call, Number).slice(1).map(function(x){ return x*(options.ratingInterval/1000);}).join(",")%>\nRating (<%=options.minRating%> to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nValid (boolean):,<%=valid.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=deviceInfo.type%>\nModel:,<%=deviceInfo.model%>\nOS:,<%=os%>\nBrowser:,<%=browser%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=(options.ratingInterval/1000)%>\nMinimum allowed rating:,<%=options.minRating%>\nMaximum stimulus duration (s):,<%=options.duration%>\nExperiment duration after end of stimulus (s):,<%=options.postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (<%=options.minRating%> to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nFeedback barbell:,<%=options.feedback.barbell%>\nFeedback bar:,<%=options.feedback.range%>\nFeedback bar color varies:,<%=options.feedback.barVaries%>\nFeedback number:,<%=options.feedback.numeric%>\nFeedback tone:,<%=options.feedback.auditory%>\nFeedback ticks:,<%=options.feedback.tactile%>\nInclude practice in reference:,<%=options.postInMedian%>\nKnockout:,<%=knockout%>\nEnable music selection:,<%=options.musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\nEmail address of experimenter:,<%=options.email%>\nDuration of mood induction (s):,<%=options.moodDuration%>\nDuration of white noise (s):,<%=options.durationWhiteNoise%>\n
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nEmail address of experimenter:,<%=options.email%>\nApp:,<%=url%>\nApp creation date:,Friday September 26 2014\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: ratings.length + 1}).map(Number.call, Number).slice(1).map(function(x){ return x*(options.ratingInterval/1000);}).join(",")%>\nRating (<%=options.minRating%> to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nValid (boolean):,<%=valid.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=deviceInfo.type%>\nModel:,<%=deviceInfo.model%>\nOS:,<%=os%>\nBrowser:,<%=browser%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=(options.ratingInterval/1000)%>\nMinimum allowed rating:,<%=options.minRating%>\nMaximum stimulus duration (s):,<%=options.duration%>\nExperiment duration after end of stimulus (s):,<%=options.postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (<%=options.minRating%> to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nFeedback barbell:,<%=options.feedback.barbell%>\nFeedback bar:,<%=options.feedback.range%>\nFeedback bar color varies:,<%=options.feedback.barVaries%>\nFeedback number:,<%=options.feedback.numeric%>\nFeedback tone:,<%=options.feedback.auditory%>\nFeedback ticks:,<%=options.feedback.tactile%>\nInclude practice in reference:,<%=options.postInMedian%>\nKnockout:,<%=knockout%>\nEnable music selection:,<%=options.musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\nDuration of mood induction (s):,<%=options.moodDuration%>\nDuration of white noise (s):,<%=options.durationWhiteNoise%>\n
 </script>       
 
     </body>

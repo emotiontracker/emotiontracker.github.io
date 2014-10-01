@@ -2,23 +2,23 @@ window.URL = window.URL || window.webkitURL;
 
 function drawTimer(el, dur) {
 
-    var loader = el.find('#loader'), 
-        border = el.find('#border'), 
+    var loader = el.find('#loader'),
+        border = el.find('#border'),
         alpha = 0,
-        pi = Math.PI, 
+        pi = Math.PI,
         t = ( dur * 1000 ) / 360;
 
     (function draw() {
       alpha++;
       alpha %= 360;
-      var r = ( alpha * pi / 180 )
-        , x = Math.sin( r ) * 50
-        , y = Math.cos( r ) * - 50
-        , mid = ( alpha > 180 ) ? 1 : 0
-        , anim = 'M 0 0 v -50 A 50 50 1 ' 
-               + mid + ' 1 ' 
-               +  x  + ' ' 
-               +  y  + ' z';
+      var r = ( alpha * pi / 180 ),
+        x = Math.sin( r ) * 50,
+        y = Math.cos( r ) * - 50,
+        mid = ( alpha > 180 ) ? 1 : 0,
+        anim = 'M 0 0 v -50 A 50 50 1 ' +
+            mid + ' 1 ' +
+            x  + ' ' +
+            y  + ' z';
      
       loader.setAttribute( 'd', anim );
       border.setAttribute( 'd', anim );
@@ -27,13 +27,13 @@ function drawTimer(el, dur) {
         setTimeout(draw, t); // Redraw
       }
       
-    })();    
+    })();
 }
 
 function is_touch_device() {
-    return (('ontouchstart' in window)
-      || (navigator.MaxTouchPoints > 0)
-      || (navigator.msMaxTouchPoints > 0));
+    return (('ontouchstart' in window) ||
+        (navigator.MaxTouchPoints > 0) ||
+        (navigator.msMaxTouchPoints > 0));
 }
 
 
@@ -49,6 +49,12 @@ else{
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
+    var VERSION = '1.1.2';
+
+    if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
+        localStorage.clear();
+        localStorage["VERSION"] = VERSION;
+    }
 
     function utf8_to_b64( str ) {
         return window.btoa(unescape(encodeURIComponent( str )));
@@ -57,20 +63,18 @@ else{
     function shuffle(o){
         for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
         return o;
-    };
+    }
 
     var Page = View.extend({
         shown: true,
         limitOrient: true,
         el: '',
 
-        init: function(start){
+        init: function(start) {
             this._super();
             _bindAll(this, 'show', 'hide');
-           if(!start){
-                // $(this.el).css('opacity', '0');
-                // $(this.el).css('display', 'none');
-                this.shown = false;                
+            if(!start) {
+                this.shown = false;
             }
         },
 
@@ -81,10 +85,10 @@ else{
 
                 if(!this.render()){
                     $(this.el).css('display', 'block');
-                    $(this.el).animate({opacity:1}, 300, _bind(function(){
+                    $(this.el).animate({opacity:1}, 300, _bind(function() {
                         this.post_render();
                         callback();
-                    }, this));                      
+                    }, this));
                 }
             
             }
@@ -100,7 +104,7 @@ else{
                     this.conceal();
                     callback();
                     $(this.el).css('display', 'none');
-                }, this));                
+                }, this));
             }
         },
 
@@ -122,8 +126,8 @@ else{
             this.touches = [{x: 0, y: 0, id: false}, {x: 0, y: 0, id: false}];
             this.touches.isDouble = function(){
                 return this[0].id && this[1].id;
-            }
-            this.doubleTouch = false;            
+            };
+            this.doubleTouch = false;
         },
 
         handleTouchStart: function(e){
@@ -131,14 +135,14 @@ else{
             var changed = e.changedTouches,
                 touches = this.touches;
 
-            for(var i = 0; i < changed.length ; i++){ 
+            for(var i = 0; i < changed.length ; i++) {
                 for(var j = 0; j < 2; j++){
                     if(!touches[j].id){
                         touches[j].x = changed[i].pageX;
                         touches[j].y = changed[i].pageY;
-                        touches[j].id = changed[i].identifier; 
-                        this.onTouchStart(touches[j]); 
-                        break;                    
+                        touches[j].id = changed[i].identifier;
+                        this.onTouchStart(touches[j]);
+                        break;
                     }
                 }
             }
@@ -154,16 +158,16 @@ else{
             var changed = e.changedTouches,
                 touches = this.touches;
 
-            for(var i = 0; i < changed.length ; i++){ 
+            for(var i = 0; i < changed.length ; i++) {
                 for(var j = 0; j < 2; j++){
                     if(touches[j].id === changed[i].identifier){
                         touches[j].x = changed[i].pageX;
                         touches[j].y = changed[i].pageY;
-                        this.onTouchMove(touches[j]); 
+                        this.onTouchMove(touches[j]);
                         break;
                     }
                 }
-            } 
+            }
 
             if(this.touches.isDouble()){
                 this.handleDoubleTouchMove();
@@ -175,16 +179,16 @@ else{
             var changed = e.changedTouches,
                 touches = this.touches;
             
-            for(var i = 0; i < changed.length ; i++){ 
+            for(var i = 0; i < changed.length ; i++) {
                 for(var j = 0; j < 2; j++){
                     if(touches[j].id === changed[i].identifier){
-                        this.onTouchEnd(touches[j]); 
+                        this.onTouchEnd(touches[j]);
                         touches[j].id = false;
                         break;
                     }
                 }
 
-            } 
+            }
 
             if(this.doubleTouch && !touches.isDouble()){
                 this.handleDoubleTouchEnd();
@@ -217,7 +221,7 @@ else{
             contactLoss: new Howl({urls:['alerts/contact_loss.mp3'], volume: 0.2}),
             contact: new Howl({urls:['alerts/contact.mp3'], volume: 0.5}),
             done: new Howl({urls:['alerts/done.mp3']}),
-            click: new Howl({urls:['alerts/click.mp3'], volume: 0.9}) 
+            click: new Howl({urls:['alerts/click.mp3'], volume: 0.9})
         },
 
         init: function(){
@@ -235,19 +239,12 @@ else{
             this.sounds[sound].stop();
         }
 
-    }
-
-/*    setInterval(function(){
-        notifier.play('contact');
-    },50);*/
+    };
 
     var DEVICE_INFO = getDeviceInfo();
-    DEVICE_INFO.pixToMm = _bind(DEVICE_INFO.pixToMm, DEVICE_INFO);
     var ua_parser = new UAParser();
 
-    var pixelRatio = window.devicePixelRatio || 1;
     var rater = { getRating: function(){} };
-
     var config = {
         name: '',
         experiment: '',
@@ -287,22 +284,75 @@ else{
         
         optionsMode: "download",
         options:{},
+        serverOptions: {},
 
         totalDuration: (+localStorage["c_duration"] || 30) + (+localStorage["c_postStimulusDuration"] || 120),
-        feltPleasure: '',
         knockout: '',
         songUri: 'whitenoise',
         songName: '',
         songArtist: '',
         songAlbum: '',
         songDuration: '',
-        songDurationMax: 600,
+
+        generateDataObject: function(){
+            var data = {
+                experiment: this.experiment,
+                name: this.name,
+                email: this.options.email,
+                url: this.url,
+                appCreateDate: getDateString(this.experimentTime),
+                timeZero: (this.absoluteTime / 1000).toFixed(2),
+                ratings: this.ratings,
+                spread: this.ratingsPx,
+                valid: this.valid,
+                feltPleasure: this.feltPleasure,
+                device: {
+                    name: DEVICE_INFO.type,
+                    model: DEVICE_INFO.model,
+                    os: this.os,
+                    browser: this.browser
+                },
+                screenWidth: this.screenWidth,
+                screenHeight: this.screenHeight,
+                windowWidth: this.windowWidth,
+                windowHeight: this.windowHeight,
+                location: this.location,
+                ratingInterval: this.options.ratingInterval,
+                minRating: this.options.minRating,
+                duration: this.options.duration,
+                postDuration: this.options.postStimulusDuration,
+                actualDuration: this.durationActual,
+                setupMinDist: this.setupMinDist,
+                setupMaxDist: this.setupMaxDist,
+                refMinDist: this.medianMinDist,
+                refMaxDist: this.medianMaxDist,
+                preMinDist: this.preMinDist,
+                preMaxDist: this.preMaxDist,
+                postMinDist: this.postMinDist,
+                postMaxDist: this.postMaxDist,
+                medianMinRating: this.medianMinRating,
+                medianMaxRating: this.medianMaxRating,
+                feedback: this.options.feedback,
+                practiceInRef: this.options.postInMedian,
+                knockout: this.knockout,
+                musicSelected: this.options.musicSelect,
+                songUri: this.songUri,
+                songName: this.songName,
+                songArtist: this.songArtist,
+                songAlbum: this.songAlbum,
+                songDuration: this.songDuration,
+                moodDuration: this.options.moodDuration,
+                noiseDuration: this.options.durationWhiteNoise
+            };
+
+            return data;
+        },
 
         initOptions: function(){
             this.options = {
                 email: localStorage["c_email"] || 'lauren.vale@nyu.edu',
                 duration: +(localStorage["c_duration"] || 30),
-                ratingInterval: +(localStorage["c_ratingInterval"] || 1000),
+                ratingInterval: +(localStorage["c_ratingInterval"] || 1),
                 minRating: +(localStorage["c_minRating"] || 1),
                 setupSteps: +(localStorage["c_setupSteps"] || 2),
                 preSteps: +(localStorage["c_preSteps"] || 2),
@@ -322,8 +372,9 @@ else{
                 moodSelect: JSON.parse(localStorage["c_moodSelect"] || "false"),
                 postStimulusDuration: +(localStorage["c_postStimulusDuration"] || 120),
                 durationWhiteNoise: +(localStorage["c_durationWhiteNoise"] || 120),
-                moodDuration: +(localStorage["c_moodDuration"] || 180)       
-            }
+                moodDuration: +(localStorage["c_moodDuration"] || 180),
+                storeData: JSON.parse(localStorage["c_storeData"] || "true")
+            };
         },
 
         generateOptionsJSON: function(){
@@ -332,11 +383,11 @@ else{
 
         generateData: function(){
 
-            this.medianMaxDist = (this.postInMedian) ? findMedian(this.setupMaxDist.concat(this.preMaxDist, this.postMaxDist)) : findMedian(this.setupMaxDist); 
-            this.medianMinDist = (this.postInMedian) ? findMedian(this.setupMinDist.concat(this.preMinDist, this.postMinDist)) : findMedian(this.setupMinDist); 
+            this.medianMaxDist = (this.postInMedian) ? findMedian(this.setupMaxDist.concat(this.preMaxDist, this.postMaxDist)) : findMedian(this.setupMaxDist);
+            this.medianMinDist = (this.postInMedian) ? findMedian(this.setupMinDist.concat(this.preMinDist, this.postMinDist)) : findMedian(this.setupMinDist);
             
-            this.medianMaxRating = findMedian(this.practiceMaxRatings).toFixed(1); 
-            this.medianMinRating = findMedian(this.practiceMinRatings).toFixed(1); 
+            this.medianMaxRating = findMedian(this.practiceMaxRatings).toFixed(1);
+            this.medianMinRating = findMedian(this.practiceMinRatings).toFixed(1);
             
             var distNames = ['setup', 'pre', 'post'];
             for(var i = 0; i<distNames.length; i++){
@@ -349,17 +400,17 @@ else{
                 }
             }
 
-            if(config.knockout == ''){
+            if(config.knockout === '') {
                 config.knockout = 'None';
             }
-            else if(config.knockout == 'mood'){
+            else if(config.knockout == 'mood') {
                 config.knockout = 'Sad mood';
             }
-            else if(config.knockout == 'name'){
-                config.knockout = 'Name'
+            else if(config.knockout == 'name') {
+                config.knockout = 'Name';
             }
 
-            return tmpl("data_tmpl", this);       
+            return tmpl("data_tmpl", this);
         }
     };
     config.initOptions();
@@ -421,7 +472,7 @@ else{
 
         init: function(){
             this._super();
-            _bindAll(this, 'handleSave', 'showStart', 'floatButtons', 'unFloatButtons', 'showAudioWarn', 'onModeSelect', 'generateOptions');
+            _bindAll(this, 'handleSave', 'showStart', 'floatButtons', 'unFloatButtons', 'showAudioWarn', 'toggleOptionMode', 'generateOptions', 'loadOptions', 'disableAll', 'enableAll', 'downloadOptions', 'uploadOptions');
 
             if(!AUDIOCTX){
                 localStorage["c_feedAuditory"] = config.options.feedback.auditory = false;
@@ -438,7 +489,7 @@ else{
             this.setupSteps = $(this.el.find('#setupSteps')).val(config.options.setupSteps);
             this.preSteps = $(this.el.find('#preSteps')).val(config.options.preSteps);
             this.postSteps = $(this.el.find('#postSteps')).val(config.options.postSteps);
-            this.ratingInterval = $(this.el.find('#ratingInterval')).val(config.options.ratingInterval/1000);
+            this.ratingInterval = $(this.el.find('#ratingInterval')).val(config.options.ratingInterval);
             this.minRating = $(this.el.find('#minRating')).val(config.options.minRating);
 
             this.feedBarbell = $(this.el).find('#feedBarbell').prop('checked', config.options.feedback.barbell);
@@ -454,12 +505,20 @@ else{
             this.moodSelect = $(this.el.find('#moodSelect')).prop('checked', config.options.moodSelect);
             this.durationWhiteNoise = $(this.el.find('#durationWhiteNoise')).val(config.options.durationWhiteNoise);
             this.moodDuration = $(this.el.find('#moodDuration')).val(config.options.moodDuration);
+            this.storeData = $(this.el.find('#storeData')).prop('checked', config.options.storeData);
+
+            this.exp = this.el.find('#optExp');
+            this.expSel = this.el.find('#optExpSel');
+            $(this.expSel).on('change', this.downloadOptions);
+            this.downloadExperiments();
+            this.disableAll();
 
             this.header = this.el.find('#settingsHeader');
             this.moodWarn = this.el.find("#moodWarn");
             this.modeUpload = $("#modeUploadPage");
 
-            new MBP.fastButton(this.el.find('#saveSubmit'), this.handleSave);
+            this.saveButton = this.el.find('#saveSubmit');
+            new MBP.fastButton(this.saveButton, this.handleSave);
             new MBP.fastButton(this.el.find('#cancelSubmit'), this.showStart);
 
             $(this.setupSteps).on('change', function(){
@@ -468,15 +527,9 @@ else{
                 }
             });
 
-            if(config.optionsMode == "download"){
-                this.currentMode = $("#modeDownloadBtn").addClass("btn-selected");
-            }
-            else{
-                this.currentMode = $("#modePrivateBtn").addClass("btn-selected");
-            }
-
             var self = this;
-            $("#optionsMode").on("touchstart", this.onModeSelect);
+            this.optionsMode = this.el.find("#optionsMode");
+            $(this.optionsMode).on("touchstart", this.toggleOptionMode);
 
             this.uploadSubmit = document.body.find('#uploadSubmit');
             this.uploadExp = document.body.find("#uploadExperiment");
@@ -491,8 +544,16 @@ else{
 
             new MBP.fastButton(this.el.find('#modeUploadBtn'), function(){
                 $(self.el).css({display:'none', opacity: 0});
+                if(config.optionsMode == "download"){
+                    $(self.uploadExp).val($(self.expSel).val());
+                }
+                else{
+                    $(self.uploadExp).val($(self.exp).val());
+                }
                 $(self.uploadKey).val('');
-                self.modeUpload.css({display:'table'}).velocity({opacity:1}, 300);
+                self.modeUpload.css({display:'table'}).velocity({opacity:1}, 300, function(){
+                    window.scrollTo(0, 1);
+                });
             });
 
             var resetUploadButton = function(){
@@ -500,38 +561,7 @@ else{
             }
             $(this.uploadExp).on('change', resetUploadButton);
             $(this.uploadKey).on('change', resetUploadButton);
-
-            new MBP.fastButton(this.uploadSubmit, function(e){
-                e.preventDefault();
-                if($(this).prop('disabled')) return false;
-                var exp = $(self.uploadExp).val().trim(),
-                    key = $(self.uploadKey).val().trim();
-
-                if(exp == '' || key == '') return false;
-
-                $(this).val('Uploading...').prop('disabled', true);
-                $.ajax({
-                    url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/upload',
-                    type: 'POST',
-                    data: JSON.stringify({e: exp, k: key, o: self.generateOptions()}),
-                    contentType: 'application/json; charset=utf-8',
-                    dataType: 'json',
-                    timeout: 8000,
-                    success: function(msg) {
-                        if(msg && msg.error){
-                           $(self.uploadSubmit).val(msg.error).addClass('btn-error'); 
-                        }
-                        else{
-                           $(self.uploadSubmit).val('Upload successful').addClass('btn-success'); 
-                        }
-                        
-                    },
-                    error: function(jqXHR, textStatus, errorThrown){
-                        $(self.uploadSubmit).val('Error contacting server').addClass('btn-error') 
-                    }
-                });
-            });
-
+            new MBP.fastButton(this.uploadSubmit, this.uploadOptions);
             
             $("#audioOk").on('touchstart', function(e){
                 e.preventDefault();
@@ -579,15 +609,117 @@ else{
             $(this.el).on('focusout', 'input[type="text"]', this.floatButtons);
         },
 
+        disableAll: function(){
+            console.log("disabling");
+            $(this.el).find('input').prop('disabled', true);
+        },
 
+        enableAll: function(){
+            console.log("enabling");
+            $(this.el).find('input').prop('disabled', false);
+        },
 
-        onModeSelect: function(e){
+        uploadOptions: function(e){
             e.preventDefault();
-            $(this.currentMode).removeClass("btn-selected");
-            this.currentMode = e.target;
-            config.optionsMode = $(this.currentMode).data("name");
-            $(this.currentMode).addClass("btn-selected");
+            if($(this.uploadSubmit).prop('disabled')) return false;
+            var exp = $(this.uploadExp).val().trim(),
+                key = $(this.uploadKey).val().trim();
 
+            if(exp == '' || key == '') return false;
+
+            $(this.uploadSubmit).val('Uploading...').prop('disabled', true);
+
+            var self = this;
+            $.ajax({
+                url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/upload',
+                type: 'POST',
+                data: JSON.stringify({e: exp, k: key, o: self.generateOptions()}),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                timeout: 8000,
+                success: function(msg) {
+                    if(msg && msg.error){
+                       $(self.uploadSubmit).val(msg.error).addClass('btn-error'); 
+                    }
+                    else{
+                       $(self.uploadSubmit).val('Upload successful').addClass('btn-success'); 
+                    }
+                    
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                    $(self.uploadSubmit).val('Error contacting server').addClass('btn-error'); 
+                }
+            });
+        },
+
+        toggleOptionMode: function(e){
+            e.preventDefault();
+
+            if(e.target.tagName != "BUTTON") return false;
+
+            var optionTarget = e.target,
+                optionName = config.optionsMode = $(optionTarget).data("name");
+
+            $(this.optionsMode).find("button").removeClass("btn-selected");
+            $(optionTarget).addClass("btn-selected");
+
+            if(optionName == "download"){
+                $(this.exp).css({display:"none"});
+                $(this.expSel).css({display:"block"});
+                var expVal = $(this.exp).val().trim();
+                if(expVal != '' && $(this.expSel).find('option[value="'+ expVal + '"]').length > 0){
+                    $(this.expSel).val(expVal);
+                }
+                else{
+                    this.disableAll();
+                    $(this.expSel).val('').children().first().prop('selected', true);
+                }
+                $(this.saveButton).css({display:"none"});
+                this.loadOptions(config.serverOptions);
+            }
+            else{
+                $(this.expSel).css({display:"none"});
+                $(this.exp).css({display:"block"});  
+                $(this.saveButton).css({display:"block"});
+                this.enableAll();
+                this.loadOptions();              
+            }
+        },
+
+        downloadExperiments: function(){
+            var self = this;
+            $.ajax({
+                url: 'http://ec2-54-210-113-201.compute-1.amazonaws.com/exps',
+                type: 'GET',
+                dataType: 'json',
+                timeout: 5000,
+                success: function(exps) {
+                    //$(self.expSel).html('<option selected disabled style="display:none">Choose an experiment</option>');
+                    for(var i=0; i<exps.length; i++){
+                        $(self.expSel).append('<option value="' + exps[i] + '">' + exps[i] +'</option>');
+                    }
+                }
+            });
+        },
+
+        downloadOptions: function(){
+            var self = this;
+            this.disableAll();
+            $.ajax({
+                url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/download?e='+$(this.expSel).val(),
+                type: 'GET',
+                dataType: 'json',
+                timeout: 8000,
+                success: function(msg) {
+                    if(msg && msg.options){
+                        config.serverOptions = msg.options;
+                        self.loadOptions(config.serverOptions);
+                    }
+                },
+                complete: function(){
+                    self.enableAll();
+                }
+            });
         },
 
         showAudioWarn: function(e){
@@ -607,30 +739,34 @@ else{
         handleSave: function(e){
             e.preventDefault();
 
-            localStorage["c_email"] = config.options.email = $(this.email).val().trim();
-            localStorage["c_duration"] = config.options.duration = +$(this.duration).val().trim();
-            localStorage["c_postStimulusDuration"] = config.options.postStimulusDuration = +$(this.postStimulusDuration).val().trim();
-            config.totalDuration = (+config.options.duration) + (+config.options.postStimulusDuration);
+            if(config.optionsMode == "private" || $(this.expSel).val() == ""){
+                localStorage["c_email"] = config.options.email = $(this.email).val().trim();
+                localStorage["c_duration"] = config.options.duration = +$(this.duration).val().trim();
+                localStorage["c_postStimulusDuration"] = config.options.postStimulusDuration = +$(this.postStimulusDuration).val().trim();
+                config.totalDuration = (+config.options.duration) + (+config.options.postStimulusDuration);
 
-            localStorage["c_setupSteps"] = config.options.setupSteps = +($(this.setupSteps).val().trim());
-            localStorage["c_preSteps"] = config.options.preSteps = +($(this.preSteps).val().trim());
-            localStorage["c_postSteps"] = config.options.postSteps = +($(this.postSteps).val().trim());
-            localStorage["c_ratingInterval"] = config.options.ratingInterval = +($(this.ratingInterval).val().trim())*1000;
-            localStorage["c_minRating"] = config.options.minRating = +($(this.minRating).val().trim());
+                localStorage["c_setupSteps"] = config.options.setupSteps = +($(this.setupSteps).val().trim());
+                localStorage["c_preSteps"] = config.options.preSteps = +($(this.preSteps).val().trim());
+                localStorage["c_postSteps"] = config.options.postSteps = +($(this.postSteps).val().trim());
+                localStorage["c_ratingInterval"] = config.options.ratingInterval = +($(this.ratingInterval).val().trim());
+                localStorage["c_minRating"] = config.options.minRating = +($(this.minRating).val().trim());
 
-            localStorage["c_feedBarbell"] = config.options.feedback.barbell = $(this.feedBarbell).prop('checked');
-            localStorage["c_feedRange"] = config.options.feedback.range = $(this.feedRange).prop('checked');
-            localStorage["c_feedNumeric"] = config.options.feedback.numeric = $(this.feedNumeric).prop('checked');
-            localStorage["c_feedAuditory"] = config.options.feedback.auditory = $(this.feedAuditory).prop('checked');
-            localStorage["c_feedTactile"] = config.options.feedback.tactile = $(this.feedTactile).prop('checked');
-            localStorage["c_feedBarVaries"] = config.options.feedback.barVaries = $(this.feedBarVaries).prop('checked');
+                localStorage["c_feedBarbell"] = config.options.feedback.barbell = $(this.feedBarbell).prop('checked');
+                localStorage["c_feedRange"] = config.options.feedback.range = $(this.feedRange).prop('checked');
+                localStorage["c_feedNumeric"] = config.options.feedback.numeric = $(this.feedNumeric).prop('checked');
+                localStorage["c_feedAuditory"] = config.options.feedback.auditory = $(this.feedAuditory).prop('checked');
+                localStorage["c_feedTactile"] = config.options.feedback.tactile = $(this.feedTactile).prop('checked');
+                localStorage["c_feedBarVaries"] = config.options.feedback.barVaries = $(this.feedBarVaries).prop('checked');
 
-            localStorage["c_postInMedian"] = config.options.postInMedian = $(this.postInMedian).prop('checked');
-            localStorage["c_musicSelect"] = config.options.musicSelect = $(this.musicSelect).prop('checked');
-            localStorage["c_nameSelect"] = config.options.nameSelect = $(this.nameSelect).prop('checked');
-            localStorage["c_moodSelect"] = config.options.moodSelect = $(this.moodSelect).prop('checked');
-            localStorage["c_durationWhiteNoise"] = config.options.durationWhiteNoise = +$(this.durationWhiteNoise).val().trim();
-            localStorage["c_moodDuration"] = config.options.moodDuration = +$(this.moodDuration).val().trim();
+                localStorage["c_postInMedian"] = config.options.postInMedian = $(this.postInMedian).prop('checked');
+                localStorage["c_musicSelect"] = config.options.musicSelect = $(this.musicSelect).prop('checked');
+                localStorage["c_nameSelect"] = config.options.nameSelect = $(this.nameSelect).prop('checked');
+                localStorage["c_moodSelect"] = config.options.moodSelect = $(this.moodSelect).prop('checked');
+                localStorage["c_durationWhiteNoise"] = config.options.durationWhiteNoise = +$(this.durationWhiteNoise).val().trim();
+                localStorage["c_moodDuration"] = config.options.moodDuration = +$(this.moodDuration).val().trim();
+                localStorage["c_storeData"] = config.options.storeData = $(this.storeData).prop('checked');
+            }
+
 
             this.showStart(e);
         },
@@ -639,7 +775,7 @@ else{
             var options = {
                 email: $(this.email).val().trim(),
                 duration: +$(this.duration).val().trim(),
-                ratingInterval: +($(this.ratingInterval).val().trim())*1000,
+                ratingInterval: +($(this.ratingInterval).val().trim()),
                 minRating: +($(this.minRating).val().trim()),
                 setupSteps: +($(this.setupSteps).val().trim()),
                 preSteps: +($(this.preSteps).val().trim()),
@@ -659,10 +795,42 @@ else{
                 moodSelect: $(this.moodSelect).prop('checked'),
                 postStimulusDuration: +$(this.postStimulusDuration).val().trim(),
                 durationWhiteNoise: +$(this.durationWhiteNoise).val().trim(),
-                moodDuration: +$(this.moodDuration).val().trim(),        
+                moodDuration: +$(this.moodDuration).val().trim(),
+                storeData: $(this.storeData).prop('checked')     
             };
 
             return options;
+        },
+
+        loadOptions: function(options){
+            if(!options || $.isEmptyObject(options)){
+                options = config.options;
+            }
+
+            $(this.email).val(options.email);
+            $(this.duration).val(options.duration);
+            $(this.postStimulusDuration).val(options.postStimulusDuration);
+
+            $(this.setupSteps).val(options.setupSteps);
+            $(this.preSteps).val(options.preSteps);
+            $(this.postSteps).val(options.postSteps);
+            $(this.ratingInterval).val(options.ratingInterval);
+            $(this.minRating).val(options.minRating);
+
+            $(this.feedBarbell).prop('checked', options.feedback.barbell);
+            $(this.feedRange).prop('checked', options.feedback.range);
+            $(this.feedNumeric).prop('checked', options.feedback.numeric);
+            $(this.feedAuditory).prop('checked', options.feedback.auditory);
+            $(this.feedTactile).prop('checked', options.feedback.tactile);
+            $(this.feedBarVaries).prop('checked', options.feedback.barVaries);
+
+            $(this.postInMedian).prop('checked', options.postInMedian);
+            $(this.musicSelect).prop('checked', options.musicSelect);
+            $(this.nameSelect).prop('checked', options.nameSelect);
+            $(this.moodSelect).prop('checked', options.moodSelect);
+            $(this.durationWhiteNoise).val(options.durationWhiteNoise);
+            $(this.moodDuration).val(options.moodDuration);
+            $(this.storeData).prop('checked', options.storeData);
         },
 
         handleResize: function(){
@@ -679,30 +847,9 @@ else{
         },
 
         render: function(){
-            $(this.email).val(config.options.email);
-            $(this.duration).val(config.options.duration);
-            $(this.postStimulusDuration).val(config.options.postStimulusDuration);
-
-            $(this.setupSteps).val(config.options.setupSteps);
-            $(this.preSteps).val(config.options.preSteps);
-            $(this.postSteps).val(config.options.postSteps);
-            $(this.ratingInterval).val(config.options.ratingInterval/1000);
-            $(this.minRating).val(config.options.minRating);
-
-            $(this.feedBarbell).prop('checked', config.options.feedback.barbell);
-            $(this.feedRange).prop('checked', config.options.feedback.range);
-            $(this.feedNumeric).prop('checked', config.options.feedback.numeric);
-            $(this.feedAuditory).prop('checked', config.options.feedback.auditory);
-            $(this.feedTactile).prop('checked', config.options.feedback.tactile);
-            $(this.feedBarVaries).prop('checked', config.options.feedback.barVaries);
-
-            $(this.postInMedian).prop('checked', config.options.postInMedian);
-            $(this.musicSelect).prop('checked', config.options.musicSelect);
-            $(this.nameSelect).prop('checked', config.options.nameSelect);
-            $(this.moodSelect).prop('checked', config.options.moodSelect);
-            $(this.durationWhiteNoise).val(config.options.durationWhiteNoise);
-            $(this.moodDuration).val(config.options.moodDuration);
-
+            if(config.optionsMode != "download"){
+                this.loadOptions();
+            }
             this.floatButtons();
         },
 
@@ -815,6 +962,15 @@ else{
         },
 
         render: function(){
+            if(config.optionsMode == 'download' && $(settingsPage.expSel).val() != ""){
+                $(this.experiment).val($(settingsPage.expSel).val());
+                $(this.experiment).prop('disabled', true);
+            }
+            else{
+                $(this.experiment).val($(settingsPage.exp).val());
+                $(this.experiment).prop('disabled', false);
+            }
+
             $(this.submitButton).prop("disabled", false).val("Continue");
             config.initOptions();
             config.setupMaxDist = [];
@@ -933,9 +1089,6 @@ else{
             this.nameContainer.style.opacity = 0;
             this.recordings.innerHTML = '<div class="page page-center" style="width:60px;height:64px"><div class="big-loader"></div></div>'
             this.nameMessages.innerHTML = '';
-            setTimeout(function () {
-                window.scrollTo(0, 0);
-            }, 1);
             $(this.titleCont).css({display:'block', opacity:1});
             this.titleIndex = 0;
         },
@@ -1479,9 +1632,6 @@ else{
             }
             // $(this.select).css({opacity:0, 'display':'none'});
             this.loader.style.display = 'none';
-            setTimeout(function () {
-                window.scrollTo(0, 0);
-            }, 1);
             //this.songList.innerHTML = '';
         },
 
@@ -2476,7 +2626,7 @@ else{
 
 
         sampleRating: function(){
-            this.timers.sample = setTimeout(this.sampleRating, config.options.ratingInterval);
+            this.timers.sample = setTimeout(this.sampleRating, config.options.ratingInterval * 1000);
 
             var touches = this.touches,
                 rating = rater.getRating(touches).toFixed(1),
@@ -2513,7 +2663,7 @@ else{
             this.feedbacks.disableAll();
 
             this.sampleRating();
-            var numSamples = Math.floor(config.durationActual/(config.options.ratingInterval/1000));
+            var numSamples = Math.floor(config.durationActual/config.options.ratingInterval);
             config.ratings = this.samples.slice(0, numSamples);
             config.ratingsPx = this.samplesPx.slice(0, numSamples);
             config.valid = this.valid.slice(0, numSamples);
@@ -2558,7 +2708,7 @@ else{
             if(!this.status.started){
                 this.status.started = true;
                 $(this.titleText).hide();
-                this.timers.sample = setTimeout(this.sampleRating, config.options.ratingInterval);
+                this.timers.sample = setTimeout(this.sampleRating, config.options.ratingInterval * 1000);
                 this.timers.end = setTimeout(this.stop, (config.totalDuration * 1000) );
 
                 config.experimentTime = new Date();
@@ -2665,7 +2815,6 @@ else{
             config.feltPleasure = $(this.selected).val();
 
             transEl(self.survey, self.messages, 400, function(){
-
                 var finalData = config.generateData();
                 $(self.sendButton).attr("href", generateMailLink(finalData));
                 mailDataMandrill(finalData, function(res){
@@ -2739,11 +2888,6 @@ else{
         handleResize: function(){
 
             if(this.curPage.limitOrient){ 
-
-                setTimeout(function(){
-                    window.scrollTo(0, 1);
-                }, 0);
-
                 if (window.innerWidth > window.innerHeight) { // Landscape
                     this.orientPage.hide();
                     //this.curPage.el.show();

@@ -286,7 +286,8 @@ h3{
 #optionsMode .btn{
   width:50%;
   padding: 12px 0;
-  margin-bottom:10px;
+  margin-top: 0;
+  margin-bottom: 10px;
 }
 
 
@@ -394,6 +395,11 @@ input[type="checkbox"]:checked:after {
 
 input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:focus{
   outline:0;
+}
+
+.inpt:disabled{
+  background-color:#ddd;
+  color:#000;
 }
 
 .doubleTouch{

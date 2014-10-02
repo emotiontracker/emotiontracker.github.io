@@ -246,6 +246,7 @@ else{
 
     var rater = { getRating: function(){} };
     var config = {
+        appCreateDate: 'Friday September 26 2014',
         name: '',
         experiment: '',
         experimentTime: '',
@@ -282,7 +283,7 @@ else{
         os: ua_parser.getOS().name + ' ' + ua_parser.getOS().version,
         browser: ua_parser.getBrowser().name + ' ' + ua_parser.getBrowser().major,
         
-        optionsMode: "download",
+        optionsMode: "server",
         options:{},
         serverOptions: {},
 
@@ -298,10 +299,12 @@ else{
             var data = {
                 experiment: this.experiment,
                 name: this.name,
-                email: this.options.email,
+                optionsMode: this.optionsMode,
                 url: this.url,
-                appCreateDate: getDateString(this.experimentTime),
-                timeZero: (this.absoluteTime / 1000).toFixed(2),
+                appCreateDate: this.appCreateDate,
+                appVersion: VERSION,
+                timeZero: getDateString(this.experimentTime),
+                timeZeroAbs: (this.absoluteTime / 1000).toFixed(2),
                 ratings: this.ratings,
                 spread: this.ratingsPx,
                 valid: this.valid,
@@ -317,10 +320,6 @@ else{
                 windowWidth: this.windowWidth,
                 windowHeight: this.windowHeight,
                 location: this.location,
-                ratingInterval: this.options.ratingInterval,
-                minRating: this.options.minRating,
-                duration: this.options.duration,
-                postDuration: this.options.postStimulusDuration,
                 actualDuration: this.durationActual,
                 setupMinDist: this.setupMinDist,
                 setupMaxDist: this.setupMaxDist,
@@ -332,17 +331,13 @@ else{
                 postMaxDist: this.postMaxDist,
                 medianMinRating: this.medianMinRating,
                 medianMaxRating: this.medianMaxRating,
-                feedback: this.options.feedback,
-                practiceInRef: this.options.postInMedian,
                 knockout: this.knockout,
-                musicSelected: this.options.musicSelect,
                 songUri: this.songUri,
                 songName: this.songName,
                 songArtist: this.songArtist,
                 songAlbum: this.songAlbum,
                 songDuration: this.songDuration,
-                moodDuration: this.options.moodDuration,
-                noiseDuration: this.options.durationWhiteNoise
+                options: this.options
             };
 
             return data;
@@ -435,12 +430,12 @@ else{
                         distance = maxDist;
                     }
 
-                    return ((distance - minDist) / ratingStep) + config.options.minRating;                      
+                    return ((distance - minDist) / ratingStep) + config.options.minRating;
                 },
 
                 getRating: function(touches){
                     var distance = getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
-                    return this.getRatingFromDist(distance);                
+                    return this.getRatingFromDist(distance);
                 },
             };
         })();
@@ -455,7 +450,7 @@ else{
         config.location.long = location.coords.longitude;
         config.location.accuracy = location.coords.accuracy;
 
-        $.get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + config.location.lat + ',' + config.location.long + '&key=AIzaSyB_fvbdKS675ZptvH62faLD5IuG7sbrEb0', function(data) { 
+        $.get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + config.location.lat + ',' + config.location.long + '&key=AIzaSyB_fvbdKS675ZptvH62faLD5IuG7sbrEb0', function(data) {
             var addr = data.results[0];
             config.location.near = addr.formatted_address;
         });
@@ -463,7 +458,7 @@ else{
 
     var getDistance = function(x1, y1, x2, y2){
         return Math.floor(Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)));
-    }
+    };
 
     var settingsPage = new (Page.extend({
         id: 'settingsPage',
@@ -479,7 +474,7 @@ else{
                 localStorage["c_musicSelect"] = config.options.musicSelect = false;
 
                 $(this.el.find('#feedAuditory')).on('click', this.showAudioWarn);
-                $(this.el.find('#musicSelect')).on('click', this.showAudioWarn);                
+                $(this.el.find('#musicSelect')).on('click', this.showAudioWarn);
             }
 
             this.email = $(this.el.find('#email')).val(config.options.email);
@@ -511,7 +506,6 @@ else{
             this.expSel = this.el.find('#optExpSel');
             $(this.expSel).on('change', this.downloadOptions);
             this.downloadExperiments();
-            this.disableAll();
 
             this.header = this.el.find('#settingsHeader');
             this.moodWarn = this.el.find("#moodWarn");
@@ -544,7 +538,7 @@ else{
 
             new MBP.fastButton(this.el.find('#modeUploadBtn'), function(){
                 $(self.el).css({display:'none', opacity: 0});
-                if(config.optionsMode == "download"){
+                if(config.optionsMode == "server"){
                     $(self.uploadExp).val($(self.expSel).val());
                 }
                 else{
@@ -558,7 +552,8 @@ else{
 
             var resetUploadButton = function(){
                 $(self.uploadSubmit).val('Upload').prop('disabled', false).removeClass('btn-success btn-error');
-            }
+            };
+
             $(this.uploadExp).on('change', resetUploadButton);
             $(this.uploadKey).on('change', resetUploadButton);
             new MBP.fastButton(this.uploadSubmit, this.uploadOptions);
@@ -569,10 +564,10 @@ else{
                     $(this).css({display:'none'});
                     $(document).off('touchmove', self.onDialogScroll);
                 });
-            }); 
+            });
 
             $(this.moodSelect).on('click', function(e){
-                if($(this).prop('checked') == false){
+                if($(this).prop('checked') === false) {
                     return true;
                 }
                 e.preventDefault();
@@ -587,7 +582,7 @@ else{
                     $(document).off('touchmove', self.onDialogScroll);
                 });
                 $(self.moodSelect).prop('checked', true);
-            });  
+            });
 
             $("#moodNo").on('touchstart', function(e){
                 e.preventDefault();
@@ -596,7 +591,8 @@ else{
                     $(document).off('touchmove', self.onDialogScroll);
                 });
                 $(self.moodSelect).prop('checked', false);
-            }); 
+            });
+
             $(window).on('resize', this.handleResize);
 
             $(this.moodDuration).on('change', function(){
@@ -609,13 +605,11 @@ else{
             $(this.el).on('focusout', 'input[type="text"]', this.floatButtons);
         },
 
-        disableAll: function(){
-            console.log("disabling");
+        disableAll: function() {
             $(this.el).find('input').prop('disabled', true);
         },
 
-        enableAll: function(){
-            console.log("enabling");
+        enableAll: function() {
             $(this.el).find('input').prop('disabled', false);
         },
 
@@ -625,7 +619,7 @@ else{
             var exp = $(this.uploadExp).val().trim(),
                 key = $(this.uploadKey).val().trim();
 
-            if(exp == '' || key == '') return false;
+            if(exp === '' || key === '') return false;
 
             $(this.uploadSubmit).val('Uploading...').prop('disabled', true);
 
@@ -639,15 +633,15 @@ else{
                 timeout: 8000,
                 success: function(msg) {
                     if(msg && msg.error){
-                       $(self.uploadSubmit).val(msg.error).addClass('btn-error'); 
+                       $(self.uploadSubmit).val(msg.error).addClass('btn-error');
                     }
                     else{
-                       $(self.uploadSubmit).val('Upload successful').addClass('btn-success'); 
+                       $(self.uploadSubmit).val('Upload successful').addClass('btn-success');
                     }
                     
                 },
                 error: function(jqXHR, textStatus, errorThrown){
-                    $(self.uploadSubmit).val('Error contacting server').addClass('btn-error'); 
+                    $(self.uploadSubmit).val('Error contacting server').addClass('btn-error');
                 }
             });
         },
@@ -663,26 +657,25 @@ else{
             $(this.optionsMode).find("button").removeClass("btn-selected");
             $(optionTarget).addClass("btn-selected");
 
-            if(optionName == "download"){
+            if(optionName == "server"){
                 $(this.exp).css({display:"none"});
                 $(this.expSel).css({display:"block"});
                 var expVal = $(this.exp).val().trim();
-                if(expVal != '' && $(this.expSel).find('option[value="'+ expVal + '"]').length > 0){
+                if(expVal !== '' && $(this.expSel).find('option[value="'+ expVal + '"]').length > 0) {
                     $(this.expSel).val(expVal);
                 }
                 else{
-                    this.disableAll();
-                    $(this.expSel).val('').children().first().prop('selected', true);
+                    $(this.expSel).val('Default');
                 }
                 $(this.saveButton).css({display:"none"});
                 this.loadOptions(config.serverOptions);
             }
             else{
                 $(this.expSel).css({display:"none"});
-                $(this.exp).css({display:"block"});  
+                $(this.exp).css({display:"block"});
                 $(this.saveButton).css({display:"block"});
-                this.enableAll();
-                this.loadOptions();              
+                //this.enableAll();
+                this.loadOptions();
             }
         },
 
@@ -698,6 +691,8 @@ else{
                     for(var i=0; i<exps.length; i++){
                         $(self.expSel).append('<option value="' + exps[i] + '">' + exps[i] +'</option>');
                     }
+                    $(self.expSel).val('Default');
+                    self.downloadOptions();
                 }
             });
         },
@@ -723,7 +718,7 @@ else{
         },
 
         showAudioWarn: function(e){
-            if($(e.target).prop('checked') == false){
+            if($(e.target).prop('checked') === false){
                 return true;
             }
             e.preventDefault();
@@ -739,7 +734,7 @@ else{
         handleSave: function(e){
             e.preventDefault();
 
-            if(config.optionsMode == "private" || $(this.expSel).val() == ""){
+            if(config.optionsMode == "here" || $(this.expSel).val() == ""){
                 localStorage["c_email"] = config.options.email = $(this.email).val().trim();
                 localStorage["c_duration"] = config.options.duration = +$(this.duration).val().trim();
                 localStorage["c_postStimulusDuration"] = config.options.postStimulusDuration = +$(this.postStimulusDuration).val().trim();
@@ -847,7 +842,7 @@ else{
         },
 
         render: function(){
-            if(config.optionsMode != "download"){
+            if(config.optionsMode != "server"){
                 this.loadOptions();
             }
             this.floatButtons();
@@ -921,28 +916,10 @@ else{
             $(this.experiment).blur();
 
             if(flag === false){
-                if(config.optionsMode == "download"){
-                    $(this.submitButton).prop("disabled", true).val("Configuring...");
-
-                    $.ajax({
-                        url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/download?e='+config.experiment,
-                        type: 'GET',
-                        dataType: 'json',
-                        timeout: 8000,
-                        success: function(msg) {
-                            if(msg && msg.options){
-                                config.options = msg.options;
-                            }
-                        },
-                        complete: function(){
-                            PageController.transition("knockout");
-                        }
-                    });
+                if(config.optionsMode == "server") {
+                    config.options = config.serverOptions;
                 }
-                else{
-                    PageController.transition("knockout");
-                }
-                
+                PageController.transition("knockout");
             }
 
         },
@@ -962,7 +939,7 @@ else{
         },
 
         render: function(){
-            if(config.optionsMode == 'download' && $(settingsPage.expSel).val() != ""){
+            if(config.optionsMode == "server" && $(settingsPage.expSel).val() != ""){
                 $(this.experiment).val($(settingsPage.expSel).val());
                 $(this.experiment).prop('disabled', true);
             }

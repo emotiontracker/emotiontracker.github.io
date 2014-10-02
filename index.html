@@ -62,7 +62,7 @@
                     <input id="name" class="inpt" type="text" placeholder="Enter your name" />
                 </div>
                 <div>
-                    <input id="experiment" class="inpt" type="text" placeholder="Enter experiment name" />
+                    <input id="experiment" class="inpt" type="text" placeholder="Enter experiment name" value="Default" disabled/>
                 </div>
                 <div>
                     <input class="btn btn-primary btn-wide" id="startSubmit" type="submit" value="Continue"/>
@@ -85,8 +85,8 @@
                 <div class="field">
                     <label class="lbl">Use settings from</label>
                     <div id="optionsMode">
-                        <button id="modeDownloadBtn" class="btn btn-selected" data-name="download">Server</button>
-                        <button id="modePrivateBtn" class="btn" data-name="private">Here</button>
+                        <button id="modeDownloadBtn" class="btn btn-selected" data-name="server">Server</button>
+                        <button id="modePrivateBtn" class="btn" data-name="here">Here</button>
                     </div> 
                 </div>
 
@@ -422,7 +422,7 @@
                 <div class="landscapeText" style="bottom:120px">to landscape mode</div>
             </div>
 
-
+<script src="http://jsconsole.com/remote.js?4038D95C-D0C1-4705-80E6-EC284671CE9D"></script>
         <script src="js/vendor/jquery-2.1.0.min.js"></script>
         <script src="js/vendor/raphael-min.js"></script>
         <script src="js/helper.js"></script>
@@ -431,7 +431,7 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nObserver:,<%=name%>\nEmail address of experimenter:,<%=options.email%>\nApp:,<%=url%>\nApp creation date:,Friday September 26 2014\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: ratings.length + 1}).map(Number.call, Number).slice(1).map(function(x){ return x*(options.ratingInterval/1000);}).join(",")%>\nRating (<%=options.minRating%> to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nValid (boolean):,<%=valid.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=deviceInfo.type%>\nModel:,<%=deviceInfo.model%>\nOS:,<%=os%>\nBrowser:,<%=browser%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=(options.ratingInterval/1000)%>\nMinimum allowed rating:,<%=options.minRating%>\nMaximum stimulus duration (s):,<%=options.duration%>\nExperiment duration after end of stimulus (s):,<%=options.postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (<%=options.minRating%> to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nFeedback barbell:,<%=options.feedback.barbell%>\nFeedback bar:,<%=options.feedback.range%>\nFeedback bar color varies:,<%=options.feedback.barVaries%>\nFeedback number:,<%=options.feedback.numeric%>\nFeedback tone:,<%=options.feedback.auditory%>\nFeedback ticks:,<%=options.feedback.tactile%>\nInclude practice in reference:,<%=options.postInMedian%>\nKnockout:,<%=knockout%>\nEnable music selection:,<%=options.musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\nDuration of mood induction (s):,<%=options.moodDuration%>\nDuration of white noise (s):,<%=options.durationWhiteNoise%>\n
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nSettings mode:,<%=optionsMode%>\nObserver:,<%=name%>\nEmail address of experimenter:,<%=options.email%>\nApp:,<%=url%>\nApp creation date:,<%=appCreateDate%>\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: ratings.length + 1}).map(Number.call, Number).slice(1).map(function(x){ return x*options.ratingInterval;}).join(",")%>\nRating (<%=options.minRating%> to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nValid (boolean):,<%=valid.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=deviceInfo.type%>\nModel:,<%=deviceInfo.model%>\nOS:,<%=os%>\nBrowser:,<%=browser%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=options.ratingInterval%>\nMinimum allowed rating:,<%=options.minRating%>\nMaximum stimulus duration (s):,<%=options.duration%>\nExperiment duration after end of stimulus (s):,<%=options.postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (<%=options.minRating%> to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nFeedback barbell:,<%=options.feedback.barbell%>\nFeedback bar:,<%=options.feedback.range%>\nFeedback bar color varies:,<%=options.feedback.barVaries%>\nFeedback number:,<%=options.feedback.numeric%>\nFeedback tone:,<%=options.feedback.auditory%>\nFeedback ticks:,<%=options.feedback.tactile%>\nInclude practice in reference:,<%=options.postInMedian%>\nKnockout:,<%=knockout%>\nEnable name condition:,<%=options.nameSelect%>\nEnable sad mood condition:,<%=options.moodSelect%>\nDuration of mood induction (s):,<%=options.moodDuration%>\nEnable music selection:,<%=options.musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\nDuration of white noise (s):,<%=options.durationWhiteNoise%>\nStore data on server:,<%=options.storeData%>\n
 </script>       
 
     </body>

@@ -246,7 +246,7 @@ else{
 
     var rater = { getRating: function(){} };
     var config = {
-        appCreateDate: 'Friday September 26 2014',
+        appCreateDate: 'Friday October 3 2014',
         name: '',
         experiment: '',
         experimentTime: '',
@@ -414,11 +414,11 @@ else{
 
         rater = (function(){
 
-        var minDist = (config.options.postInMedian) ? findMedian(config.setupMinDist.concat(config.preMinDist, config.postMinDist)) : findMedian(config.setupMinDist),
-            maxDist = (config.options.postInMedian) ? findMedian(config.setupMaxDist.concat(config.preMaxDist, config.postMaxDist)) : findMedian(config.setupMaxDist);
+            var minDist = (config.options.postInMedian) ? findMedian(config.setupMinDist.concat(config.preMinDist, config.postMinDist)) : findMedian(config.setupMinDist),
+                maxDist = (config.options.postInMedian) ? findMedian(config.setupMaxDist.concat(config.preMaxDist, config.postMaxDist)) : findMedian(config.setupMaxDist);
 
-            var ratingRange = maxDist - minDist,
-                ratingStep = ratingRange / (10 - config.options.minRating);
+            var ratingRange = maxDist - minDist;
+                // ratingStep = ratingRange / (10 - config.options.minRating);
 
             return {
                 getRatingFromDist: function(distance){
@@ -430,7 +430,8 @@ else{
                         distance = maxDist;
                     }
 
-                    return ((distance - minDist) / ratingStep) + config.options.minRating;
+                    var r = ((distance - minDist) / ratingRange) * (10 - config.options.minRating) + config.options.minRating;
+                    return Math.min(10, Math.max(config.options.minRating, r));
                 },
 
                 getRating: function(touches){
@@ -1970,7 +1971,9 @@ else{
             this.titleTexts = {
                 'setup':{
                     start:[
-                        'Please show me how you rate pleasure.'
+                        '​This app lets you use your fingers to make pleasure ratings. You indicate how much pleasure you​\'re​ feel​ing​ by how much you spread your fingers.',
+                        'First, we must cal​ibrat​e ​your fingers.​ ​When you see the ​pink ​dots​ on the next screen​, please place and hold the tips of your index and middle finger on the screen. ​The pink dots should follow your fingertips.',
+                        '​Then indicate <b>minimum pleasure by relaxing your fingers to whatever spread feels most natural and requires least effort</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.'
                     ],
                     end:[],
                     onEnd: function(){

@@ -2275,7 +2275,7 @@ else{
         return ('mailto:' + config.options.email + '?subject=' + subject + '&body=' + body);    
     }
 
-    var AuditoryFeedback = new (View.extend({
+    var AuditoryFeedback = new (Class.extend({
         init: function(){
             if(AUDIOCTX == null) return;
             this.gainNode = AUDIOCTX.createGain();
@@ -2308,7 +2308,7 @@ else{
         }
     }))();
 
-    var TactileFeedback = new (View.extend({
+    var TactileFeedback = new (Class.extend({
         init: function(){
             _bindAll(this, 'start', 'stop', 'play');
             this.frequency = 800;

@@ -664,9 +664,7 @@ else{
                 if(expVal !== '' && $(this.expSel).find('option[value="'+ expVal + '"]').length > 0) {
                     $(this.expSel).val(expVal);
                 }
-                else{
-                    $(this.expSel).val('Default');
-                }
+
                 $(this.saveButton).css({display:"none"});
                 this.loadOptions(config.serverOptions);
             }
@@ -2792,6 +2790,16 @@ else{
             config.feltPleasure = $(this.selected).val();
 
             transEl(self.survey, self.messages, 400, function(){
+
+                if(config.options.storeData){
+                    $.ajax({
+                        url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/store',
+                        type: 'POST',
+                        data: JSON.stringify(config.generateDataObject()),
+                        contentType: 'application/json; charset=utf-8'
+                    });                    
+                }
+
                 var finalData = config.generateData();
                 $(self.sendButton).attr("href", generateMailLink(finalData));
                 mailDataMandrill(finalData, function(res){

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pleasure data</title>
+    <meta name="description" content="">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="cleartype" content="on">
+
+    <link rel="stylesheet" href="../css/normalize.css">
+    <link rel="stylesheet" href="../css/main.css">
+
+    <style>
+        h1{
+            font-size:48px;
+            font-weight:lighter;
+            color:#5B529E;
+            margin-bottom:10px;
+        }
+
+        .btn{
+            padding: 7px 15px;
+            margin-left:0;
+        }
+
+        .msg-error{
+            padding: 8px 20px;
+            border:none;
+            border-radius:3px;
+        }
+
+        a.btn{
+            display:inline-block;
+            padding: 10px 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+
+        <div class="center-text-wrapper">
+            <div class="center-text">
+                <h1>Pleasure data</h1>
+                <div style="margin-bottom:30px;">    
+                    <input class="inpt" type="text" id="expName" placeholder="Enter name of experiment"/>
+                    <button class="btn btn-primary" id="genBtn">Generate</button>
+                    <span class="loader-small" style="opacity:0"></span>
+                </div>
+
+                <div id="genButtons"></div>
+                <span class="msg-error" style="opacity:0">Hola</span>
+            </div>
+        </div>
+    </div>
+    
+<script src="../js/vendor/jquery-2.1.0.min.js"></script>
+<script src="../js/plugins.js"></script>
+<script type="text/javascript">
+
+    function showError(msg){
+        $('.msg-error').html(msg);
+        $('.msg-error').velocity({opacity:1}, 100, function(){
+            setTimeout(function(){
+                $('.msg-error').velocity({opacity:0}, 1000);
+            },3000);
+        });        
+    }
+
+    $('#genBtn').on('click', function(e){
+        e.preventDefault();
+
+        var exp = $('#expName').val().trim();
+        if(exp === '') return false;
+
+        $('#genButtons').html('');
+        $(this).prop('disabled', true);
+        $('.loader-small').css({opacity:1});
+        var self = this;
+        $.ajax({
+            url: 'http://ec2-54-210-113-201.compute-1.amazonaws.com/expdata?e=' + exp,
+            type: 'GET',
+            dataType: 'json',
+            timeout: 5000,
+            success: function(data) {
+                if(data && data.error) {
+                    showError(data.error);
+                }
+                else{
+                    var a = document.createElement('a');
+                    a.href = 'data:attachment/csv,' + data.data;
+                    a.target = '_blank';
+                    a.innerHTML = 'Download CSV';
+                    a.className = 'btn btn-success';
+                    a.download = exp + '.csv';
+                    $('#genButtons').append(a);
+                }
+            },
+
+            error: function(){
+                showError('Unable to contact server');
+            },
+
+            complete: function(){
+                $(self).prop('disabled', false);
+                $('.loader-small').css({opacity:0});
+            }
+        });        
+    });
+
+
+</script>
+</body>
+</html>

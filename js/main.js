@@ -2275,7 +2275,7 @@ else{
         return ('mailto:' + config.options.email + '?subject=' + subject + '&body=' + body);    
     }
 
-    var AuditoryFeedback = new (Class.extend({
+    var AuditoryFeedbackClass = Class.extend({
         init: function(){
             if(AUDIOCTX == null) return;
             this.gainNode = AUDIOCTX.createGain();
@@ -2286,8 +2286,6 @@ else{
         getFrequencyFromRating: function(rating){
             rating += 1;
             return ( 440 * Math.pow(10, (0.1 * rating * (Math.log(4186.1/440) / Math.log(10) ) ) ) );
-            //return Math.log(rating) * 1000;
-            //return 27.5;
         },
 
         onStart: function(t, rating){
@@ -2306,9 +2304,10 @@ else{
         onEnd: function(){
             this.oscillator.disconnect();
         }
-    }))();
+    });
+    var AuditoryFeedback = new AuditoryFeedbackClass();
 
-    var TactileFeedback = new (Class.extend({
+    var TactileFeedbackClass = Class.extend({
         init: function(){
             _bindAll(this, 'start', 'stop', 'play');
             this.frequency = 800;
@@ -2347,7 +2346,8 @@ else{
         onEnd: function(t, rating){
             this.stop();
         }
-    }))();
+    });
+    var TactileFeedback = new TactileFeedbackClass();
 
 
     var Feedbacks = View.extend({

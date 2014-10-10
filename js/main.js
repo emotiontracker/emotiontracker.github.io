@@ -61,7 +61,7 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.1.21', STORELOCAL = localStorageTest();
+    var VERSION = '1.1.3', STORELOCAL = localStorageTest();
 
     if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
         localStorage.clear();
@@ -259,7 +259,7 @@ else {
 
     var rater = { getRating: function(){} };
     var config = {
-        appCreateDate: 'Friday October 3 2014',
+        appCreateDate: 'Friday October 10 2014',
         name: '',
         experiment: '',
         experimentTime: '',
@@ -438,14 +438,6 @@ else {
 
             return {
                 getRatingFromDist: function(distance){
-
-                    if(distance < minDist) {
-                        distance = minDist;
-                    }
-                    else if(distance > maxDist){
-                        distance = maxDist;
-                    }
-
                     var r = ((distance - minDist) / ratingRange) * (10 - config.options.minRating) + config.options.minRating;
                     return Math.min(10, Math.max(config.options.minRating, r));
                 },
@@ -483,7 +475,7 @@ else {
 
         init: function(){
             this._super();
-            _bindAll(this, 'handleSave', 'showStart', 'floatButtons', 'unFloatButtons', 'showAudioWarn', 'toggleOptionMode', 'generateOptions', 'loadOptions', 'disableAll', 'enableAll', 'downloadOptions', 'uploadOptions');
+            _bindAll(this, 'handleSave', 'showStart', 'floatButtons', 'unFloatButtons', 'showAudioWarn', 'toggleOptionMode', 'generateOptions', 'loadOptions', 'disableAll', 'enableAll', 'uploadOptions');
 
             config.initOptions();
 
@@ -522,8 +514,25 @@ else {
 
             this.exp = this.el.find('#optExp');
             this.expSel = this.el.find('#optExpSel');
-            $(this.expSel).on('change', this.downloadOptions);
-            this.downloadExperiments();
+
+            var self = this;
+            $(this.expSel).on({
+                'change': function() {
+                    self.disableAll();
+                    downloadOptions($(this).val(), null, function(){
+                        self.enableAll();
+                    });
+                },
+                'touchstart': function(e) {
+                    e.preventDefault();
+                    var that = this;
+                    $(that).prop('disabled', true);
+                    downloadExperiments($(this).val(), null, function(){
+                        $(that).prop('disabled', false);
+                        $(that).focus();
+                    });
+                }
+            });
 
             this.header = this.el.find('#settingsHeader');
             this.moodWarn = this.el.find("#moodWarn");
@@ -539,7 +548,6 @@ else {
                 }
             });
 
-            var self = this;
             this.optionsMode = this.el.find("#optionsMode");
             $(this.optionsMode).on("touchstart", this.toggleOptionMode);
 
@@ -642,10 +650,11 @@ else {
             $(this.uploadSubmit).val('Uploading...').prop('disabled', true);
 
             var self = this;
+            var updatedOptions = self.generateOptions();
             $.ajax({
                 url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/upload',
                 type: 'POST',
-                data: JSON.stringify({e: exp, k: key, o: self.generateOptions()}),
+                data: JSON.stringify({e: exp, k: key, o: updatedOptions}),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 timeout: 8000,
@@ -655,6 +664,8 @@ else {
                     }
                     else{
                        $(self.uploadSubmit).val('Upload successful').addClass('btn-success');
+                       downloadExperiments(exp);
+                       config.serverOptions = updatedOptions;
                     }
                     
                 },
@@ -692,44 +703,6 @@ else {
                 $(this.saveButton).css({display:"block"});
                 this.loadOptions();
             }
-        },
-
-        downloadExperiments: function(){
-            var self = this;
-            $.ajax({
-                url: 'http://ec2-54-210-113-201.compute-1.amazonaws.com/exps',
-                type: 'GET',
-                dataType: 'json',
-                timeout: 5000,
-                success: function(exps) {
-                    //$(self.expSel).html('<option selected disabled style="display:none">Choose an experiment</option>');
-                    for(var i=0; i<exps.length; i++){
-                        $(self.expSel).append('<option value="' + exps[i] + '">' + exps[i] +'</option>');
-                    }
-                    $(self.expSel).val('Default');
-                    self.downloadOptions();
-                }
-            });
-        },
-
-        downloadOptions: function(){
-            var self = this;
-            this.disableAll();
-            $.ajax({
-                url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/download?e='+$(this.expSel).val(),
-                type: 'GET',
-                dataType: 'json',
-                timeout: 8000,
-                success: function(msg) {
-                    if(msg && msg.options){
-                        config.serverOptions = msg.options;
-                        self.loadOptions(config.serverOptions);
-                    }
-                },
-                complete: function(){
-                    self.enableAll();
-                }
-            });
         },
 
         showAudioWarn: function(e){
@@ -784,7 +757,6 @@ else {
                 moodDuration: +$(this.moodDuration).val().trim(),
                 storeData: $(this.storeData).prop('checked')
             };
-
             return options;
         },
 
@@ -833,12 +805,15 @@ else {
         },
 
         render: function(){
-            if(config.optionsMode != "server"){
+            if(config.optionsMode == "server") {
+                $(this.expSel).val($(PageController.pages.start.experimentSel).val());
+            }
+            else {
                 this.loadOptions();
+                $(this.exp).val($(PageController.pages.start.experiment).val());
             }
             this.floatButtons();
         },
-
         pre_conceal: function(){
             $(this.el).hide();
         },
@@ -862,6 +837,29 @@ else {
 
             this.name = this.el.find('#name');
             this.experiment = this.el.find('#experiment');
+            this.experimentSel = this.el.find('#experimentSel');
+
+            var that = this;
+            $(this.experimentSel).prop('disabled', true);
+            downloadExperiments('', null, function(){
+                $(that.experimentSel).prop('disabled', false);
+            });
+            downloadOptions('');
+
+            $(this.experimentSel).on({
+                'change': function() {
+                    downloadOptions($(this).val());
+                },
+                'touchstart': function(e) {
+                    e.preventDefault();
+                    var self = this;
+                    $(self).prop('disabled', true);
+                    downloadExperiments($(this).val(), null, function(){
+                        $(self).prop('disabled', false);
+                        $(self).focus();
+                    });
+                }
+            });
 
             this.name.on("change", this.removeInvalidHighlight);
             this.experiment.on("change", this.removeInvalidHighlight);
@@ -898,7 +896,7 @@ else {
                 flag = true;
             }
 
-            if(config.experiment === ''){
+            if(config.optionsMode == "here" && config.experiment === ''){
                 $(this.experiment).addClass('invalid');
                 flag = true;
             }
@@ -909,6 +907,9 @@ else {
             if(flag === false){
                 if(config.optionsMode == "server") {
                     config.options = config.serverOptions;
+                }
+                else {
+                    $(settingsPage.exp).val(config.experiment);
                 }
                 config.totalDuration = config.options.duration + config.options.postStimulusDuration;
                 PageController.transition("knockout");
@@ -931,13 +932,19 @@ else {
         },
 
         render: function(){
-            if(config.optionsMode == "server" && $(settingsPage.expSel).val() != ""){
-                $(this.experiment).val($(settingsPage.expSel).val());
-                $(this.experiment).prop('disabled', true);
+            if(config.optionsMode == "server"){
+/*              $(this.experiment).val($(settingsPage.expSel).val());
+                $(this.experiment).prop('disabled', true);*/
+                $(this.experiment).css({display: 'none'});
+                $(this.experimentSel).css({display: 'block'});
+                $(this.experimentSel).val($(settingsPage.expSel).val());
             }
             else{
+/*              $(this.experiment).val($(settingsPage.exp).val());
+                $(this.experiment).prop('disabled', false);*/
+                $(this.experiment).css({display: 'block'});
                 $(this.experiment).val($(settingsPage.exp).val());
-                $(this.experiment).prop('disabled', false);
+                $(this.experimentSel).css({display: 'none'});
             }
 
             $(this.submitButton).prop("disabled", false).val("Continue");
@@ -966,6 +973,50 @@ else {
         }
 
     });
+
+
+    function downloadOptions(exp, error, complete){
+        var self = this;
+        exp = (!exp || exp === '') ? 'Default' :  exp;
+        $.ajax({
+            url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/download?e='+exp,
+            type: 'GET',
+            dataType: 'json',
+            timeout: 8000,
+            success: function(msg) {
+                if(msg && msg.options){
+                    config.serverOptions = msg.options;
+                    settingsPage.loadOptions(config.serverOptions);
+                }
+            },
+            error: error || function(){},
+            complete: complete
+        });
+    }
+
+    function downloadExperiments(exp, error, complete){
+        var self = this;
+        $.ajax({
+            url: 'http://ec2-54-210-113-201.compute-1.amazonaws.com/exps',
+            type: 'GET',
+            dataType: 'json',
+            timeout: 5000,
+            success: function(exps) {
+                $(settingsPage.expSel).html('<option selected disabled style="display:none">Choose an experiment</option>');
+                $(PageController.pages.start.experimentSel).html('<option selected disabled style="display:none">Choose an experiment</option>');
+                
+                for(var i=0; i<exps.length; i++){
+                    $(settingsPage.expSel).append('<option value="' + exps[i] + '">' + exps[i] +'</option>');
+                    $(PageController.pages.start.experimentSel).append('<option value="' + exps[i] + '">' + exps[i] +'</option>');
+                }
+                exp = (!exp || exp === '') ? 'Default' :  exp;
+                $(settingsPage.expSel).val(exp);
+                $(PageController.pages.start.experimentSel).val(exp);
+            },
+            error: error || function(){},
+            complete: complete
+        });
+    }
 
     function transEl(el1, el2, dur, cb){
         $(el1).velocity({opacity: 0}, (dur * 0.25), function(){
@@ -1417,7 +1468,7 @@ else {
                 buffer.getChannelData(1).set(data.right, 0);
                 this.playQueue.push(buffer);
                 if(!this.started){
-                    if(this.playQueue.length >= 4 && this.buffcb){
+                    if(this.playQueue.length >= Math.min(3, config.options.duration) && this.buffcb){
                         this.buffcb();
                         this.buffcb = null;
                     }
@@ -1963,9 +2014,9 @@ else {
             this.titleTexts = {
                 'setup':{
                     start:[
-                        '​This app lets you use your fingers to make pleasure ratings. You indicate how much pleasure you​\'re​ feel​ing​ by how much you spread your fingers.',
+                        '​This app lets you use your fingers to make pleasure ratings. You indicate how much pleasure you​\'re​ feel​ing​ by how much you spread your fingers. Please use your first two fingers: index and middle finger.',
                         'First, we must cal​ibrat​e ​your fingers.​ ​When you see the ​pink ​dots​ on the next screen​, please place and hold the tips of your index and middle finger on the screen. ​The pink dots should follow your fingertips.',
-                        '​Then indicate <b>minimum pleasure by relaxing your fingers to whatever spread feels most natural and requires least effort</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.'
+                        '​Then <b>indicate maximum pleasure by spreading your fingers as far apart as you can comfortably maintain</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.'
                     ],
                     end:[],
                     onEnd: function(){
@@ -2561,7 +2612,13 @@ else {
         },
 
         showReadyTitle: function(){
-            this.titleText.innerHTML = '<span class="strong">When you\'re ready, place two fingers to begin.</span>';
+            if(config.options.musicSelect) {
+                this.titleText.innerHTML = '<span class="strong">When you\'re ready, place two fingers to begin.</span>';
+            }
+            else {
+                this.titleText.innerHTML = '<span class="strong">When the experimenter tells you, please begin by pressing two fingers on the screen.</span>'
+            }
+            
             this.feedbacks.enable();
 
             document.addEventListener('touchstart', this.handleTouchStart);

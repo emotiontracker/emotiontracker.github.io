@@ -14,7 +14,7 @@
 
     <style>
         h1{
-            font-size:48px;
+            font-size:32px;
             font-weight:lighter;
             color:#5B529E;
             margin-bottom:10px;
@@ -45,7 +45,19 @@
             <div class="center-text">
                 <h1>Pleasure data</h1>
                 <div style="margin-bottom:30px;">    
-                    <input class="inpt" type="text" id="expName" placeholder="Enter name of experiment"/>
+                    <div>
+                        <input class="inpt" type="text" id="expName" placeholder="Enter name of experiment"/>
+                    </div>
+                    <div>
+                        <span>Date</span>
+                        <span>
+                        <input class="inpt" style="width:170px" type="text" id="expDate" placeholder="mm/dd/yyyy"/></span>
+                    </div>
+                    <div>
+                        <span>Time</span>
+                        <span>
+                        <input class="inpt" style="width:170px" type="text" id="expTime" placeholder="hh:mm"/></span>
+                    </div>
                     <button class="btn btn-primary" id="genBtn">Generate</button>
                     <span class="loader-small" style="opacity:0"></span>
                 </div>
@@ -69,18 +81,33 @@
         });        
     }
 
+    var now = new Date();
+    var $date = $('#expDate'),
+        $time = $('#expTime');
+
+    $date.val((now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear());
+    $time.val(now.getHours() + ':' + now.getMinutes());
+
     $('#genBtn').on('click', function(e){
         e.preventDefault();
 
         var exp = $('#expName').val().trim();
         if(exp === '') return false;
 
+        var date = $date.val().trim().split('/');
+        if(date.length != 3) return false;
+        date[0] = +date[0] - 1;
+
+        var time = $time.val().trim().split(':');
+        if(time.length != 2) return false;
+
+        var dateObject = new Date(date[2], date[0], date[1], time[0], time[1]);
         $('#genButtons').html('');
         $(this).prop('disabled', true);
         $('.loader-small').css({opacity:1});
         var self = this;
         $.ajax({
-            url: 'http://ec2-54-210-113-201.compute-1.amazonaws.com/expdata?e=' + exp,
+            url: 'http://ec2-54-210-113-201.compute-1.amazonaws.com/expdata?e=' + exp + '&t=' + dateObject.getTime(),
             type: 'GET',
             dataType: 'json',
             timeout: 5000,

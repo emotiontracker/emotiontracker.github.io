@@ -61,7 +61,7 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.1.3', STORELOCAL = localStorageTest();
+    var VERSION = '1.1.4', STORELOCAL = localStorageTest();
 
     if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
         localStorage.clear();
@@ -259,7 +259,7 @@ else {
 
     var rater = { getRating: function(){} };
     var config = {
-        appCreateDate: 'Friday October 10 2014',
+        appCreateDate: 'Monday October 13 2014',
         name: '',
         experiment: '',
         experimentTime: '',
@@ -316,8 +316,7 @@ else {
                 url: this.url,
                 appCreateDate: this.appCreateDate,
                 appVersion: VERSION,
-                timeZero: getDateString(this.experimentTime),
-                timeZeroAbs: (this.absoluteTime / 1000).toFixed(2),
+                timeZero: this.experimentTime,
                 ratings: this.ratings,
                 spread: this.ratingsPx,
                 valid: this.valid,
@@ -483,7 +482,6 @@ else {
                 config.options.feedback.auditory = false;
                 config.options.musicSelect = false;
                 $(this.el.find('#feedAuditory, #musicSelect')).on('click', this.showAudioWarn);
-                //$(this.el.find('#musicSelect')).on('click', this.showAudioWarn);
             }
 
             this.email = $(this.el.find('#email'));
@@ -896,17 +894,26 @@ else {
                 flag = true;
             }
 
-            if(config.optionsMode == "here" && config.experiment === ''){
-                $(this.experiment).addClass('invalid');
-                flag = true;
+            if( config.optionsMode == "here" ) {
+
+                if(config.experiment === ''){
+                    $(this.experiment).addClass('invalid');
+                    flag = true;
+                }
+            }
+            else if( config.optionsMode == "server" ) {
+                config.experiment = $(this.experimentSel).val();
             }
 
             $(this.name).blur();
             $(this.experiment).blur();
+            $(this.experimentSel).blur();
+
 
             if(flag === false){
                 if(config.optionsMode == "server") {
                     config.options = config.serverOptions;
+                    $(settingsPage.expSel).val(config.experiment);
                 }
                 else {
                     $(settingsPage.exp).val(config.experiment);
@@ -921,6 +928,7 @@ else {
             e.preventDefault();
             $(this.name).blur();
             $(this.experiment).blur();
+            $(this.experimentSel).blur();
             this.hide(settingsPage.show);
         },
 
@@ -933,18 +941,14 @@ else {
 
         render: function(){
             if(config.optionsMode == "server"){
-/*              $(this.experiment).val($(settingsPage.expSel).val());
-                $(this.experiment).prop('disabled', true);*/
                 $(this.experiment).css({display: 'none'});
-                $(this.experimentSel).css({display: 'block'});
                 $(this.experimentSel).val($(settingsPage.expSel).val());
+                $(this.experimentSel).css({display: 'block'});
             }
             else{
-/*              $(this.experiment).val($(settingsPage.exp).val());
-                $(this.experiment).prop('disabled', false);*/
-                $(this.experiment).css({display: 'block'});
-                $(this.experiment).val($(settingsPage.exp).val());
                 $(this.experimentSel).css({display: 'none'});
+                $(this.experiment).val($(settingsPage.exp).val());
+                $(this.experiment).css({display: 'block'});
             }
 
             $(this.submitButton).prop("disabled", false).val("Continue");
@@ -2593,6 +2597,7 @@ else {
                 config.experiment += ',ABORTED!';
                 var finalData = config.generateData();
                 mailDataMandrill(finalData, function(){
+                    PageController.pages.start.reset();
                     PageController.transition("start");
                 });                
             }

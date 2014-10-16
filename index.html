@@ -61,10 +61,34 @@
                 <div style="font-size:24px;margin:40px 0">Sorry, this device is not touch friendly :(</div>
                 <div style="color:#c9cdff;font-size:16px;padding:10px 20px;border:2px solid #c9cdff;border-radius:3px;display:inline-block">Try opening this page on a touch-screen device such as a smartphone or tablet.</div>
                 <div id="macDownload">
-                    <a class="btn btn-success" href="/pleasure/mac.zip">Download for Mac</a>                
+                    <a class="btn btn-success" href="mac.zip">Download for Mac (v1.1.0)</a>                
                 </div>
             </div>
         </div>
+
+        <div id="infoPage" style="display:none">
+            <h2>Pleasure Tracker</h2>
+            <div class="emph">v1.1.5</div>
+            <div class="info-desc">Measure self-reported pleasure over time. Currently supports Safari and Chrome browsers on iOS and Android devices. Support for other devices may be added. Let us know what you need. <a href="mailto:denis.pelli@nyu.edu?subject=Pleasure%20Tracker">denis.pelli@nyu.edu</a></div>
+
+            <div class="light">Copyright © 2014 Denis Pelli</div>
+            <div class="row">
+                <div class="col info-label">Design</div>
+                <div class="info-text">Denis Pelli<br/>Professor of Psychology and Neural Science at NYU<br/><a href="http://psych.nyu.edu/pelli">psych.nyu.edu/pelli</a></div>
+            </div>
+            <div class="row">
+                <div class="col info-label">Implementation</div>
+                <div class="info-text">Jugal Manjeshwar<br/><a href="http://jugalm.com/">jugalm.com</a></div>
+            </div>
+            <div class="row">
+                <div class="col info-label">Citation</div>
+                <div class="info-text">Pelli, D. G. and Vale, L. (2014) Lingering pleasure in the experience of beauty. International Association for Empirical Aesthetics, New York, New York, August 22-24, 2014.<br/><a href="http://psych.nyu.edu/pelli/posters.html">psych.nyu.edu/pelli/posters.html</a></div>
+            </div>
+            <div style="width:100%;text-align:center; margin:40px 0 0;font-size:15px;opacity:0.6;border-top: 1px solid #d6d4e5;
+            padding-top:15px"><a href="http://pleasuretracker.net">pleasuretracker.net</a></div>
+            <button id="infoClose" class="btn btn-img2"><div class="ico-close"></div></button>
+        </div>
+
         <div id="startPage" style="display:none;opacity:0">
             <div class="page page-center start-wrapper" >
                 <div id="logo"></div>
@@ -80,8 +104,9 @@
                     <input class="btn btn-primary btn-wide" id="startSubmit" type="submit" value="Continue"/>
                 </div>                   
             </div>  
-            <div style="position:fixed; bottom:15px;left:15px;color:#999; font-size:11px;">v1.1.4</div>
-            <button id="btnSettings" class=""><div class="ico-settings"></div></button>
+            <button id="btnInfo"><div class="ico-info"></div></button>
+            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;">v1.1.5</div>
+            <button id="btnSettings"><div class="ico-settings"></div></button>
         </div>
 
         <div id="settingsPage" style="display:none;opacity:0">
@@ -330,7 +355,6 @@
             <div id="calibTracker"></div>
             <div class="rangeFeedback"></div>
             <div class="numericFeedback"></div>
-
             <div id="calibInstr"></div>
 
             <div class="center-text-wrapper">
@@ -442,7 +466,7 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment%>\nSettings mode:,<%=optionsMode%>\nObserver:,<%=name%>\nEmail address of experimenter:,<%=options.email%>\nApp:,<%=url%>\nApp creation date:,<%=appCreateDate%>\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: ratings.length + 1}).map(Number.call, Number).slice(1).map(function(x){ return x*options.ratingInterval;}).join(",")%>\nRating (<%=options.minRating%> to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nValid (boolean):,<%=valid.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=deviceInfo.type%>\nModel:,<%=deviceInfo.model%>\nOS:,<%=os%>\nBrowser:,<%=browser%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=options.ratingInterval%>\nMinimum allowed rating:,<%=options.minRating%>\nMaximum stimulus duration (s):,<%=options.duration%>\nExperiment duration after end of stimulus (s):,<%=options.postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (<%=options.minRating%> to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nFeedback barbell:,<%=options.feedback.barbell%>\nFeedback bar:,<%=options.feedback.range%>\nFeedback bar color varies:,<%=options.feedback.barVaries%>\nFeedback number:,<%=options.feedback.numeric%>\nFeedback tone:,<%=options.feedback.auditory%>\nFeedback ticks:,<%=options.feedback.tactile%>\nInclude practice in reference:,<%=options.postInMedian%>\nKnockout:,<%=knockout%>\nEnable name condition:,<%=options.nameSelect%>\nEnable sad mood condition:,<%=options.moodSelect%>\nDuration of mood induction (s):,<%=options.moodDuration%>\nEnable music selection:,<%=options.musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\nDuration of white noise (s):,<%=options.durationWhiteNoise%>\nStore data on server:,<%=options.storeData%>\n
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment + ((aborted == true) ? ',ABORTED!' : '')%>\nSettings from:,<%=optionsMode%>\nObserver:,<%=name%>\nEmail to:,<%=options.email%>\nApp:,<%=url%>\nApp version:,<%=appVersion%>\nApp created:,<%=appCreateDate%>\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime / 1000).toFixed(2)%>\nTime (s):,<%=Array.apply(null, {length: ratings.length + 1}).map(Number.call, Number).slice(1).map(function(x){ return x*options.ratingInterval;}).join(",")%>\nRating (<%=options.minRating%> to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nValid (boolean):,<%=valid.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=deviceInfo.type%>\nModel:,<%=deviceInfo.model%>\nOS:,<%=os%>\nBrowser:,<%=browser%>\nLocal storage:,<%=localStore%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=options.ratingInterval%>\nMinimum allowed rating:,<%=options.minRating%>\nMaximum stimulus duration (s):,<%=options.duration%>\nExperiment duration after end of stimulus (s):,<%=options.postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (<%=options.minRating%> to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nFeedback barbell:,<%=options.feedback.barbell%>\nFeedback bar:,<%=options.feedback.range%>\nFeedback bar color varies:,<%=options.feedback.barVaries%>\nFeedback number:,<%=options.feedback.numeric%>\nFeedback tone:,<%=options.feedback.auditory%>\nFeedback ticks:,<%=options.feedback.tactile%>\nInclude practice in reference:,<%=options.postInMedian%>\nKnockout:,<%=knockout%>\nEnable name condition:,<%=options.nameSelect%>\nEnable sad mood condition:,<%=options.moodSelect%>\nDuration of mood induction (s):,<%=options.moodDuration%>\nEnable music selection:,<%=options.musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\nDuration of white noise (s):,<%=options.durationWhiteNoise%>\nStore data on server:,<%=options.storeData%>\n
 </script>       
 
     </body>

@@ -260,6 +260,7 @@ else {
     var rater = { getRating: function(){} };
     var config = {
         appCreateDate: 'Monday October 13 2014',
+        appVersion: VERSION,
         name: '',
         experiment: '',
         experimentTime: '',
@@ -295,6 +296,7 @@ else {
         deviceInfo: DEVICE_INFO,
         os: ua_parser.getOS().name + ' ' + ua_parser.getOS().version,
         browser: ua_parser.getBrowser().name + ' ' + ua_parser.getBrowser().major,
+        localStore: STORELOCAL,
         
         optionsMode: "server",
         options:{},
@@ -307,15 +309,18 @@ else {
         songArtist: '',
         songAlbum: '',
         songDuration: '',
+        feltPleasure: '',
+        aborted: false,
 
         generateDataObject: function(){
             var data = {
                 experiment: this.experiment,
+                aborted: this.aborted,
                 name: this.name,
                 optionsMode: this.optionsMode,
                 url: this.url,
                 appCreateDate: this.appCreateDate,
-                appVersion: VERSION,
+                appVersion: this.appVersion,
                 timeZero: this.experimentTime,
                 ratings: this.ratings,
                 spread: this.ratingsPx,
@@ -325,7 +330,8 @@ else {
                     name: DEVICE_INFO.type,
                     model: DEVICE_INFO.model,
                     os: this.os,
-                    browser: this.browser
+                    browser: this.browser,
+                    localStore: this.localStore
                 },
                 screenWidth: this.screenWidth,
                 screenHeight: this.screenHeight,
@@ -831,11 +837,16 @@ else {
 
         init: function(){
             this._super(true);
-            _bindAll(this, 'handleSubmit', 'showSettings', 'floatButtons', 'unFloatButtons');
+            _bindAll(this, 'handleSubmit', 'showSettings', 'showInfo', 'hideInfo' ,'floatButtons', 'unFloatButtons');
 
             this.name = this.el.find('#name');
             this.experiment = this.el.find('#experiment');
             this.experimentSel = this.el.find('#experimentSel');
+            this.settingsButton = this.el.find('#btnSettings');
+            this.submitButton = this.el.find('#startSubmit');
+            this.infoButton = this.el.find('#btnInfo');
+            this.infoPage = $('#infoPage');
+            this.infoClose = $('#infoClose');
 
             var that = this;
             $(this.experimentSel).prop('disabled', true);
@@ -862,15 +873,33 @@ else {
             this.name.on("change", this.removeInvalidHighlight);
             this.experiment.on("change", this.removeInvalidHighlight);
 
-            this.settingsButton = this.el.find('#btnSettings');
-            this.submitButton = this.el.find('#startSubmit');
             new MBP.fastButton(this.submitButton, this.handleSubmit);
             new MBP.fastButton(this.settingsButton, this.showSettings);
-
+            new MBP.fastButton(this.infoButton, this.showInfo);
+            
+            $(this.infoClose).on('touchstart', this.hideInfo);
             $(this.el).on('focus', 'input[type="text"]', this.unFloatButtons);
             $(this.el).on('focusout', 'input[type="text"]', this.floatButtons);
         },
 
+        showInfo: function(e){
+            e.preventDefault();
+            var self = this;
+            $(this.el).velocity({opacity:0}, 100, function(){
+                $(this).css({display:'none'});
+                $(self.infoPage).css({display: 'block'});
+                $(self.infoPage).velocity({opacity: 1}, 200);
+            });
+        },
+
+        hideInfo: function(e){
+            var self = this;
+            $(this.infoPage).velocity({opacity:0}, 100, function(){
+                $(this).css({display:'none'});
+                $(self.el).css({display: 'block'});
+                $(self.el).velocity({opacity: 1}, 200);
+            });
+        },
 
         removeInvalidHighlight: function(e){
             var el = e.target;
@@ -973,6 +1002,7 @@ else {
             config.songAlbum = '';
             config.songDuration = '';
             config.knockout = '';
+            config.aborted = false,
             rater = { getRating: function(){} };
         }
 
@@ -1655,12 +1685,12 @@ else {
                 $(this.curSong).removeClass('selected selected-warning');
                 this.curSong = null;
             }
-            // $(this.select).css({opacity:0, 'display':'none'});
             this.loader.style.display = 'none';
-            //this.songList.innerHTML = '';
         },
 
         selectSong: function(e){
+            e.preventDefault();
+            if(!e.currentTarget) return false;
             if(this.curSong){
                 $(this.curSong).removeClass('selected selected-warning');
             }
@@ -1689,8 +1719,6 @@ else {
             this.curSong = null;
             $(this.submit).prop('disabled', true);
 
-            //$(this.select).velocity({opacity:0}, 100, function(){$(this).css('display', 'none')});
-            
             if( query === '' ){
                 self.songList.innerHTML = this.instructions;
                 return false;
@@ -1726,6 +1754,7 @@ else {
 
         submitSong: function(e){
             e.preventDefault();
+            if(!this.curSong) return false;
 
             var uri = $(this.curSong).data("uri");
             if(uri === 'whitenoise'){
@@ -1915,18 +1944,17 @@ else {
 
         trials: [{
             title: 'Indicate <span class="strong">maximum</span> pleasure.',
-            instr: 'Using two fingers, drag the circles as far apart as comfortably possible.',
+            instr: 'Using two fingers, drag the pink dots as far apart as comfortably possible.',
             configVar: 'Max'
         }, {
             title: 'Indicate <span class="strong">minimum</span> pleasure.',
-            instr: 'Using two fingers, drag the circles as close as comfortably possible.',
+            instr: 'Using two fingers, drag the pink dots to whatever spread is most natural, requiring least effort.',
             configVar: 'Min'
         }],
 
         init: function(){
             this._super();
             _bindAll(this, 'beginTrials', 'onTap');
-
 
             this.tracker = this.el.find('#calibTracker');
             this.titleText = this.el.find('#calibTitle');
@@ -1935,7 +1963,6 @@ else {
             this.tapText = this.el.find('#calibTap');
 
             this.feedbacks = new Feedbacks({el:this.el, disableBarbell:true});
-
         },
 
         handleResize: function(){
@@ -1963,7 +1990,6 @@ else {
 
         onTap: function(e){
             e.preventDefault();
-
             var self = this;
             document.removeEventListener('touchstart', this.onTap);
 
@@ -1976,6 +2002,9 @@ else {
                     if(self.titlePhase == 'start'){
                         self.beginPre();
                     }   
+                    else if(self.titlePhase == 'mid'){
+                        self.titleTexts[self.trialParams.phase].afterMid();
+                    }
                     else if(self.titlePhase == 'end'){
                         self.titleTexts[self.trialParams.phase].onEnd();
                     }       
@@ -1987,7 +2016,6 @@ else {
         },
 
         showTitle: function(){
-
             var self = this;
 
             this.titlesText.innerHTML = this.titleTexts[this.trialParams.phase][this.titlePhase][this.titleIndex];
@@ -2019,10 +2047,16 @@ else {
                 'setup':{
                     start:[
                         '​This app lets you use your fingers to make pleasure ratings. You indicate how much pleasure you​\'re​ feel​ing​ by how much you spread your fingers. Please use your first two fingers: index and middle finger.',
-                        'First, we must cal​ibrat​e ​your fingers.​ ​When you see the ​pink ​dots​ on the next screen​, please place and hold the tips of your index and middle finger on the screen. ​The pink dots should follow your fingertips.',
-                        '​Then <b>indicate maximum pleasure by spreading your fingers as far apart as you can comfortably maintain</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.'
+                        'First, we must calibrate your fingers. When you see the pink dots on the next screen, place and hold your fingertips on the screen. The pink dots will follow your fingertips.',
+                        '​You will <b>indicate maximum pleasure by spreading your fingers as far apart as you can comfortably maintain</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.'
+                    ],
+                    mid: [
+                        'Next, indicate <b>minimum</b> pleasure by <b>relaxing</b> your two fingers to whatever spread feels <b>most natural and requires least effort</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.'
                     ],
                     end:[],
+                    afterMid: function(){
+                        self.startTrial(1);
+                    },
                     onEnd: function(){
                         self.begin('pre');
                     }
@@ -2168,9 +2202,12 @@ else {
 
             $(this.titleText).velocity({opacity: 1}, 200);
             $(this.instrText).velocity({opacity: 1}, 200);
+            $(this.tracker).velocity({opacity: 1}, 200);
         },
 
         endTrial: function(){
+
+            var self = this;
 
             window.removeEventListener('touchstart', this.handleTouchStart);
             this.bubbles.shapes.bubbles.forEach(function(b){
@@ -2199,11 +2236,21 @@ else {
             }
             tp.index++;
 
-            if(tp.queue.length == 0){
+            if(tp.phase == 'setup' && tp.step == 1){
+                $(this.instrText).velocity({opacity: 0}, 50, function(){
+                    $(self.titleText).velocity({opacity: 0}, { duration: 200, queue: false });
+                    $(self.tracker).velocity({opacity: 0}, { duration: 200, queue: false, complete: function(){
+                        self.titlePhase = 'mid';
+                        self.titleIndex = 0;
+                        tp.queue.splice(0,1);
+                        self.showTitle();
+                    }});
+                });
+            }
+            else if(tp.queue.length == 0){
                 this.end();
             }
             else{
-                var self = this;
                 $(self.instrText).velocity({opacity: 0}, 50, function(){
                     $(self.titleText).velocity({opacity: 0}, 100, function(){
                         self.startTrial(tp.queue.splice(0,1)[0]);
@@ -2255,7 +2302,7 @@ else {
 
     var generateExperimentString = function(){
         var time = config.experimentTime;
-        var subjectParams = [config.experiment, config.name, time.getFullYear(), time.getMonth() + 1, time.getDate(), time.getHours(), time.getMinutes()];
+        var subjectParams = [config.experiment + ((config.aborted == true) ? ',ABORTED!' : ''), config.name, time.getFullYear(), time.getMonth() + 1, time.getDate(), time.getHours(), time.getMinutes()];
         return subjectParams.join('.');        
     }
 
@@ -2263,7 +2310,7 @@ else {
         var html = ' \
             <h2> Results </h2> \
             <table> \
-                <tr> <td>Experiment:</td> <td>' + config.experiment + '</td> </tr> \
+                <tr> <td>Experiment:</td> <td>' + config.experiment  + ((config.aborted == true) ? ',ABORTED!' : '') + '</td> </tr> \
                 <tr> <td>Username:</td> <td>' + config.name + '</td> </tr> \
             </table> \
             <table><tr>' + getDateString(config.experimentTime) + '</tr></table>';
@@ -2322,79 +2369,82 @@ else {
         return ('mailto:' + config.options.email + '?subject=' + subject + '&body=' + body);    
     }
 
-    var AuditoryFeedbackClass = Class.extend({
-        init: function(){
-            if(AUDIOCTX == null) return;
-            this.gainNode = AUDIOCTX.createGain();
-            this.gainNode.connect(AUDIOCTX.destination); 
-            this.gainNode.gain.value = .01; 
-        },
+    var AuditoryFeedback = (function(){
 
-        getFrequencyFromRating: function(rating){
-            rating += 1;
-            return ( 440 * Math.pow(10, (0.1 * rating * (Math.log(4186.1/440) / Math.log(10) ) ) ) );
-        },
+        if(AUDIOCTX == null) return;
+        var gainNode = AUDIOCTX.createGain();
+        gainNode.connect(AUDIOCTX.destination); 
+        gainNode.gain.value = .01; 
+        var oscillator;
 
-        onStart: function(t, rating){
-            if(AUDIOCTX == null) return;
-            this.oscillator = AUDIOCTX.createOscillator();
-            this.oscillator.frequency.value = this.getFrequencyFromRating(rating);
-            this.oscillator.type = 0;
-            this.oscillator.connect(this.gainNode); 
-            this.oscillator.noteOn(0);
-        },
+        return {
+            getFrequencyFromRating: function(rating){
+                rating += 1;
+                return ( 440 * Math.pow(10, (0.1 * rating * (Math.log(4186.1/440) / Math.log(10) ) ) ) );
+            },
 
-        onMove: function(t, rating){
-            this.oscillator.frequency.value = this.getFrequencyFromRating(rating);
-        },
+            onStart: function(t, rating){
+                if(AUDIOCTX == null) return;
+                oscillator = AUDIOCTX.createOscillator();
+                oscillator.frequency.value = this.getFrequencyFromRating(rating);
+                oscillator.type = 0;
+                oscillator.connect(gainNode); 
+                oscillator.noteOn(0);
+            },
 
-        onEnd: function(){
-            this.oscillator.disconnect();
-        }
-    });
-    var AuditoryFeedback = new AuditoryFeedbackClass();
+            onMove: function(t, rating){
+                oscillator.frequency.value = this.getFrequencyFromRating(rating);
+            },
 
-    var TactileFeedbackClass = Class.extend({
-        init: function(){
-            _bindAll(this, 'start', 'stop', 'play');
-            this.frequency = 800;
-            this.timeout = null;
-            this.audio = null;
-        },
+            onEnd: function(){
+                oscillator.disconnect();
+            }
+        };
 
-        getFrequencyFromRating: function(rating){
-            return 800 - (rating * 40);
-        },
+    })();
 
-        start: function(){
-            this.play();
-        },
+    var TactileFeedback = (function() {
 
-        stop: function(){
-            clearTimeout(this.timeout);
-            notifier.stop('click');
-        },
+        //_bindAll(this, 'start', 'stop', 'play');
+        var frequency = 800,
+            timeout = null;
 
-        play: function(){
-            notifier.play('click');
-            this.timeout = setTimeout(this.play, this.frequency);
-        },
+        return {
+            getFrequencyFromRating: function(rating){
+                return 800 - (rating * 40);
+            },
 
-        onStart: function(t, rating){
-            this.stop();
-            this.frequency = this.getFrequencyFromRating(rating);
-            this.start();
-        },
+            start: function(){
+                this.play();
+            },
 
-        onMove:function(t, rating){
-            this.frequency = this.getFrequencyFromRating(rating);
-        },
+            stop: function(){
+                clearTimeout(timeout);
+                notifier.stop('click');
+            },
 
-        onEnd: function(t, rating){
-            this.stop();
-        }
-    });
-    var TactileFeedback = new TactileFeedbackClass();
+            play: function(){
+                notifier.play('click');
+                var self = this;
+                timeout = setTimeout(function(){self.play.call(self);}, frequency);
+            },
+
+            onStart: function(t, rating){
+                this.stop();
+                frequency = this.getFrequencyFromRating(rating);
+                this.start();
+            },
+
+            onMove:function(t, rating){
+                frequency = this.getFrequencyFromRating(rating);
+            },
+
+            onEnd: function(t, rating){
+                this.stop();
+            }            
+        };
+
+    })();
 
 
     var Feedbacks = View.extend({
@@ -2594,7 +2644,7 @@ else {
             if(e.touches.length == 5){
                 this.status.canceled = true;
                 this.close();
-                config.experiment += ',ABORTED!';
+                config.aborted = true;
                 var finalData = config.generateData();
                 mailDataMandrill(finalData, function(){
                     PageController.pages.start.reset();
@@ -2621,7 +2671,7 @@ else {
                 this.titleText.innerHTML = '<span class="strong">When you\'re ready, place two fingers to begin.</span>';
             }
             else {
-                this.titleText.innerHTML = '<span class="strong">When the experimenter tells you, please begin by pressing two fingers on the screen.</span>'
+                this.titleText.innerHTML = '<span style="font-size:1.5em; color:#6e65b0">Wait!</span><br/><span class="strong">When the experimenter tells you, please begin by pressing two fingers on the screen.</span>'
             }
             
             this.feedbacks.enable();
@@ -2778,7 +2828,7 @@ else {
 
         init: function(){
             this._super();
-             _bindAll(this, 'showFinal', 'onSelect');
+             _bindAll(this, 'showFinal');
 
             this.survey = this.el.find("#completeSurvey");
             this.surveyTap = this.el.find("#completeSurveyTap");
@@ -2793,8 +2843,7 @@ else {
             this.statusContainer = this.el.find("#completeStatusContainer");
             this.selected = false;
 
-            $(this.el).on('touchstart', '.survey-btn', this.onSelect);
-            new MBP.fastButton(this.surveyTap, this.showFinal);
+            $(this.el).on('touchstart', '.survey-btn', this.showFinal);
             new MBP.fastButton(this.restartButton, function(e){
                 e.preventDefault();
                 PageController.pages.start.reset();
@@ -2825,7 +2874,7 @@ else {
             this.buttons.style.display = 'none';
         },
 
-        onSelect: function(e){
+/*        onSelect: function(e){
             e.preventDefault();
             if(this.selected){
                 $(this.selected).removeClass('selected');
@@ -2835,12 +2884,15 @@ else {
             }
             $(e.target).addClass('selected');
             this.selected = e.target;
-        },
+        },*/
 
-        showFinal: function(){
-            var self = this;
+        showFinal: function(e){
+            e.preventDefault();
+            this.selected = e.target;
+            $(this.selected).addClass('selected');
             config.feltPleasure = $(this.selected).val();
 
+            var self = this;
             transEl(self.survey, self.messages, 400, function(){
 
                 if(config.options.storeData){

@@ -78,6 +78,36 @@ h2{
   margin:0;
 }
 
+#infoPage{
+  padding: 20px;
+  font-size:13px;
+}
+
+#infoPage .row{
+  margin: 20px 0 0;
+}
+
+.info-desc{
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+.info-label{
+  width: 50px;
+  font-weight:bold;
+  float:left;
+}
+
+.info-text{
+  width: 62%;
+  float:right;
+}
+
+a:link, a:visited, a:hover, a:focus{
+  color:#6e65b0;
+  text-decoration:none;
+}
+
 .page.start-wrapper{
   height:450px;
   width:240px;
@@ -690,11 +720,15 @@ input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:fo
   height:30px;
 }
 
-#uploadClose{
+#uploadClose, #infoClose{
   position:absolute;
   top:5px;
   right:5px;
+}
 
+#infoClose{
+  padding: 5px;
+  top:8px;
 }
 
 .inpt{
@@ -1154,6 +1188,13 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
   background-size: 24px 24px;
 }
 
+.ico-info{
+  background-image:url(../img/info.png);  
+  width:24px;
+  height:24px;
+  background-size: 24px 24px;
+}
+
 .ico-close{
   background-image:url(../img/close_thin.png);  
   width:24px;
@@ -1173,15 +1214,20 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);  
 }
 
-#btnSettings{
+#btnSettings, #btnInfo{
   padding: 8px;
   border:0;
   background:#fff;
   position:fixed;bottom:8px;right:8px;
   border-radius:4px;
+  opacity:0.7;
 }
 
-#btnSettings:active{
+#btnInfo{
+  left: 8px; right:auto;
+}
+
+#btnSettings:active, #btnInfo:active{
   background:#eee;
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
 }
@@ -1232,6 +1278,10 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
 
   .ico-settings{
     background-image:url(../img/settings@2x.png);
+  }
+
+  .ico-info{
+    background-image:url(../img/info@2x.png);  
   }
 
   .ico-close, .rec-remove-btn{

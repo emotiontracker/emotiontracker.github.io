@@ -140,7 +140,7 @@ else {
         resetDoubleTouch: function(){
             this.touches = [{x: 0, y: 0, id: false}, {x: 0, y: 0, id: false}];
             this.touches.isDouble = function(){
-                return this[0].id && this[1].id;
+                return (this[0].id !== false && this[1].id !== false);
             };
             this.doubleTouch = false;
         },
@@ -152,7 +152,7 @@ else {
 
             for(var i = 0; i < changed.length ; i++) {
                 for(var j = 0; j < 2; j++){
-                    if(!touches[j].id){
+                    if(touches[j].id === false){
                         touches[j].x = changed[i].pageX;
                         touches[j].y = changed[i].pageY;
                         touches[j].id = changed[i].identifier;
@@ -193,7 +193,7 @@ else {
             e.preventDefault();
             var changed = e.changedTouches,
                 touches = this.touches;
-            
+
             for(var i = 0; i < changed.length ; i++) {
                 for(var j = 0; j < 2; j++){
                     if(touches[j].id === changed[i].identifier){
@@ -202,7 +202,6 @@ else {
                         break;
                     }
                 }
-
             }
 
             if(this.doubleTouch && !touches.isDouble()){
@@ -259,7 +258,7 @@ else {
 
     var rater = { getRating: function(){} };
     var config = {
-        appCreateDate: 'Monday October 13 2014',
+        appCreateDate: 'Friday October 17 2014',
         appVersion: VERSION,
         name: '',
         experiment: '',
@@ -385,6 +384,7 @@ else {
                 postStimulusDuration: 120,
                 durationWhiteNoise: 120,
                 moodDuration: 180,
+                fingers: 0,
                 storeData: false
             };
 
@@ -480,7 +480,7 @@ else {
 
         init: function(){
             this._super();
-            _bindAll(this, 'handleSave', 'showStart', 'floatButtons', 'unFloatButtons', 'showAudioWarn', 'toggleOptionMode', 'generateOptions', 'loadOptions', 'disableAll', 'enableAll', 'uploadOptions');
+            _bindAll(this, 'handleSave', 'showStart', 'floatButtons', 'unFloatButtons', 'showAudioWarn', 'toggleOptionMode', 'toggleOptionFingers', 'generateOptions', 'loadOptions', 'disableAll', 'enableAll', 'uploadOptions');
 
             config.initOptions();
 
@@ -513,6 +513,8 @@ else {
             this.moodSelect = $(this.el.find('#moodSelect'));
             this.durationWhiteNoise = $(this.el.find('#durationWhiteNoise'));
             this.moodDuration = $(this.el.find('#moodDuration'));
+            this.optionsMode = this.el.find("#optionsMode");
+            this.optionsFingers = $(this.el.find('#optionsFingers'));
             this.storeData = $(this.el.find('#storeData'));
             this.loadOptions();
 
@@ -533,7 +535,10 @@ else {
                     $(that).prop('disabled', true);
                     downloadExperiments($(this).val(), null, function(){
                         $(that).prop('disabled', false);
-                        $(that).focus();
+                        var event;
+                        event = document.createEvent('MouseEvents');
+                        event.initMouseEvent('mousedown', true, true, window);
+                        $(that)[0].dispatchEvent(event);
                     });
                 }
             });
@@ -552,8 +557,8 @@ else {
                 }
             });
 
-            this.optionsMode = this.el.find("#optionsMode");
-            $(this.optionsMode).on("touchstart", this.toggleOptionMode);
+            $(this.optionsMode).on('touchstart', '.btn', this.toggleOptionMode);
+            $(this.optionsFingers).on('touchstart', '.btn', this.toggleOptionFingers);
 
             this.uploadSubmit = document.body.find('#uploadSubmit');
             this.uploadExp = document.body.find("#uploadExperiment");
@@ -679,10 +684,18 @@ else {
             });
         },
 
+        toggleOptionFingers: function(e) {
+            e.preventDefault();
+            if(!e.target) return false;
+
+            var optionTarget = e.target;
+            $(this.optionsFingers).find(".btn-selected").removeClass("btn-selected");
+            $(optionTarget).addClass("btn-selected");
+        },
+
         toggleOptionMode: function(e){
             e.preventDefault();
-
-            if(e.target.tagName != "BUTTON") return false;
+            if(!e.target) return false;
 
             var optionTarget = e.target,
                 optionName = config.optionsMode = $(optionTarget).data("name");
@@ -759,6 +772,7 @@ else {
                 postStimulusDuration: +$(this.postStimulusDuration).val().trim(),
                 durationWhiteNoise: +$(this.durationWhiteNoise).val().trim(),
                 moodDuration: +$(this.moodDuration).val().trim(),
+                fingers:  +$(this.optionsFingers).find(".btn-selected").first().data('value'),
                 storeData: $(this.storeData).prop('checked')
             };
             return options;
@@ -793,6 +807,10 @@ else {
             $(this.durationWhiteNoise).val(options.durationWhiteNoise);
             $(this.moodDuration).val(options.moodDuration);
             $(this.storeData).prop('checked', options.storeData);
+
+            $(this.optionsFingers).find("button").removeClass("btn-selected");
+            $(this.optionsFingers).find('[data-value='+options.fingers+']').addClass('btn-selected');
+
         },
 
         handleResize: function(){
@@ -865,7 +883,10 @@ else {
                     $(self).prop('disabled', true);
                     downloadExperiments($(this).val(), null, function(){
                         $(self).prop('disabled', false);
-                        $(self).focus();
+                        var event;
+                        event = document.createEvent('MouseEvents');
+                        event.initMouseEvent('mousedown', true, true, window);
+                        $(self)[0].dispatchEvent(event);
                     });
                 }
             });
@@ -1805,7 +1826,7 @@ else {
                 },
 
                 toggleSelected: function(){
-                    if(this.selected){
+                    if(this.selected !== false){
                         this.circle.animate({
                             "fill-opacity": 0.2,
                             "r": 40
@@ -1845,7 +1866,7 @@ else {
             shapes.bubbles[1].x = window.innerWidth/2 + 40;
             shapes.bubbles[0].y = shapes.bubbles[1].y = window.innerHeight/2;
             shapes.bubbles.selected = function(){
-                return (this[0].selected && this[1].selected);
+                return (this[0].selected !== false && this[1].selected !== false);
             } 
             shapes.bubbles.distance = function(){
                 return getDistance(this[0].x, this[0].y, this[1].x, this[1].y);
@@ -1894,7 +1915,7 @@ else {
             var b;
             for(var i = 0; i < 2; i++){
                 b = this.shapes.bubbles[i];
-                if(!b.selected){
+                if(b.selected === false){
                     if(this.drag && !b.circle.isPointInside(touch.x, touch.y)){
                         continue;
                     }
@@ -1907,7 +1928,6 @@ else {
                     break;
                 }                    
             }
-
         },
 
         onTouchMove: function(touch){
@@ -2046,7 +2066,7 @@ else {
             this.titleTexts = {
                 'setup':{
                     start:[
-                        '​This app lets you use your fingers to make pleasure ratings. You indicate how much pleasure you​\'re​ feel​ing​ by how much you spread your fingers. Please use your first two fingers: index and middle finger.',
+                        '​This app lets you use your fingers to make pleasure ratings. You indicate how much pleasure you​\'re​ feel​ing​ by how much you spread your fingers. ' + ((config.options.fingers === 0) ? 'Please use your thumb and index fingers.' : 'Please use your first two fingers: index and middle finger.'),
                         'First, we must calibrate your fingers. When you see the pink dots on the next screen, place and hold your fingertips on the screen. The pink dots will follow your fingertips.',
                         '​You will <b>indicate maximum pleasure by spreading your fingers as far apart as you can comfortably maintain</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.'
                     ],
@@ -2271,7 +2291,7 @@ else {
         onTouchEnd: function(touch){
             notifier.play("contactLoss");
             this.bubbles.onTouchEnd(touch, this.touches);
-            if(this.bubbles.doubleSelect && !this.bubbles.shapes.bubbles[0].selected && !this.bubbles.shapes.bubbles[1].selected){
+            if(this.bubbles.doubleSelect && this.bubbles.shapes.bubbles[0].selected === false && this.bubbles.shapes.bubbles[1].selected === false){
                 this.endTrial();
                 this.bubbles.doubleSelect = false;
             }
@@ -2714,7 +2734,7 @@ else {
                 rating = rater.getRating(touches).toFixed(1),
                 dist = getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
             
-            if(!touches[0].id || !touches[1].id && rating !== this.samples[this.samples.length-1]){
+            if(touches[0].id === false || touches[1].id === false && rating !== this.samples[this.samples.length-1]){
                 rating = (+rating);
                 this.valid.push(0);
             }

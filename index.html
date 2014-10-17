@@ -121,7 +121,7 @@
             <div class="settings-wrapper">
                 <div class="field">
                     <label class="lbl">Use settings from</label>
-                    <div id="optionsMode">
+                    <div id="optionsMode" class="option-btn-group">
                         <button id="modeDownloadBtn" class="btn btn-selected" data-name="server">Server</button>
                         <button id="modePrivateBtn" class="btn" data-name="here">Here</button>
                     </div> 
@@ -243,6 +243,14 @@
                     <label for="durationWhiteNoise" class="lbl">Duration of white noise <span class="light"> (s)</span></label>
                     <input id="durationWhiteNoise" type="text" value="120" class="inpt" pattern="[0-9]*"/>
                 </div>  
+
+                <div class="field">
+                    <label class="lbl">Fingers</label>
+                    <div id="optionsFingers" class="option-btn-group">
+                        <button id="modeThumbBtn" class="btn" data-value="0">Thumb and Index </button>
+                        <button id="modeMiddleBtn" class="btn" data-value="1">Index and Middle</button>
+                    </div> 
+                </div>
                 
                 <div class="field" style="margin-bottom:60px">
                     <div class="field-check">

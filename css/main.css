@@ -297,11 +297,11 @@ h3{
 
 
 
-#optionsMode{
+.option-btn-group{
   margin: 0 10px 0 20px;
 }
 
-#knockSelector .btn, #optionsMode .btn{
+#knockSelector .btn, .option-btn-group .btn{
   width:33.33%;
   padding: 18px 0;
   font-size:16px;
@@ -313,7 +313,7 @@ h3{
   border-radius:0;
 }
 
-#optionsMode .btn{
+.option-btn-group .btn{
   width:50%;
   padding: 12px 0;
   margin-top: 0;
@@ -321,18 +321,18 @@ h3{
 }
 
 
-#knockSelector .btn:active, #optionsMode .btn:active, #optionsMode .btn-selected{
+#knockSelector .btn:active, .option-btn-group .btn:active, .option-btn-group .btn-selected{
   background-color:#6e65b0;
   color:#fff;
 }
 
-#optionsMode .btn:first-child{
+.option-btn-group .btn:first-child{
   border-top-left-radius: 3px;
   border-bottom-left-radius: 3px;
   margin-left:-1px;
 }
 
-#optionsMode .btn:last-child{
+.option-btn-group .btn:last-child{
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }

@@ -47,6 +47,8 @@ function localStorageTest(){
     }
 }
 
+$(function(){
+
 if(!isTouchDevice()) {
 
     if(navigator.platform.toUpperCase().indexOf('MAC')>=0){
@@ -3016,3 +3018,4 @@ else {
 
 })();
 }
+});

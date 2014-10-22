@@ -1,3 +1,3 @@
-pleasure
+emotion
 ========
-Try out the web app on a touch screen device: [pleasuretracker.net](http://pleasuretracker.net)
+Try out the web app on a touch screen device: [emotiontracker.net](http://emotiontracker.net)

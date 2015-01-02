@@ -699,6 +699,11 @@ input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:fo
   border-radius:0;
 }
 
+#settingsPage .inpt:focus{
+  border-left: 0 !important;
+  border-right: 0 !important;
+}
+
 .field-check{
   border-bottom-width:0;
 }

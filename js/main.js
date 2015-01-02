@@ -523,7 +523,17 @@ else {
             this.exp = this.el.find('#optExp');
             this.expSel = this.el.find('#optExpSel');
 
+            this.oldRatingInterval = 0;
+
             var self = this;
+            $(this.ratingInterval).change(function(){
+                if(!$.isNumeric(+$(this).val())){
+                    $(this).val(self.oldRatingInterval);
+                }
+            }).focus(function(){
+                self.oldRatingInterval = +$(this).val();
+            });
+
             $(this.expSel).on({
                 'change': function() {
                     self.disableAll();

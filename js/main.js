@@ -67,7 +67,7 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.1.5', STORELOCAL = localStorageTest();
+    var VERSION = '1.1.6', STORELOCAL = localStorageTest();
 
     if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
         localStorage.clear();
@@ -264,7 +264,7 @@ else {
 
     var rater = { getRating: function(){} };
     var config = {
-        appCreateDate: 'Friday October 17 2014',
+        appCreateDate: 'Sunday January 4 2015',
         appVersion: VERSION,
         name: '',
         experiment: '',

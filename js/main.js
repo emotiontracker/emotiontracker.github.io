@@ -1,5 +1,9 @@
 window.URL = window.URL || window.webkitURL;
 
+function decimalPlaces(number) {
+  return ((+number).toFixed(20)).replace(/^-?\d*\.?|0+$/g, '').length;
+}
+
 function drawTimer(el, dur) {
 
     var loader = el.find('#loader'),
@@ -280,6 +284,7 @@ else {
         ratings: [],
         ratingsPx: [],
         valid: [],
+        times: [],
         practiceMinRatings: [],
         practiceMaxRatings: [],
         cancelTime: 5000,
@@ -323,6 +328,7 @@ else {
                 appCreateDate: this.appCreateDate,
                 appVersion: this.appVersion,
                 timeZero: this.experimentTime,
+                time: this.times,
                 ratings: this.ratings,
                 spread: this.ratingsPx,
                 valid: this.valid,
@@ -1026,6 +1032,7 @@ else {
             config.postMinDist = []; 
             config.practiceMinRatings = [];
             config.practiceMaxRatings = [];
+            config.times = [];
             config.ratings = [];
             config.ratingsPx = [];
             config.valid = [];
@@ -2354,9 +2361,9 @@ else {
                 "key": "DIE-Gm5EhIT4k_u8R-VhhQ",
                 "message": {
                     "html": generateMailBody(),
-                    "subject": '[Pleasure Data] ' + generateExperimentString(),
-                    "from_email": "pleasure@tracker.edu",
-                    "from_name": "Pleasure Tracker",
+                    "subject": '[Emotion Data] ' + generateExperimentString(),
+                    "from_email": "emotion@tracker.edu",
+                    "from_name": "Emotion Tracker",
                     "to": [
                         {
                             "email": config.options.email,
@@ -2392,7 +2399,7 @@ else {
     }
 
     var generateMailLink = function(data){
-        var subject = '[Pleasure] ' + generateExperimentString(),
+        var subject = '[Emotion] ' + generateExperimentString(),
             body = data;
         
         body = body.replace(/\n/g, "%0D%0A");
@@ -2649,6 +2656,7 @@ else {
         },
 
         begin: function(){
+            this.times = [];
             this.samples = [];
             this.samplesPx = [];
             this.valid = [];
@@ -2666,7 +2674,8 @@ else {
                 doubleTouch: false,
                 started: false,
                 canceled: false
-            }; 
+            };
+            this.timeRes = decimalPlaces(config.ratingInterval);
             this.titleIndex = 0;
             this.showTitle();         
         },
@@ -2746,16 +2755,16 @@ else {
                 rating = rater.getRating(touches).toFixed(1),
                 dist = getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
             
-            if(touches[0].id === false || touches[1].id === false && rating !== this.samples[this.samples.length-1]){
-                rating = (+rating);
-                this.valid.push(0);
+            if(touches[0].id === false || touches[1].id === false /* && rating !== this.samples[this.samples.length-1]*/){
             }
             else{
-                this.valid.push(1);
+                //this.valid.push(1);
+                this.times.push( (((new Date()) - config.experimentTime) / 1000).toFixed(this.timeRes) );
+                this.samples.push(rating);  
+                this.samplesPx.push(dist);
             }
 
-            this.samples.push(rating);  
-            this.samplesPx.push(dist);
+
         },
 
         close: function(){
@@ -2767,20 +2776,21 @@ else {
             document.removeEventListener('touchend', this.handleTouchEnd);
             document.removeEventListener('touchcancel', this.handleTouchEnd); 
 
-            if(this.status.canceled == true){
-                config.durationActual = Math.floor( ((new Date()) - config.experimentTime) / 1000 );
-            }
-            else{
-                config.durationActual = config.totalDuration;
-            }
+            this.sampleRating();
             PageController.pages.knockout.stopRecordings();
             this.feedbacks.disableAll();
 
-            this.sampleRating();
-            var numSamples = Math.floor(config.durationActual/config.options.ratingInterval);
+            var numSamples = Math.floor(config.totalDuration/config.options.ratingInterval);
+            config.times = this.times.slice(0, numSamples);
             config.ratings = this.samples.slice(0, numSamples);
             config.ratingsPx = this.samplesPx.slice(0, numSamples);
-            config.valid = this.valid.slice(0, numSamples);
+/*            if(this.status.canceled == true){
+                config.durationActual = Math.floor( ((new Date()) - config.experimentTime) / 1000 );
+            }
+            else{*/
+                config.durationActual = config.times[config.times.length - 1] - config.times[0];
+            //}
+            //config.valid = this.valid.slice(0, numSamples);
         },
 
         stop: function(){
@@ -2789,6 +2799,7 @@ else {
 
             notifier.play("done");
             this.titleText.innerHTML = '<span class="strong" style="font-size:1.8em;font-weight:normal">Done</span>';
+            $(this.titleText).show();
             var self = this;
             $(this.titleText).fadeIn(200).delay(1500).fadeOut(200, function(){
                 self.postStop();
@@ -2827,7 +2838,6 @@ else {
 
                 config.experimentTime = new Date();
                 config.absoluteTime = config.experimentTime.getTime();
-
 
                 if(config.options.musicSelect){
                     PageController.pages.music.playMusic(config.songUri, config.options.duration);
@@ -3017,6 +3027,9 @@ else {
                     //this.curPage.el.hide();
                     this.orientPage.show();
                 }                
+            }
+            else {
+            this.orientPage.hide(); 
             }
 
             this.curPage.handleResize();           

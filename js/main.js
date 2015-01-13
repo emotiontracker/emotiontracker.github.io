@@ -873,16 +873,20 @@ else {
 
         init: function(){
             this._super(true);
-            _bindAll(this, 'handleSubmit', 'showSettings', 'showInfo', 'hideInfo' ,'floatButtons', 'unFloatButtons');
+            _bindAll(this, 'handleSubmit', 'showSettings', 'showInfo', 'hideInfo', 'showHelp', 'hideHelp'  ,'floatButtons', 'unFloatButtons');
 
             this.name = this.el.find('#name');
             this.experiment = this.el.find('#experiment');
             this.experimentSel = this.el.find('#experimentSel');
             this.settingsButton = this.el.find('#btnSettings');
             this.submitButton = this.el.find('#startSubmit');
-            this.infoButton = this.el.find('#btnInfo');
+            this.helpButton = this.el.find('#btnInfo');
+            this.creditsButton = document.body.find('#showCreditsBtn');
+            this.helpPage = $('#helpPage');
+            this.helpClose = $('#helpClose');
             this.infoPage = $('#infoPage');
             this.infoClose = $('#infoClose');
+            this.helpShown = false;
 
             var that = this;
             $(this.experimentSel).prop('disabled', true);
@@ -914,17 +918,41 @@ else {
 
             new MBP.fastButton(this.submitButton, this.handleSubmit);
             new MBP.fastButton(this.settingsButton, this.showSettings);
-            new MBP.fastButton(this.infoButton, this.showInfo);
+            new MBP.fastButton(this.helpButton, this.showHelp);
+            new MBP.fastButton(this.creditsButton, this.showInfo);
             
             $(this.infoClose).on('touchstart', this.hideInfo);
+            $(this.helpClose).on('touchstart', this.hideHelp);
             $(this.el).on('focus', 'input[type="text"]', this.unFloatButtons);
             $(this.el).on('focusout', 'input[type="text"]', this.floatButtons);
         },
 
-        showInfo: function(e){
+        showHelp: function(e){
             e.preventDefault();
             var self = this;
             $(this.el).velocity({opacity:0}, 100, function(){
+                $(this).css({display:'none'});
+                self.helpShown = true;
+                $(self.helpPage).css({display: 'block'});
+                $(self.helpPage).velocity({opacity: 1}, 200);
+            });
+        },
+
+        hideHelp: function(e){
+            var self = this;
+            self.helpShown = false;
+            $(this.helpPage).velocity({opacity:0}, 100, function(){
+                $(this).css({display:'none'});
+                $(self.el).css({display: 'block'});
+                $(self.el).velocity({opacity: 1}, 200);
+            });
+        },
+
+        showInfo: function(e){
+            if(!this.helpShown) return false;
+            e.preventDefault();
+            var self = this;
+            $(this.helpPage).velocity({opacity:0}, 100, function(){
                 $(this).css({display:'none'});
                 $(self.infoPage).css({display: 'block'});
                 $(self.infoPage).velocity({opacity: 1}, 200);
@@ -935,8 +963,8 @@ else {
             var self = this;
             $(this.infoPage).velocity({opacity:0}, 100, function(){
                 $(this).css({display:'none'});
-                $(self.el).css({display: 'block'});
-                $(self.el).velocity({opacity: 1}, 200);
+                $(self.helpPage).css({display: 'block'});
+                $(self.helpPage).velocity({opacity: 1}, 200);
             });
         },
 
@@ -2838,6 +2866,7 @@ else {
 
                 config.experimentTime = new Date();
                 config.absoluteTime = config.experimentTime.getTime();
+                this.sampleRating();
 
                 if(config.options.musicSelect){
                     PageController.pages.music.playMusic(config.songUri, config.options.duration);

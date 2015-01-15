@@ -110,7 +110,7 @@
 
         <div id="infoPage" style="display:none">
             <h2>Emotion Tracker</h2>
-            <div class="emph">v1.1.6</div>
+            <div class="emph">v1.1.7</div>
             <div class="info-desc">Measure self-reported emotion over time. Currently supports Safari and Chrome browsers on iOS and Android devices. Support for other devices may be added. Let us know what you need. <a href="mailto:denis.pelli@nyu.edu?subject=Emotion%20Tracker">denis.pelli@nyu.edu</a></div>
 
             <div class="light">Copyright © 2014 - 2015 Denis Pelli</div>
@@ -151,7 +151,7 @@
                 </div>                   
             </div>  
             <button id="btnInfo"><div class="ico-info"></div></button>
-            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;">v1.1.6</div>
+            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;">v1.1.7</div>
             <button id="btnSettings"><div class="ico-settings"></div></button>
         </div>
 
@@ -210,6 +210,18 @@
                 <div class="field">
                     <label for="postSteps" class="lbl">Final practice ratings</label>
                     <input id="postSteps" type="text" value="1" class="inpt" pattern="[0-9]*" />
+                </div>
+
+                <div class="field">
+                    <div class="field-check">
+                        <label for="skipRepeat" class="lbl">Skip setup and practice on repeat trials</label>
+                        <span class="chkbox"><input id="skipRepeat" type="checkbox" /></span>
+                    </div>
+                </div> 
+
+                <div class="field">
+                    <label for="repeatInterval" class="lbl">Max time between repeats <span class="light"> (s)</span></label>
+                    <input id="repeatInterval" type="text" value="1" class="inpt" pattern="[0-9]*" />
                 </div>
 
                 <div class="field">

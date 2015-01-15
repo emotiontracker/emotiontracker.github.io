@@ -67,7 +67,7 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.1.6', STORELOCAL = localStorageTest();
+    var VERSION = '1.1.7', STORELOCAL = localStorageTest();
 
     if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
         localStorage.clear();
@@ -279,6 +279,11 @@ else {
         postMinDist: [],
         medianMaxDist: 0,
         medianMinDist: 0,
+        refMin: 0,
+        refMax: 0,
+        refValid: false,
+        refExperiment: '',
+        refObserver: '',
         medianMaxRating: 0,
         medianMinRating: 0,
         ratings: [],
@@ -377,6 +382,8 @@ else {
                 setupSteps: 2,
                 preSteps: 2,
                 postSteps: 1,
+                skipRepeat: false,
+                repeatInterval: 30,
                 feedback:{
                     barbell: false,
                     range: false,
@@ -412,6 +419,12 @@ else {
             this.medianMaxDist = (this.postInMedian) ? findMedian(this.setupMaxDist.concat(this.preMaxDist, this.postMaxDist)) : findMedian(this.setupMaxDist);
             this.medianMinDist = (this.postInMedian) ? findMedian(this.setupMinDist.concat(this.preMinDist, this.postMinDist)) : findMedian(this.setupMinDist);
             
+            this.refMax = this.medianMaxDist;
+            this.refMin = this.medianMinDist;
+            this.refValid = (new Date()).getTime() + this.options.repeatInterval*1000;
+            this.refExperiment = this.experiment;
+            this.refObserver = this.name;
+
             this.medianMaxRating = findMedian(this.practiceMaxRatings).toFixed(1);
             this.medianMinRating = findMedian(this.practiceMinRatings).toFixed(1);
             
@@ -444,8 +457,8 @@ else {
 
         rater = (function(){
 
-            var minDist = (config.options.postInMedian) ? findMedian(config.setupMinDist.concat(config.preMinDist, config.postMinDist)) : findMedian(config.setupMinDist),
-                maxDist = (config.options.postInMedian) ? findMedian(config.setupMaxDist.concat(config.preMaxDist, config.postMaxDist)) : findMedian(config.setupMaxDist);
+            var minDist = (config.refValid) ? config.refMin : (config.options.postInMedian) ? findMedian(config.setupMinDist.concat(config.preMinDist, config.postMinDist)) : findMedian(config.setupMinDist),
+                maxDist = (config.refValid) ? config.refMax : (config.options.postInMedian) ? findMedian(config.setupMaxDist.concat(config.preMaxDist, config.postMaxDist)) : findMedian(config.setupMaxDist);
 
             var ratingRange = maxDist - minDist;
 
@@ -505,6 +518,8 @@ else {
             this.setupSteps = $(this.el.find('#setupSteps'));
             this.preSteps = $(this.el.find('#preSteps'));
             this.postSteps = $(this.el.find('#postSteps'));
+            this.skipRepeat = $(this.el.find('#skipRepeat'));
+            this.repeatInterval = $(this.el.find('#repeatInterval'));
             this.ratingInterval = $(this.el.find('#ratingInterval'));
             this.minRating = $(this.el.find('#minRating'));
 
@@ -679,7 +694,7 @@ else {
             var self = this;
             var updatedOptions = self.generateOptions();
             $.ajax({
-                url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/upload',
+                url:'http://ec2-54-164-131-244.compute-1.amazonaws.com/upload',
                 type: 'POST',
                 data: JSON.stringify({e: exp, k: key, o: updatedOptions}),
                 contentType: 'application/json; charset=utf-8',
@@ -775,6 +790,8 @@ else {
                 setupSteps: +$(this.setupSteps).val().trim(),
                 preSteps: +$(this.preSteps).val().trim(),
                 postSteps: +$(this.postSteps).val().trim(),
+                skipRepeat: $(this.skipRepeat).prop('checked'),
+                repeatInterval: +$(this.repeatInterval).val(),
                 feedback:{
                     barbell: $(this.feedBarbell).prop('checked'),
                     range: $(this.feedRange).prop('checked'),
@@ -808,6 +825,8 @@ else {
             $(this.setupSteps).val(options.setupSteps);
             $(this.preSteps).val(options.preSteps);
             $(this.postSteps).val(options.postSteps);
+            $(this.skipRepeat).prop('checked', options.skipRepeat);
+            $(this.repeatInterval).val(options.repeatInterval);
             $(this.ratingInterval).val(options.ratingInterval);
             $(this.minRating).val(options.minRating);
 
@@ -1081,13 +1100,18 @@ else {
         var self = this;
         exp = (!exp || exp === '') ? 'Default' :  exp;
         $.ajax({
-            url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/download?e='+exp,
+            url:'http://ec2-54-164-131-244.compute-1.amazonaws.com/download?e='+exp,
             type: 'GET',
             dataType: 'json',
             timeout: 8000,
             success: function(msg) {
                 if(msg && msg.options){
                     config.serverOptions = msg.options;
+                    for(opt in config.options){
+                        if(!config.serverOptions.hasOwnProperty(opt)){
+                            config.serverOptions[opt] = config.options[opt];
+                        }
+                    }
                     settingsPage.loadOptions(config.serverOptions);
                 }
             },
@@ -1099,7 +1123,7 @@ else {
     function downloadExperiments(exp, error, complete){
         var self = this;
         $.ajax({
-            url: 'http://ec2-54-210-113-201.compute-1.amazonaws.com/exps',
+            url: 'http://ec2-54-164-131-244.compute-1.amazonaws.com/exps',
             type: 'GET',
             dataType: 'json',
             timeout: 5000,
@@ -2125,6 +2149,7 @@ else {
                         self.startTrial(1);
                     },
                     onEnd: function(){
+                        updateRater(config);
                         self.begin('pre');
                     }
                 },
@@ -2135,6 +2160,7 @@ else {
                     ],
                     end: [],
                     onEnd: function(){
+                        updateRater(config);
                         if(config.options.musicSelect){
                             PageController.transition("music");                    
                         }
@@ -2154,20 +2180,17 @@ else {
                     start: [ 'Prepare for the final practice ratings.' ],
                     end: [],
                     onEnd: function(){
+                        updateRater(config);
                         PageController.transition("complete");
                     }
                 }
             };
 
-            if(config.options[phase + 'Steps'] == 0){
-                return this.titleTexts[phase].onEnd();
-            }
-
-            if(config.options.feedback.auditory || config.options.feedback.tactile){
-                this.titleTexts['pre'].start[1] += ' Adjust the volume of your device to be comfortable.';
-            }
-
             if(phase == 'setup'){
+                config.refValid = config.options.skipRepeat 
+                    && (new Date()).getTime() < config.refValid 
+                    && config.refExperiment === config.experiment
+                    && config.refObserver === config.name;
                 rater = (function(){
                     return{
                         getRating: function(){
@@ -2175,6 +2198,14 @@ else {
                         }
                     };
                 })();
+            }
+
+            if(config.options[phase + 'Steps'] == 0 || config.refValid){
+                return this.titleTexts[phase].onEnd();
+            }
+
+            if(config.options.feedback.auditory || config.options.feedback.tactile){
+                this.titleTexts['pre'].start[1] += ' Adjust the volume of your device to be comfortable.';
             }
 
             this.titleText.style.opacity = 0;
@@ -2229,8 +2260,6 @@ else {
                 $(self.tracker).velocity({opacity: 0}, { duration: 200, queue: false, 
                     complete: function(){
                         self.bubbles.paper.clear();
-                        
-                        updateRater(config);
 
                         if(self.titleTexts[self.trialParams.phase].end.length > 0){
                             self.titlePhase = 'end';
@@ -2861,7 +2890,7 @@ else {
             if(!this.status.started){
                 this.status.started = true;
                 $(this.titleText).hide();
-                this.timers.sample = setTimeout(this.sampleRating, config.options.ratingInterval * 1000);
+                //this.timers.sample = setTimeout(this.sampleRating, config.options.ratingInterval * 1000);
                 this.timers.end = setTimeout(this.stop, (config.totalDuration * 1000) );
 
                 config.experimentTime = new Date();
@@ -2968,7 +2997,7 @@ else {
 
                 if(config.options.storeData){
                     $.ajax({
-                        url:'http://ec2-54-210-113-201.compute-1.amazonaws.com/store',
+                        url:'http://ec2-54-164-131-244.compute-1.amazonaws.com/store',
                         type: 'POST',
                         data: JSON.stringify(config.generateDataObject()),
                         contentType: 'application/json; charset=utf-8'

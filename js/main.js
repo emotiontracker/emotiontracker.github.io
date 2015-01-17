@@ -694,7 +694,7 @@ else {
             var self = this;
             var updatedOptions = self.generateOptions();
             $.ajax({
-                url:'http://ec2-54-164-131-244.compute-1.amazonaws.com/upload',
+                url:'http://54.172.59.119/upload',
                 type: 'POST',
                 data: JSON.stringify({e: exp, k: key, o: updatedOptions}),
                 contentType: 'application/json; charset=utf-8',
@@ -1100,7 +1100,7 @@ else {
         var self = this;
         exp = (!exp || exp === '') ? 'Default' :  exp;
         $.ajax({
-            url:'http://ec2-54-164-131-244.compute-1.amazonaws.com/download?e='+exp,
+            url:'http://54.172.59.119/download?e='+exp,
             type: 'GET',
             dataType: 'json',
             timeout: 8000,
@@ -1123,7 +1123,7 @@ else {
     function downloadExperiments(exp, error, complete){
         var self = this;
         $.ajax({
-            url: 'http://ec2-54-164-131-244.compute-1.amazonaws.com/exps',
+            url: 'http://54.172.59.119/exps',
             type: 'GET',
             dataType: 'json',
             timeout: 5000,
@@ -2997,7 +2997,7 @@ else {
 
                 if(config.options.storeData){
                     $.ajax({
-                        url:'http://ec2-54-164-131-244.compute-1.amazonaws.com/store',
+                        url:'http://54.172.59.119/store',
                         type: 'POST',
                         data: JSON.stringify(config.generateDataObject()),
                         contentType: 'application/json; charset=utf-8'

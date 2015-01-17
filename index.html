@@ -41,14 +41,14 @@
         <link rel="stylesheet" href="css/normalize.css">
         <link rel="stylesheet" href="css/main.css">
 
-        <script>
+<!--        <script>
             (function(_,e,rr,s){_errs=[s];var c=_.onerror;_.onerror=function(){var a=arguments;_errs.push(a);
             c&&c.apply(this,a)};var b=function(){var c=e.createElement(rr),b=e.getElementsByTagName(rr)[0];
             c.src="//beacon.errorception.com/"+s+".js";c.async=!0;b.parentNode.insertBefore(c,b)};
             _.addEventListener?_.addEventListener("load",b,!1):_.attachEvent("onload",b)})
             (window,document,"script","542ed55fe361eb023f0006cb");
         </script>
-
+-->
 
         <script src="js/vendor/modernizr-2.7.1.min.js"></script>
     </head>
@@ -66,9 +66,51 @@
             </div>
         </div>
 
+        <div id="helpPage" style="display:none">
+            <div id="helpHeader" class="page-header">
+                <div>
+                    Welcome to the
+                    <h2>Emotion Tracker App</h2>
+                </div>
+            </div> 
+            <div class="row" style="padding-top:0;margin-bottom:30px">
+                <button id="showCreditsBtn" class="btn btn-primary btn-full">View credits</button> 
+            </div>
+            <button id="helpClose" class="btn btn-img2"><div class="ico-close"></div></button>  
+
+            <div class="row">
+                <div class="help-title">What is it for?</div>
+                <div class="help-text">This app tracks​ any subjective magnitude (e.g. pleasure) over time. ​The participant keeps the tips of two fingers on the smartphone screen, and reports magnitude by finger spread over time. The app ​takes a reading every second (or any rate you like), ​converts ​each analog ​spread into a numerical rating, ​and, at the end of the trial, emails the data as a spreadsheet file (.CSV) to the experimenter (you). You can use the app with virtually any stimulus – music, art, ​​video, live performance,​ ​or even discussion.​</div>
+            </div>  
+
+            <div class="row">
+                <div class="help-title">Music</div>
+                <div class="help-text">The app can present music from spotify, selected by the participant. However, this is data-intense and our Spotify license only allows us to serve one user at a time, in the whole world.</div>
+            </div>     
+
+            <div class="row">
+                <div class="help-title">Who can use it?</div>
+                <div class="help-text">With this app, you can collect data on any touch​screen device​ (iOS or Android)​ with internet access, including iPhone, iPad, and Samsung Galaxy. ​ ​Anyone can use it.​  It's free.  If you publish your data, please cite us.  (See credit page for full citation.)</div>
+            </div>
+
+            <div class="row">
+                <div class="help-title">What features can I change?</div>
+                <div class="help-text">You can set the duration, feedback, ​calibration details, and your email address, to which the data file will be sent. [Soon, you will be able to select the name for the magnitude (emotion) that the participant will be asked to report, e.g. "pleasure" or "anxiety".] You edit the settings by clicking on the gear icon on the home screen.</div>
+            </div>
+
+            <div class="row">
+                <div class="help-title">Group data for lecture or classroom demonstration</div>
+                <div class="help-text">For lecture use, a group ​data ​feature (under development)​​ collects data from multiple observers during the same session​ (e.g. everyone watching a movie), each responding through their own device. Our server provides a data page from which you can request a summary data file that summarizes all the data files on the server for a particular experiment and time window. All the data files are aligned by absolute time before the summary is made. Saving data on the server is optional. It is only needed to get a group data summary. Your data belong to you.​ <a href="http://emotiontracker.net/data">emotiontracker.net/data</a></div>
+            </div>
+
+            <div class="row">
+                <div class="help-text light">Denis G. Pelli, December 6, 2014</div>
+            </div>
+        </div>
+
         <div id="infoPage" style="display:none">
             <h2>Emotion Tracker</h2>
-            <div class="emph">v1.1.6</div>
+            <div class="emph">v1.1.7</div>
             <div class="info-desc">Measure self-reported emotion over time. Currently supports Safari and Chrome browsers on iOS and Android devices. Support for other devices may be added. Let us know what you need. <a href="mailto:denis.pelli@nyu.edu?subject=Emotion%20Tracker">denis.pelli@nyu.edu</a></div>
 
             <div class="light">Copyright © 2014 - 2015 Denis Pelli</div>
@@ -81,8 +123,12 @@
                 <div class="info-text">Jugal Manjeshwar<br/><a href="http://jugalm.com/">jugalm.com</a></div>
             </div>
             <div class="row">
+                <div class="col info-label">UX Design</div>
+                <div class="info-text">Lauren Vale<br/><a href="mailto:lauren.vale@nyu.edu?subject=Emotion%20Tracker">lauren.vale@nyu.edu</a></div>
+            </div>
+            <div class="row">
                 <div class="col info-label">Citation</div>
-                <div class="info-text">Pelli, D. G. and Vale, L. (2014) Lingering pleasure in the experience of beauty. International Association for Empirical Aesthetics, New York, New York, August 22-24, 2014.<br/><a href="http://psych.nyu.edu/pelli/posters.html">psych.nyu.edu/pelli/posters.html</a></div>
+                <div class="info-text">Pelli, D. G. and Vale, L. (2014) Lingering pleasure in the experience of beauty. International Association for Empirical Aesthetics, New York, New York, August 22-24, 2014.<br/><a href="http://psych.nyu.edu/pelli/pubs/pelli2014iaea-beauty-poster.pdf">View poster</a></div>
             </div>
             <div style="width:100%;text-align:center; margin:40px 0 0;font-size:15px;opacity:0.6;border-top: 1px solid #d6d4e5;
             padding-top:15px"><a href="http://emotiontracker.net">emotiontracker.net</a></div>
@@ -105,12 +151,12 @@
                 </div>                   
             </div>  
             <button id="btnInfo"><div class="ico-info"></div></button>
-            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;">v1.1.6</div>
+            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;">v1.1.7</div>
             <button id="btnSettings"><div class="ico-settings"></div></button>
         </div>
 
         <div id="settingsPage" style="display:none;opacity:0">
-            <div id="settingsHeader" class="fixed-wrapper row">
+            <div id="settingsHeader" class="fixed-wrapper row page-header">
                 <div class="col"><h2>Settings</h2></div>
                 <div class="row col-right">
                     <button class="btn btn-primary col" id="saveSubmit" style="display:none">Save & close</button>
@@ -164,6 +210,18 @@
                 <div class="field">
                     <label for="postSteps" class="lbl">Final practice ratings</label>
                     <input id="postSteps" type="text" value="1" class="inpt" pattern="[0-9]*" />
+                </div>
+
+                <div class="field">
+                    <div class="field-check">
+                        <label for="skipRepeat" class="lbl">Skip setup and practice on repeat trials</label>
+                        <span class="chkbox"><input id="skipRepeat" type="checkbox" /></span>
+                    </div>
+                </div> 
+
+                <div class="field">
+                    <label for="repeatInterval" class="lbl">Max time between repeats <span class="light"> (s)</span></label>
+                    <input id="repeatInterval" type="text" value="1" class="inpt" pattern="[0-9]*" />
                 </div>
 
                 <div class="field">
@@ -247,8 +305,8 @@
                 <div class="field">
                     <label class="lbl">Fingers</label>
                     <div id="optionsFingers" class="option-btn-group">
-                        <button id="modeThumbBtn" class="btn" data-value="0">Thumb and Index </button>
-                        <button id="modeMiddleBtn" class="btn" data-value="1">Index and Middle</button>
+                        <button id="modeThumbBtn" class="btn" data-value="0">Thumb and index </button>
+                        <button id="modeMiddleBtn" class="btn" data-value="1">Index and middle</button>
                     </div> 
                 </div>
                 
@@ -474,7 +532,7 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment + ((aborted == true) ? ',ABORTED!' : '')%>\nSettings from:,<%=optionsMode%>\nObserver:,<%=name%>\nEmail to:,<%=options.email%>\nApp:,<%=url%>\nApp version:,<%=appVersion%>\nApp created:,<%=appCreateDate%>\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime/1000)%>\nTime (s):,<%=times.join(",")%>\nRating (<%=options.minRating%> to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=deviceInfo.type%>\nModel:,<%=deviceInfo.model%>\nOS:,<%=os%>\nBrowser:,<%=browser%>\nLocal storage:,<%=localStore%>\n"Screen (height, width) (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (height, width) (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (latitude, longitude):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nLocation near:,"<%=location.near%>"\nInterval between ratings (s):,<%=options.ratingInterval%>\nMinimum allowed rating:,<%=options.minRating%>\nMaximum stimulus duration (s):,<%=options.duration%>\nExperiment duration after end of stimulus (s):,<%=options.postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (<%=options.minRating%> to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nFeedback barbell:,<%=options.feedback.barbell%>\nFeedback bar:,<%=options.feedback.range%>\nFeedback bar color varies:,<%=options.feedback.barVaries%>\nFeedback number:,<%=options.feedback.numeric%>\nFeedback tone:,<%=options.feedback.auditory%>\nFeedback ticks:,<%=options.feedback.tactile%>\nInclude practice in reference:,<%=options.postInMedian%>\nKnockout:,<%=knockout%>\nEnable name condition:,<%=options.nameSelect%>\nEnable sad mood condition:,<%=options.moodSelect%>\nDuration of mood induction (s):,<%=options.moodDuration%>\nEnable music selection:,<%=options.musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\nDuration of white noise (s):,<%=options.durationWhiteNoise%>\nFingers:,<%=(options.fingers === 0 ) ? 'Thumb and Index' : 'Index and Middle'%>\nStore data on server:,<%=options.storeData%>\n</script>       
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment + ((aborted == true) ? ',ABORTED!' : '')%>\nSettings from:,<%=optionsMode%>\nObserver:,<%=name%>\nEmail to:,<%=options.email%>\nApp:,<%=url%>\nApp version:,<%=appVersion%>\nApp created:,<%=appCreateDate%>\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime/1000)%>\nTime (s):,<%=times.join(",")%>\nRating (<%=options.minRating%> to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=deviceInfo.type%>\nModel:,<%=deviceInfo.model%>\nOS:,<%=os%>\nBrowser:,<%=browser%>\nLocal storage:,<%=localStore%>\n"Screen (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (lat., long.):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nNear:,"<%=location.near%>"\nInterval between ratings (s):,<%=options.ratingInterval%>\nMinimum allowed rating:,<%=options.minRating%>\nMaximum stimulus duration (s):,<%=options.duration%>\nExperiment duration after end of stimulus (s):,<%=options.postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (<%=options.minRating%> to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nSkip setup and practice on repeat trials:,<%=options.skipRepeat%>\nMax time between repeats (s):,<%=options.repeatInterval%>\nFeedback barbell:,<%=options.feedback.barbell%>\nFeedback bar:,<%=options.feedback.range%>\nFeedback bar color varies:,<%=options.feedback.barVaries%>\nFeedback number:,<%=options.feedback.numeric%>\nFeedback tone:,<%=options.feedback.auditory%>\nFeedback ticks:,<%=options.feedback.tactile%>\nInclude practice in reference:,<%=options.postInMedian%>\nKnockout:,<%=knockout%>\nEnable name condition:,<%=options.nameSelect%>\nEnable sad mood condition:,<%=options.moodSelect%>\nDuration of mood induction (s):,<%=options.moodDuration%>\nEnable music selection:,<%=options.musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\nDuration of white noise (s):,<%=options.durationWhiteNoise%>\nFingers:,<%=(options.fingers === 0 ) ? 'Thumb and index' : 'Index and middle'%>\nStore data on server:,<%=options.storeData%>\n</script>       
 
     </body>
 </html>

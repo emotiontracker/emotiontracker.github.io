@@ -67,7 +67,7 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.1.6', STORELOCAL = localStorageTest();
+    var VERSION = '1.1.7', STORELOCAL = localStorageTest();
 
     if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
         localStorage.clear();
@@ -279,6 +279,11 @@ else {
         postMinDist: [],
         medianMaxDist: 0,
         medianMinDist: 0,
+        refMin: 0,
+        refMax: 0,
+        refValid: false,
+        refExperiment: '',
+        refObserver: '',
         medianMaxRating: 0,
         medianMinRating: 0,
         ratings: [],
@@ -377,6 +382,8 @@ else {
                 setupSteps: 2,
                 preSteps: 2,
                 postSteps: 1,
+                skipRepeat: false,
+                repeatInterval: 30,
                 feedback:{
                     barbell: false,
                     range: false,
@@ -412,6 +419,12 @@ else {
             this.medianMaxDist = (this.postInMedian) ? findMedian(this.setupMaxDist.concat(this.preMaxDist, this.postMaxDist)) : findMedian(this.setupMaxDist);
             this.medianMinDist = (this.postInMedian) ? findMedian(this.setupMinDist.concat(this.preMinDist, this.postMinDist)) : findMedian(this.setupMinDist);
             
+            this.refMax = this.medianMaxDist;
+            this.refMin = this.medianMinDist;
+            this.refValid = (new Date()).getTime() + this.options.repeatInterval*1000;
+            this.refExperiment = this.experiment;
+            this.refObserver = this.name;
+
             this.medianMaxRating = findMedian(this.practiceMaxRatings).toFixed(1);
             this.medianMinRating = findMedian(this.practiceMinRatings).toFixed(1);
             
@@ -444,8 +457,8 @@ else {
 
         rater = (function(){
 
-            var minDist = (config.options.postInMedian) ? findMedian(config.setupMinDist.concat(config.preMinDist, config.postMinDist)) : findMedian(config.setupMinDist),
-                maxDist = (config.options.postInMedian) ? findMedian(config.setupMaxDist.concat(config.preMaxDist, config.postMaxDist)) : findMedian(config.setupMaxDist);
+            var minDist = (config.refValid) ? config.refMin : (config.options.postInMedian) ? findMedian(config.setupMinDist.concat(config.preMinDist, config.postMinDist)) : findMedian(config.setupMinDist),
+                maxDist = (config.refValid) ? config.refMax : (config.options.postInMedian) ? findMedian(config.setupMaxDist.concat(config.preMaxDist, config.postMaxDist)) : findMedian(config.setupMaxDist);
 
             var ratingRange = maxDist - minDist;
 
@@ -505,6 +518,8 @@ else {
             this.setupSteps = $(this.el.find('#setupSteps'));
             this.preSteps = $(this.el.find('#preSteps'));
             this.postSteps = $(this.el.find('#postSteps'));
+            this.skipRepeat = $(this.el.find('#skipRepeat'));
+            this.repeatInterval = $(this.el.find('#repeatInterval'));
             this.ratingInterval = $(this.el.find('#ratingInterval'));
             this.minRating = $(this.el.find('#minRating'));
 
@@ -775,6 +790,8 @@ else {
                 setupSteps: +$(this.setupSteps).val().trim(),
                 preSteps: +$(this.preSteps).val().trim(),
                 postSteps: +$(this.postSteps).val().trim(),
+                skipRepeat: $(this.skipRepeat).prop('checked'),
+                repeatInterval: +$(this.repeatInterval).val(),
                 feedback:{
                     barbell: $(this.feedBarbell).prop('checked'),
                     range: $(this.feedRange).prop('checked'),
@@ -808,6 +825,8 @@ else {
             $(this.setupSteps).val(options.setupSteps);
             $(this.preSteps).val(options.preSteps);
             $(this.postSteps).val(options.postSteps);
+            $(this.skipRepeat).prop('checked', options.skipRepeat);
+            $(this.repeatInterval).val(options.repeatInterval);
             $(this.ratingInterval).val(options.ratingInterval);
             $(this.minRating).val(options.minRating);
 
@@ -873,16 +892,20 @@ else {
 
         init: function(){
             this._super(true);
-            _bindAll(this, 'handleSubmit', 'showSettings', 'showInfo', 'hideInfo' ,'floatButtons', 'unFloatButtons');
+            _bindAll(this, 'handleSubmit', 'showSettings', 'showInfo', 'hideInfo', 'showHelp', 'hideHelp'  ,'floatButtons', 'unFloatButtons');
 
             this.name = this.el.find('#name');
             this.experiment = this.el.find('#experiment');
             this.experimentSel = this.el.find('#experimentSel');
             this.settingsButton = this.el.find('#btnSettings');
             this.submitButton = this.el.find('#startSubmit');
-            this.infoButton = this.el.find('#btnInfo');
+            this.helpButton = this.el.find('#btnInfo');
+            this.creditsButton = document.body.find('#showCreditsBtn');
+            this.helpPage = $('#helpPage');
+            this.helpClose = $('#helpClose');
             this.infoPage = $('#infoPage');
             this.infoClose = $('#infoClose');
+            this.helpShown = false;
 
             var that = this;
             $(this.experimentSel).prop('disabled', true);
@@ -914,17 +937,41 @@ else {
 
             new MBP.fastButton(this.submitButton, this.handleSubmit);
             new MBP.fastButton(this.settingsButton, this.showSettings);
-            new MBP.fastButton(this.infoButton, this.showInfo);
+            new MBP.fastButton(this.helpButton, this.showHelp);
+            new MBP.fastButton(this.creditsButton, this.showInfo);
             
             $(this.infoClose).on('touchstart', this.hideInfo);
+            $(this.helpClose).on('touchstart', this.hideHelp);
             $(this.el).on('focus', 'input[type="text"]', this.unFloatButtons);
             $(this.el).on('focusout', 'input[type="text"]', this.floatButtons);
         },
 
-        showInfo: function(e){
+        showHelp: function(e){
             e.preventDefault();
             var self = this;
             $(this.el).velocity({opacity:0}, 100, function(){
+                $(this).css({display:'none'});
+                self.helpShown = true;
+                $(self.helpPage).css({display: 'block'});
+                $(self.helpPage).velocity({opacity: 1}, 200);
+            });
+        },
+
+        hideHelp: function(e){
+            var self = this;
+            self.helpShown = false;
+            $(this.helpPage).velocity({opacity:0}, 100, function(){
+                $(this).css({display:'none'});
+                $(self.el).css({display: 'block'});
+                $(self.el).velocity({opacity: 1}, 200);
+            });
+        },
+
+        showInfo: function(e){
+            if(!this.helpShown) return false;
+            e.preventDefault();
+            var self = this;
+            $(this.helpPage).velocity({opacity:0}, 100, function(){
                 $(this).css({display:'none'});
                 $(self.infoPage).css({display: 'block'});
                 $(self.infoPage).velocity({opacity: 1}, 200);
@@ -935,8 +982,8 @@ else {
             var self = this;
             $(this.infoPage).velocity({opacity:0}, 100, function(){
                 $(this).css({display:'none'});
-                $(self.el).css({display: 'block'});
-                $(self.el).velocity({opacity: 1}, 200);
+                $(self.helpPage).css({display: 'block'});
+                $(self.helpPage).velocity({opacity: 1}, 200);
             });
         },
 
@@ -1060,6 +1107,11 @@ else {
             success: function(msg) {
                 if(msg && msg.options){
                     config.serverOptions = msg.options;
+                    for(opt in config.options){
+                        if(!config.serverOptions.hasOwnProperty(opt)){
+                            config.serverOptions[opt] = config.options[opt];
+                        }
+                    }
                     settingsPage.loadOptions(config.serverOptions);
                 }
             },
@@ -2097,6 +2149,7 @@ else {
                         self.startTrial(1);
                     },
                     onEnd: function(){
+                        updateRater(config);
                         self.begin('pre');
                     }
                 },
@@ -2107,6 +2160,7 @@ else {
                     ],
                     end: [],
                     onEnd: function(){
+                        updateRater(config);
                         if(config.options.musicSelect){
                             PageController.transition("music");                    
                         }
@@ -2126,20 +2180,17 @@ else {
                     start: [ 'Prepare for the final practice ratings.' ],
                     end: [],
                     onEnd: function(){
+                        updateRater(config);
                         PageController.transition("complete");
                     }
                 }
             };
 
-            if(config.options[phase + 'Steps'] == 0){
-                return this.titleTexts[phase].onEnd();
-            }
-
-            if(config.options.feedback.auditory || config.options.feedback.tactile){
-                this.titleTexts['pre'].start[1] += ' Adjust the volume of your device to be comfortable.';
-            }
-
             if(phase == 'setup'){
+                config.refValid = config.options.skipRepeat 
+                    && (new Date()).getTime() < config.refValid 
+                    && config.refExperiment === config.experiment
+                    && config.refObserver === config.name;
                 rater = (function(){
                     return{
                         getRating: function(){
@@ -2147,6 +2198,14 @@ else {
                         }
                     };
                 })();
+            }
+
+            if(config.options[phase + 'Steps'] == 0 || config.refValid){
+                return this.titleTexts[phase].onEnd();
+            }
+
+            if(config.options.feedback.auditory || config.options.feedback.tactile){
+                this.titleTexts['pre'].start[1] += ' Adjust the volume of your device to be comfortable.';
             }
 
             this.titleText.style.opacity = 0;
@@ -2201,8 +2260,6 @@ else {
                 $(self.tracker).velocity({opacity: 0}, { duration: 200, queue: false, 
                     complete: function(){
                         self.bubbles.paper.clear();
-                        
-                        updateRater(config);
 
                         if(self.titleTexts[self.trialParams.phase].end.length > 0){
                             self.titlePhase = 'end';
@@ -2833,11 +2890,12 @@ else {
             if(!this.status.started){
                 this.status.started = true;
                 $(this.titleText).hide();
-                this.timers.sample = setTimeout(this.sampleRating, config.options.ratingInterval * 1000);
+                //this.timers.sample = setTimeout(this.sampleRating, config.options.ratingInterval * 1000);
                 this.timers.end = setTimeout(this.stop, (config.totalDuration * 1000) );
 
                 config.experimentTime = new Date();
                 config.absoluteTime = config.experimentTime.getTime();
+                this.sampleRating();
 
                 if(config.options.musicSelect){
                     PageController.pages.music.playMusic(config.songUri, config.options.duration);

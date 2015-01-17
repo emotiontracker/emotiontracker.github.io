@@ -78,7 +78,7 @@ h2{
   margin:0;
 }
 
-#infoPage{
+#infoPage {
   padding: 20px;
   font-size:13px;
 }
@@ -87,13 +87,48 @@ h2{
   margin: 20px 0 0;
 }
 
+#helpPage .row{
+  padding: 20px;
+}
+
+#helpPage h2{
+  font-size:26px;
+}
+
+#helpHeader {
+  background-color: #695DC2;
+  color:#fff;
+  border:none;
+  
+  /*
+  8C80E5
+  695DC2
+  */
+}
+
+#helpHeader h2{
+  color:#fff;
+}
+
+#helpButtons {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+#helpClose {
+  background-color:#8C80E5;
+  background-image:none;
+  border-color:#695DC2;
+}
+
 .info-desc{
   font-size: 14px;
   margin: 10px 0;
 }
 
 .info-label{
-  width: 50px;
+  width: 60px;
   font-weight:bold;
   float:left;
 }
@@ -101,6 +136,16 @@ h2{
 .info-text{
   width: 62%;
   float:right;
+}
+
+.help-title {
+  font-size:16px;
+  color: #7f73d6;
+}
+
+.help-text {
+  font-size: 14px;
+  margin: 5px 0 0;
 }
 
 a:link, a:visited, a:hover, a:focus{
@@ -364,20 +409,26 @@ audio{
   margin:10px;
 }
 
-#settingsHeader{
+.page-header{
   padding: 15px 10px 10px 20px;
   background-color: rgba(255,255,255,0.9);; 
   border-bottom:1px solid #ddd;  
   box-shadow: 0 -1px 6px rgba(0,0,0,0.08);
 }
 
-#settingsHeader .btn{
+.page-header .btn{
   margin: 0px 0 0 5px;
   padding: 6px 15px;
   line-height:24px;
 }
 
-#settingsHeader .btn-img2{
+#showCreditsBtn{
+  padding: 7px 0;
+  line-height:24px; 
+  display:block; 
+}
+
+.page-header .btn-img2{
   padding: 6px 8px;
 }
 
@@ -725,13 +776,13 @@ input[type="checkbox"]:focus, input[type=checkbox]:active, button:focus, .btn:fo
   height:30px;
 }
 
-#uploadClose, #infoClose{
+#uploadClose, #infoClose, #helpClose{
   position:absolute;
   top:5px;
   right:5px;
 }
 
-#infoClose{
+#infoClose, #helpClose{
   padding: 5px;
   top:8px;
 }

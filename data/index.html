@@ -136,7 +136,7 @@
         if(time.length != 2) return false;
 
         var dateObject = new Date(date[2], date[0], date[1], time[0], time[1]);
-        
+
         $.ajax({
             url: 'http://54.172.59.119/expCount?e=' + exp + '&t=' + dateObject.getTime(),
             type: 'GET',
@@ -160,14 +160,17 @@
                 $name.append('<option value="' + exps[i] + '">' + exps[i] +'</option>');
             }
             $name.val('Default');
+            updateCount();
         },
         error: function(){}
     });
 
-    $('#countBtn').on('click', function(e){
-        e.preventDefault();
+    $name.on('change', function(e){
         updateCount();
-        return false;
+    });
+
+    $('#countBtn').on('click', function(e){
+        updateCount();
     });
 
     $('#genBtn').on('click', function(e){

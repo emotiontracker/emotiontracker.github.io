@@ -67,7 +67,7 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.1.7', STORELOCAL = localStorageTest();
+    var VERSION = '1.1.8', STORELOCAL = localStorageTest();
 
     if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
         localStorage.clear();

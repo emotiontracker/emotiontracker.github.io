@@ -2082,6 +2082,9 @@ else {
         onTap: function(e){
             e.preventDefault();
             var self = this;
+            if(getOrientation() == 'portrait'){
+                return false;
+            }
             document.removeEventListener('touchstart', this.onTap);
 
             $(this.tapText).velocity({opacity:0}, 100);
@@ -2558,9 +2561,9 @@ else {
             if(config.options.feedback.range){
                 this.enabled.push(new RangeFeedback({el:this.el.find('.rangeFeedback')}));
             }
-            if(config.options.feedback.barbell && !this.disableBarbell){
+/*            if(config.options.feedback.barbell && !this.disableBarbell){
                 this.enabled.push(new BarbellFeedback({el:this.el.find('.barbellFeedback')}));
-            }
+            }*/
             if(config.options.feedback.auditory){
                 this.enabled.push(AuditoryFeedback);
             }
@@ -2683,7 +2686,7 @@ else {
 
         onEnd: function(touches){
             this.bubbles.shapes.bubbles[0].selected = this.bubbles.shapes.bubbles[1].selected = false;
-            this.bubbles.el.style.opacity = 0;
+            //this.bubbles.el.style.opacity = 0;
         }
     });
 
@@ -2696,7 +2699,7 @@ else {
             
             this.titleText = this.el.find('#expTitle');
             this.tapText = this.el.find('#expTap');
-
+            this.bubblesEl = this.el.find('.barbellFeedback');
             this.feedbacks = new Feedbacks({el:this.el.find('.feedbacks')});
             this.titleTexts = [
                 'Soon, you will continuously rate your pleasure. You\'ll spread your fingers to indicate how much pleasure you are getting from the object at that moment.',
@@ -2732,9 +2735,15 @@ else {
                 started: false,
                 canceled: false
             };
+            if(config.options.feedback.barbell){
+                this.bubblesEl.innerHTML = '';
+                console.log('Initing bubbles');
+                this.bubbles = new BubbleView({el: this.bubblesEl});
+                this.bubblesEl.style.opacity = 0;
+            }
             this.timeRes = decimalPlaces(config.ratingInterval);
             this.titleIndex = 0;
-            this.showTitle();         
+            this.showTitle();    
         },
 
         abort: function(e){
@@ -2753,6 +2762,9 @@ else {
 
         onTap: function(e){
             e.preventDefault();
+            if(getOrientation() == 'portrait'){
+                return false;
+            }
             document.removeEventListener('touchstart', this.onTap);
             var self = this;
 
@@ -2826,6 +2838,7 @@ else {
 
         close: function(){
             PageController.pages.music.stop();
+            this.bubblesEl.style.opacity = 0;
             this.timers.clearAll();
             document.removeEventListener('touchstart', this.abort);
             document.removeEventListener('touchstart', this.handleTouchStart);
@@ -2876,10 +2889,16 @@ else {
 
         onTouchStart: function(touch){
             notifier.play("contact");
+            if(this.bubbles) this.bubbles.onTouchStart(touch, this.touches);
+        },
+
+        onTouchMove: function(touch){
+            if(this.bubbles) this.bubbles.onTouchMove(touch, this.touches);
         },
 
         onTouchEnd: function(touch){
             notifier.play("contactLoss");
+            if(this.bubbles) this.bubbles.onTouchEnd(touch, this.touches);
         },
 
         handleDoubleTouchStart: function(){
@@ -2890,6 +2909,7 @@ else {
             if(!this.status.started){
                 this.status.started = true;
                 $(this.titleText).hide();
+                this.bubblesEl.style.opacity = 1;
                 //this.timers.sample = setTimeout(this.sampleRating, config.options.ratingInterval * 1000);
                 this.timers.end = setTimeout(this.stop, (config.totalDuration * 1000) );
 

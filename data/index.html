@@ -17,7 +17,7 @@
             font-size:32px;
             font-weight:lighter;
             color:#5B529E;
-            margin-bottom:10px;
+            margin-bottom:40px;
         }
 
         .btn{
@@ -35,38 +35,67 @@
             display:inline-block;
             padding: 10px 50px;
         }
+
+        .content {
+            width: 230px;
+            margin: 0 auto;
+        }
+
+        #expCount {
+            font-size: 12px;
+            font-weight:bold;
+        }
+
+        .count {
+            font-size:11px;
+            padding:2px 4px;
+            border-radius:6px;
+            background:#666;
+            color:#fff;
+            margin: 0 0 0 10px;
+            font-weight:bold;
+        }
+
+        select.inpt{
+            margin-left: 0;
+        }
     </style>
 </head>
 <body>
 
-    <div class="wrapper">
 
-        <div class="center-text-wrapper">
-            <div class="center-text">
-                <h1>Pleasure data</h1>
-                <div style="margin-bottom:30px;">    
-                    <div>
-                        <input class="inpt" type="text" id="expName" placeholder="Enter name of experiment"/>
-                    </div>
-                    <div>
-                        <span>Date</span>
-                        <span>
-                        <input class="inpt" style="width:170px" type="text" id="expDate" placeholder="mm/dd/yyyy"/></span>
-                    </div>
-                    <div>
-                        <span>Time</span>
-                        <span>
-                        <input class="inpt" style="width:170px" type="text" id="expTime" placeholder="hh:mm"/></span>
-                    </div>
-                    <button class="btn btn-primary" id="genBtn">Generate</button>
-                    <span class="loader-small" style="opacity:0"></span>
+    <div class="center-text-wrapper">
+        <div class="center-text">
+            <div class="content">
+            <h1>Pleasure data</h1>
+            <div style="margin-bottom:30px;">    
+                <div>
+                    <div style="text-align:left"><label for="expName">Choose experiment</label></div>
+                    <select id="expName" class="inpt">
+                        <option value="" selected disabled style="display:none">Getting list of experiments...</option>
+                    </select>
                 </div>
+                <div>
+                    <span>Date</span>
+                    <span>
+                    <input class="inpt" style="width:170px" type="text" id="expDate" placeholder="mm/dd/yyyy"/></span>
+                </div>
+                <div>
+                    <span>Time</span>
+                    <span>
+                    <input class="inpt" style="width:170px" type="text" id="expTime" placeholder="hh:mm"/></span>
+                </div>
+                <button class="btn btn-primary" id="genBtn">Generate</button>
+                <button class="btn" id="countBtn">Count<span class="count">0</span></button>
+                <span class="loader-small" style="opacity:0"></span>
+            </div>
 
-                <div id="genButtons"></div>
-                <span class="msg-error" style="opacity:0">Hola</span>
+            <div id="genButtons"></div>
+            <span class="msg-error" style="opacity:0">Hola</span>
             </div>
         </div>
     </div>
+
     
 <script src="../js/vendor/jquery-2.1.0.min.js"></script>
 <script src="../js/plugins.js"></script>
@@ -81,17 +110,70 @@
         });        
     }
 
-    var now = new Date();
     var $date = $('#expDate'),
-        $time = $('#expTime');
+        $time = $('#expTime'),
+        $name = $('#expName');
 
-    $date.val((now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear());
-    $time.val(now.getHours() + ':' + now.getMinutes());
+    function updateDateTime(){
+        var now = new Date();
+        $date.val((now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear());
+        $time.val(now.getHours() + ':' + now.getMinutes());
+        setTimeout(updateDateTime, (60 - now.getSeconds()) * 1000 ); 
+    }
+    updateDateTime();
+
+
+    function updateCount() {
+
+        var exp = $name.val().trim();
+        if(exp === '') return false;
+
+        var date = $date.val().trim().split('/');
+        if(date.length != 3) return false;
+        date[0] = +date[0] - 1;
+
+        var time = $time.val().trim().split(':');
+        if(time.length != 2) return false;
+
+        var dateObject = new Date(date[2], date[0], date[1], time[0], time[1]);
+        
+        $.ajax({
+            url: 'http://54.172.59.119/expCount?e=' + exp + '&t=' + dateObject.getTime(),
+            type: 'GET',
+            dataType: 'json',
+            timeout: 5000,
+            success: function(exps) {
+                $('.count').text(exps.count);
+            },
+            error: function(){}
+        });      
+    }
+
+    $.ajax({
+        url: 'http://54.172.59.119/exps',
+        type: 'GET',
+        dataType: 'json',
+        timeout: 5000,
+        success: function(exps) {
+            
+            for(var i=0; i<exps.length; i++){
+                $name.append('<option value="' + exps[i] + '">' + exps[i] +'</option>');
+            }
+            $name.val('Default');
+        },
+        error: function(){}
+    });
+
+    $('#countBtn').on('click', function(e){
+        e.preventDefault();
+        updateCount();
+        return false;
+    });
 
     $('#genBtn').on('click', function(e){
         e.preventDefault();
 
-        var exp = $('#expName').val().trim();
+        var exp = $name.val().trim();
         if(exp === '') return false;
 
         var date = $date.val().trim().split('/');
@@ -107,7 +189,7 @@
         $('.loader-small').css({opacity:1});
         var self = this;
         $.ajax({
-            url: 'http://ec2-54-210-113-201.compute-1.amazonaws.com/expdata?e=' + exp + '&t=' + dateObject.getTime(),
+            url: 'http://54.172.59.119/expdata?e=' + exp + '&t=' + dateObject.getTime(),
             type: 'GET',
             dataType: 'json',
             timeout: 5000,

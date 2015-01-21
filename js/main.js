@@ -281,6 +281,8 @@ else {
         medianMinDist: 0,
         refMin: 0,
         refMax: 0,
+        refMinRating: '',
+        refMaxRating: '',
         refValid: false,
         refExperiment: '',
         refObserver: '',
@@ -416,8 +418,8 @@ else {
 
         generateData: function(){
 
-            this.medianMaxDist = (this.postInMedian) ? findMedian(this.setupMaxDist.concat(this.preMaxDist, this.postMaxDist)) : findMedian(this.setupMaxDist);
-            this.medianMinDist = (this.postInMedian) ? findMedian(this.setupMinDist.concat(this.preMinDist, this.postMinDist)) : findMedian(this.setupMinDist);
+            this.medianMaxDist = (this.refValid) ? this.refMax : (this.postInMedian) ? findMedian(this.setupMaxDist.concat(this.preMaxDist, this.postMaxDist)) : findMedian(this.setupMaxDist);
+            this.medianMinDist = (this.refValid) ? this.refMin : (this.postInMedian) ? findMedian(this.setupMinDist.concat(this.preMinDist, this.postMinDist)) : findMedian(this.setupMinDist);
             
             this.refMax = this.medianMaxDist;
             this.refMin = this.medianMinDist;
@@ -425,8 +427,10 @@ else {
             this.refExperiment = this.experiment;
             this.refObserver = this.name;
 
-            this.medianMaxRating = findMedian(this.practiceMaxRatings).toFixed(1);
-            this.medianMinRating = findMedian(this.practiceMinRatings).toFixed(1);
+            this.medianMaxRating = (this.refValid) ? this.refMaxRating : findMedian(this.practiceMaxRatings).toFixed(1);
+            this.medianMinRating = (this.refValid) ? this.refMinRating : findMedian(this.practiceMinRatings).toFixed(1);
+            this.refMaxRating = this.medianMaxRating;
+            this.refMinRating = this.medianMinRating;
             
             var distNames = ['setup', 'pre', 'post'];
             for(var i = 0; i<distNames.length; i++){

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pleasure data</title>
+    <title>Emotion data</title>
     <meta name="description" content="">
     <meta name="HandheldFriendly" content="True">
     <meta name="MobileOptimized" content="320">
@@ -26,9 +26,10 @@
         }
 
         .msg-error{
-            padding: 8px 20px;
+            padding: 8px 10px;
             border:none;
             border-radius:3px;
+            display:block;
         }
 
         a.btn{
@@ -48,17 +49,17 @@
         }
 
         .count {
-            font-size:11px;
-            padding:2px 4px;
-            border-radius:6px;
-            background:#666;
-            color:#fff;
-            margin: 0 0 0 10px;
             font-weight:bold;
         }
 
         select.inpt{
             margin-left: 0;
+        }
+
+        .btn{
+            width: 220px;
+            margin-bottom: 0;
+            text-align: left;
         }
     </style>
 </head>
@@ -68,7 +69,7 @@
     <div class="center-text-wrapper">
         <div class="center-text">
             <div class="content">
-            <h1>Emotion tracker data</h1>
+            <h1>Emotion data</h1>
             <div style="margin-bottom:30px;">    
                 <div>
                     <div style="text-align:left"><label for="expName">Choose experiment</label></div>
@@ -86,9 +87,9 @@
                     <span>
                     <input class="inpt" style="width:170px" type="text" id="expTime" placeholder="hh:mm"/></span>
                 </div>
-                <button class="btn btn-primary" id="genBtn">Generate</button>
-                <button class="btn" id="countBtn">Count<span class="count">0</span></button>
-                <span class="loader-small" style="opacity:0"></span>
+                
+                <div><button class="btn" id="countBtn">Found <span class="count">0</span> trials</button></div>
+                <div><button class="btn btn-primary" id="genBtn">Generate CSV</button></div>
             </div>
 
             <div id="genButtons"></div>
@@ -190,13 +191,11 @@
         var dateObject = new Date(date[2], date[0], date[1], time[0], time[1]);
         $('#genButtons').html('');
         $(this).prop('disabled', true);
-        $('.loader-small').css({opacity:1});
         var self = this;
         $.ajax({
             url: 'http://54.172.59.119/expdata?e=' + exp + '&t=' + dateObject.getTime(),
             type: 'GET',
             dataType: 'json',
-            timeout: 5000,
             success: function(data) {
                 if(data && data.error) {
                     showError(data.error);
@@ -218,7 +217,6 @@
 
             complete: function(){
                 $(self).prop('disabled', false);
-                $('.loader-small').css({opacity:0});
             }
         });        
     });

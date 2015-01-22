@@ -2405,7 +2405,7 @@ else {
 
     var generateExperimentString = function(){
         var time = config.experimentTime;
-        var subjectParams = [config.experiment + ((config.aborted == true) ? ',ABORTED!' : ''), config.name, time.getFullYear(), time.getMonth() + 1, time.getDate(), time.getHours(), time.getMinutes()];
+        var subjectParams = [config.experiment + ((config.aborted == true) ? ',ABORTED!' : ''), config.name, time.getFullYear(), time.getMonth() + 1, time.getDate(), time.getHours(), time.getMinutes(), time.getSeconds()];
         return subjectParams.join('.');        
     }
 

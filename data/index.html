@@ -188,12 +188,12 @@
         var time = $time.val().trim().split(':');
         if(time.length != 2) return false;
 
-        var dateObject = new Date(date[2], date[0], date[1], time[0], time[1]);
+        var dt = new Date(date[2], date[0], date[1], time[0], time[1]);
         $('#genButtons').html('');
         $(this).prop('disabled', true);
         var self = this;
         $.ajax({
-            url: 'http://54.172.59.119/expdata?e=' + exp + '&t=' + dateObject.getTime(),
+            url: 'http://54.172.59.119/expdata?e=' + exp + '&t=' + dt.getTime(),
             type: 'GET',
             dataType: 'json',
             success: function(data) {
@@ -206,7 +206,7 @@
                     a.target = '_blank';
                     a.innerHTML = 'Download CSV';
                     a.className = 'btn btn-success';
-                    a.download = exp + '.csv';
+                    a.download = '[' + exp + '].' + [dt.getFullYear(), dt.getMonth() + 1, dt.getDate(), dt.getHours(), dt.getMinutes()].join('.') + '.csv';
                     $('#genButtons').append(a);
                 }
             },

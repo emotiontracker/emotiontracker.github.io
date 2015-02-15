@@ -67,7 +67,7 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.1.8', STORELOCAL = localStorageTest();
+    var VERSION = '1.1.9', STORELOCAL = localStorageTest();
 
     if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
         localStorage.clear();
@@ -398,9 +398,13 @@ else {
                 musicSelect: true,
                 nameSelect: false,
                 moodSelect: false,
+                crySelect: false,
+                knockOff: false,
+                knockOnset: 0,
+                knockDuration: 30,
+                moodDuration: 180,
                 postStimulusDuration: 120,
                 durationWhiteNoise: 120,
-                moodDuration: 180,
                 fingers: 0,
                 storeData: false
             };
@@ -538,8 +542,13 @@ else {
             this.musicSelect = $(this.el.find('#musicSelect'));
             this.nameSelect = $(this.el.find('#nameSelect'));
             this.moodSelect = $(this.el.find('#moodSelect'));
-            this.durationWhiteNoise = $(this.el.find('#durationWhiteNoise'));
+            this.crySelect = $(this.el.find('#crySelect'));
+            this.knockOff = $(this.el.find('#knockOff'));
             this.moodDuration = $(this.el.find('#moodDuration'));
+            this.knockOnset = $(this.el.find('#knockOnset'));
+            this.knockDuration = $(this.el.find('#knockDuration'));
+
+            this.durationWhiteNoise = $(this.el.find('#durationWhiteNoise'));
             this.optionsMode = this.el.find("#optionsMode");
             this.optionsFingers = $(this.el.find('#optionsFingers'));
             this.storeData = $(this.el.find('#storeData'));
@@ -583,6 +592,7 @@ else {
             this.header = this.el.find('#settingsHeader');
             this.moodWarn = this.el.find("#moodWarn");
             this.modeUpload = $("#modeUploadPage");
+            this.storeWarn = this.el.find('#storeWarn');
 
             this.saveButton = this.el.find('#saveSubmit');
             new MBP.fastButton(this.saveButton, this.handleSave);
@@ -663,6 +673,24 @@ else {
                     $(document).off('touchmove', self.onDialogScroll);
                 });
                 $(self.moodSelect).prop('checked', false);
+            });
+
+            $(this.storeData).on('click', function(e){
+                if($(this).prop('checked') === false) {
+                    return true;
+                }
+                e.preventDefault();
+                $(document).on("touchmove", self.onDialogScroll);
+                $(self.storeWarn).css({display:'table', width: window.innerWidth + 'px', height: window.innerHeight + 'px'}).velocity({opacity:1}, 100);
+            });
+
+            $("#storeOk").on('touchstart', function(e){
+                e.preventDefault();
+                $(self.storeWarn).velocity({opacity:0}, 200, function(){
+                    $(self.storeWarn).css({display:'none'});
+                    $(document).off('touchmove', self.onDialogScroll);
+                });
+                $(self.storeData).prop('checked', true);
             });
 
             $(window).on('resize', this.handleResize);
@@ -808,9 +836,13 @@ else {
                 musicSelect: $(this.musicSelect).prop('checked'),
                 nameSelect: $(this.nameSelect).prop('checked'),
                 moodSelect: $(this.moodSelect).prop('checked'),
-                postStimulusDuration: +$(this.postStimulusDuration).val().trim(),
-                durationWhiteNoise: +$(this.durationWhiteNoise).val().trim(),
-                moodDuration: +$(this.moodDuration).val().trim(),
+                crySelect: $(this.crySelect).prop('checked'),
+                knockOff: $(this.knockOff).prop('checked'),
+                knockOnset: +$(this.knockOnset).val(),
+                knockDuration: +$(this.knockDuration).val(),
+                moodDuration: +$(this.moodDuration).val(),
+                postStimulusDuration: +$(this.postStimulusDuration).val(),
+                durationWhiteNoise: +$(this.durationWhiteNoise).val(),
                 fingers:  +$(this.optionsFingers).find(".btn-selected").first().data('value'),
                 storeData: $(this.storeData).prop('checked')
             };
@@ -845,8 +877,12 @@ else {
             $(this.musicSelect).prop('checked', options.musicSelect);
             $(this.nameSelect).prop('checked', options.nameSelect);
             $(this.moodSelect).prop('checked', options.moodSelect);
-            $(this.durationWhiteNoise).val(options.durationWhiteNoise);
+            $(this.crySelect).prop('checked', options.crySelect);
+            $(this.knockOff).prop('checked', options.knockOff);
+            $(this.knockOnset).val(options.knockOnset);
+            $(this.knockDuration).val(options.knockDuration);
             $(this.moodDuration).val(options.moodDuration);
+            $(this.durationWhiteNoise).val(options.durationWhiteNoise);
             $(this.storeData).prop('checked', options.storeData);
 
             $(this.optionsFingers).find("button").removeClass("btn-selected");
@@ -856,6 +892,7 @@ else {
 
         handleResize: function(){
             $(this.moodWarn).css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
+            $(this.storeWarn).css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
             $("#audioWarn").css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
         },
 
@@ -1164,13 +1201,14 @@ else {
 
         init: function(){
             this._super();
-            _bindAll(this, "beginName", "showNameError", "handleAddRecording", "handleRecordPlay", "handleRecordRemove", "clearRecordings", "playRecordings", "stopRecordings", "end", "onTap", "showTitle");
+            _bindAll(this, "beginName", "showNameError", "handleAddRecording", "handleRecordPlay", "handleRecordRemove", "clearRecordings", "playRecordings", "stopRecordings", "playCries", "stopCries", "end", "onTap", "showTitle");
 
             this.selector = this.el.find("#knockSelector");
             this.nameContainer = this.el.find("#knockNameContainer");
 
             this.nameBtn = this.el.find("#knockNameBtn");
             this.moodBtn = this.el.find("#knockMoodBtn");
+            this.cryBtn = this.el.find("#knockCryBtn");
             this.skipBtn = this.el.find("#knockSkipBtn");
 
             this.nameAddBtn = this.el.find("#knockNameAddBtn");
@@ -1180,6 +1218,13 @@ else {
             this.nameForm = this.el.find("#knockNameForm");
             this.nameMessages = this.el.find("#knockNameMessages");
             this.recs = [];
+            this.cries = [            
+                new Howl({urls:['alerts/baby-crying-01.mp3']}),
+                new Howl({urls:['alerts/baby-crying-02.mp3']}),
+                new Howl({urls:['alerts/baby-crying-03.mp3']}),
+                new Howl({urls:['alerts/baby-crying-04.mp3']}),
+                new Howl({urls:['alerts/baby-crying-05.mp3']})
+            ];
             this.nameAlert = null;
             this.titles = [
                 'In the following screen, you will be prompted to select atleast 5 recordings of yourself speaking your name. Try and vary your tone in each recording (ex. happy, sad, angry, excited, funny).',
@@ -1194,7 +1239,6 @@ else {
             this.titlesText = this.el.find("#knockNameTitles");
             this.tap = this.el.find("#knockNameTap");
 
-
             var self = this;
             new MBP.fastButton(this.nameBtn, function(e){
                 e.preventDefault();
@@ -1206,11 +1250,20 @@ else {
                 config.knockout = 'mood';
                 self.end();  
             });
+            new MBP.fastButton(this.cryBtn, function(e){
+                e.preventDefault();
+                config.knockout = 'cry';
+                self.end();  
+            });
             this.skipBtn.on('touchstart', this.end);
 
             this.nameFileEl.addEventListener("change", this.handleAddRecording);
             this.nameAddBtn.on('touchstart', function(){ self.nameFileEl.value = null; self.nameFileEl.click(); });
             new MBP.fastButton(this.nameEndBtn, this.end);
+        },
+
+        loadCries: function() {
+            this.cries = shuffle(this.cries);
         },
 
         render: function(){
@@ -1222,15 +1275,15 @@ else {
 
             if(config.options.nameSelect === true){btns.push("#knockNameBtn")}
             if(config.options.moodSelect === true){btns.push("#knockMoodBtn")}
+            if(config.options.crySelect === true){btns.push("#knockCryBtn")}
 
-            if(btns.length == 1){
+            if(btns.length == 1) {
                 return this.end();
             }
 
-            btns.forEach(function(b){
+            btns.forEach(function(b) {
                 $(b).css({display:'inline-block', width: (100/btns.length) + '%'});
             })
-
             $(btns[0]).css({'border-radius': '3px 0 0 3px'});
             $(btns[btns.length - 1]).css({'border-radius': '0 3px 3px 0'});
 
@@ -1431,7 +1484,7 @@ else {
         },
 
 
-        playRecordings: function(i){
+        playRecordings: function(i) {
             if(this.recs.length == 0) return;
             if(i >= this.recs.length){
                 this.recs = shuffle(this.recs);
@@ -1447,13 +1500,37 @@ else {
             rec.play();
         },
 
-        stopRecordings: function(){
+        stopRecordings: function() {
             for(var i = 0; i<this.recs.length; i++){
                 var rec = this.recs[i];
                 rec.off('end');
                 rec.stop();
             }
-        }
+        },
+
+        playCries: function(i) {
+            if(i >= this.cries.length){
+                this.cries = shuffle(this.cries);
+                i = 0;
+            }
+            var self = this;
+            console.log(this.cries.length);
+            console.log('playing ' + (i));
+            var cry = this.cries[i];
+            cry.on('end', function(){
+                cry.off('end');
+                self.playCries(i+1);
+            });
+            cry.play();
+        },
+
+        stopCries: function() {
+            for(var i = 0; i<this.cries.length; i++){
+                var cry = this.cries[i];
+                cry.off('end');
+                cry.stop();
+            }
+        },
 
     });
 
@@ -2851,7 +2928,12 @@ else {
             document.removeEventListener('touchcancel', this.handleTouchEnd); 
 
             this.sampleRating();
-            PageController.pages.knockout.stopRecordings();
+            if(config.knockout == 'name') {
+                PageController.pages.knockout.stopRecordings();
+            }
+            else if(config.knockout == 'cry') {
+                PageController.pages.knockout.stopCries();
+            }
             this.feedbacks.disableAll();
 
             var numSamples = Math.floor(config.totalDuration/config.options.ratingInterval);
@@ -2926,9 +3008,19 @@ else {
                 }
 
                 if(config.knockout == 'name'){
-                    PageController.pages.knockout.playRecordings(0);
-                    
-                    setTimeout(PageController.pages.knockout.stopRecordings, config.options.duration * 1000);
+                    setTimeout(function() {
+                        PageController.pages.knockout.playRecordings(0);
+                        setTimeout(PageController.pages.knockout.stopRecordings, config.options.musicSelect ? config.options.duration : (config.options.knockDuration * 1000) );
+                    }, 
+                    config.options.knockOnset * 1000);
+                }
+                else if(config.knockout == 'cry') {
+                    PageController.pages.knockout.loadCries();
+                    setTimeout(function() {
+                        PageController.pages.knockout.playCries(0);
+                        setTimeout(PageController.pages.knockout.stopCries, config.options.musicSelect ? config.options.duration : (config.options.knockDuration * 1000) );
+                    }, 
+                    config.options.knockOnset * 1000);
                 }
                 document.addEventListener('touchstart', this.abort);
             }
@@ -3024,7 +3116,8 @@ else {
                         url:'http://54.172.59.119/store',
                         type: 'POST',
                         data: JSON.stringify(config.generateDataObject()),
-                        contentType: 'application/json; charset=utf-8'
+                        contentType: 'application/json; charset=utf-8',
+                        timeout: 10000
                     });                    
                 }
 

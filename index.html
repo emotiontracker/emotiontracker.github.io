@@ -110,7 +110,7 @@
 
         <div id="infoPage" style="display:none">
             <h2>Emotion Tracker</h2>
-            <div class="emph">v1.1.8</div>
+            <div class="emph">v1.1.9</div>
             <div class="info-desc">Measure self-reported emotion over time. Currently supports Safari and Chrome browsers on iOS and Android devices. Support for other devices may be added. Let us know what you need. <a href="mailto:denis.pelli@nyu.edu?subject=Emotion%20Tracker">denis.pelli@nyu.edu</a></div>
 
             <div class="light">Copyright © 2014 - 2015 Denis Pelli</div>
@@ -151,7 +151,7 @@
                 </div>                   
             </div>  
             <button id="btnInfo"><div class="ico-info"></div></button>
-            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;">v1.1.8</div>
+            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;">v1.1.9</div>
             <button id="btnSettings"><div class="ico-settings"></div></button>
         </div>
 
@@ -272,22 +272,39 @@
  
 
                 <div class="field">
-                    <label class="lbl lbl-title">Condition</label>
+                    <label class="lbl lbl-title">Knockout</label>
                     <div>
                         <div class="field-check">
-                            <label for="nameSelect" class="lbl">Enable name condition</label>
+                            <label for="nameSelect" class="lbl">Enable name knockout</label>
                             <span class="chkbox"><input id="nameSelect" type="checkbox" /></span>
                         </div>
 
 
                         <div class="field-check">
-                            <label for="moodSelect" class="lbl">Enable sad mood condition</label>
+                            <label for="moodSelect" class="lbl">Enable sad mood knockout</label>
                             <span class="chkbox"><input id="moodSelect" type="checkbox" /></span>
+                        </div>
+
+                        <div class="field-check">
+                            <label for="crySelect" class="lbl">Enable crying knockout</label>
+                            <span class="chkbox"><input id="crySelect" type="checkbox" /></span>
+                        </div>
+
+                        <div class="field-check">
+                            <label for="knockOff" class="lbl">Stimulus offset turns off knockout</label>
+                            <span class="chkbox"><input id="knockOff" type="checkbox" /></span>
                         </div>
                     </div>
 
                     <label for="moodDuration" class="lbl">Duration of mood induction <span class="light"> (s)</span></label>
                     <input id="moodDuration" type="text" value="180" class="inpt"/>
+
+                    <label for="knockOnset" class="lbl">Knockout onset time <span class="light"> (s)</span></label>
+                    <input id="knockOnset" type="text" value="0" class="inpt"/>
+
+                    <label for="knockDuration" class="lbl">Knockout max duration <span class="light"> (s)</span></label>
+                    <input id="knockDuration" type="text" value="30" class="inpt"/>
+
                 </div>
 
                 <div class="field">
@@ -338,13 +355,25 @@
                 <div class="center-text">
                     <div class="dialog">
                         <div class="dialog-title">No audio</div>
-                        <div class="dialog-content">This device does has limited audio capabilities. Try updating your software.</div>
+                        <div class="dialog-content">This device has limited audio capabilities. Try updating your software.</div>
                         <div class="dialog-buttons row">
                             <button id="audioOk" class="dialog-btn" style="width:100%">Ok</button>
                         </div>
                     </div>
                 </div>
-            </div>      
+            </div> 
+
+            <div id="storeWarn" class="center-text-wrapper dialog-overlay" style="opacity:0;display:none">
+                <div class="center-text">
+                    <div class="dialog">
+                        <div class="dialog-title">Caution</div>
+                        <div class="dialog-content">Needed only for group data.</div>
+                        <div class="dialog-buttons row">
+                            <button id="storeOk" class="dialog-btn" style="width:100%">Ok</button>
+                        </div>
+                    </div>
+                </div>
+            </div>     
                          
         </div>
 
@@ -372,6 +401,7 @@
                     <button class="btn" id="knockSkipBtn">Regular</button>
                     <button class="btn" id="knockNameBtn">Name</button>
                     <button class="btn" id="knockMoodBtn">Mood</button>
+                    <button class="btn" id="knockCryBtn">Cry</button>
                 </div>              
             </div>
 
@@ -439,6 +469,20 @@
                     <div id="songLoader" class="loader-small"></div>
                 </div>
                 <div id="songList"></div>
+            </div>
+
+            <div class="row">
+                <div class="piece img border"></div>
+            </div>
+            <div class="row">
+                <div class="piece img border"></div>
+                <div></div>
+                <div></div>
+            </div>
+            <div class="row">
+                <div class="piece img border"></div>
+                <div></div>
+                <div></div>
             </div>
             <div id="stimulusOther">
                 <div class="song" data-uri="spotify:track:7lxB9FziYc80prwwiUtAZc">
@@ -523,7 +567,7 @@
                 <div id="landscape"></div>
                 <div class="landscapeText" style="bottom:120px">to landscape mode</div>
             </div>
-            
+
         <script src="js/vendor/jquery-2.1.0.min.js"></script>
         <script src="js/vendor/raphael-min.js"></script>
         <script src="js/helper.js"></script>
@@ -532,7 +576,7 @@
         <script src="js/main.js"></script>
         
 
-<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment + ((aborted == true) ? ',ABORTED!' : '')%>\nSettings from:,<%=optionsMode%>\nObserver:,<%=name%>\nEmail to:,<%=options.email%>\nApp:,<%=url%>\nApp version:,<%=appVersion%>\nApp created:,<%=appCreateDate%>\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime/1000)%>\nTime (s):,<%=times.join(",")%>\nRating (<%=options.minRating%> to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=deviceInfo.type%>\nModel:,<%=deviceInfo.model%>\nOS:,<%=os%>\nBrowser:,<%=browser%>\nLocal storage:,<%=localStore%>\n"Screen (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (lat., long.):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nNear:,"<%=location.near%>"\nInterval between ratings (s):,<%=options.ratingInterval%>\nMinimum allowed rating:,<%=options.minRating%>\nMaximum stimulus duration (s):,<%=options.duration%>\nExperiment duration after end of stimulus (s):,<%=options.postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (<%=options.minRating%> to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nSkip setup and practice on repeat trials:,<%=options.skipRepeat%>\nMax time between repeats (s):,<%=options.repeatInterval%>\nFeedback barbell:,<%=options.feedback.barbell%>\nFeedback bar:,<%=options.feedback.range%>\nFeedback bar color varies:,<%=options.feedback.barVaries%>\nFeedback number:,<%=options.feedback.numeric%>\nFeedback tone:,<%=options.feedback.auditory%>\nFeedback ticks:,<%=options.feedback.tactile%>\nInclude practice in reference:,<%=options.postInMedian%>\nKnockout:,<%=knockout%>\nEnable name condition:,<%=options.nameSelect%>\nEnable sad mood condition:,<%=options.moodSelect%>\nDuration of mood induction (s):,<%=options.moodDuration%>\nEnable music selection:,<%=options.musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\nDuration of white noise (s):,<%=options.durationWhiteNoise%>\nFingers:,<%=(options.fingers === 0 ) ? 'Thumb and index' : 'Index and middle'%>\nStore data on server:,<%=options.storeData%>\n</script>       
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment + ((aborted == true) ? ',ABORTED!' : '')%>\nSettings from:,<%=optionsMode%>\nObserver:,<%=name%>\nEmail to:,<%=options.email%>\nApp:,<%=url%>\nApp version:,<%=appVersion%>\nApp created:,<%=appCreateDate%>\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime/1000)%>\nTime (s):,<%=times.join(",")%>\nRating (<%=options.minRating%> to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=deviceInfo.type%>\nModel:,<%=deviceInfo.model%>\nOS:,<%=os%>\nBrowser:,<%=browser%>\nLocal storage:,<%=localStore%>\n"Screen (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (lat., long.):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nNear:,"<%=location.near%>"\nInterval between ratings (s):,<%=options.ratingInterval%>\nMinimum allowed rating:,<%=options.minRating%>\nMaximum stimulus duration (s):,<%=options.duration%>\nExperiment duration after end of stimulus (s):,<%=options.postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (<%=options.minRating%> to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nSkip setup and practice on repeat trials:,<%=options.skipRepeat%>\nMax time between repeats (s):,<%=options.repeatInterval%>\nFeedback barbell:,<%=options.feedback.barbell%>\nFeedback bar:,<%=options.feedback.range%>\nFeedback bar color varies:,<%=options.feedback.barVaries%>\nFeedback number:,<%=options.feedback.numeric%>\nFeedback tone:,<%=options.feedback.auditory%>\nFeedback ticks:,<%=options.feedback.tactile%>\nInclude practice in reference:,<%=options.postInMedian%>\nKnockout:,<%=knockout%>\nEnable name knockout:,<%=options.nameSelect%>\nEnable sad mood knockout:,<%=options.moodSelect%>\nEnable crying knockout:,<%=options.crySelect%>\nStimulus offset turns off knockout:,<%=options.knockOff%>\nDuration of mood induction (s):,<%=options.moodDuration%>\nKnockout onset time:,<%=options.knockOnset%>\nKnockout max duration:,<%=options.knockDuration%>\nEnable music selection:,<%=options.musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\nDuration of white noise (s):,<%=options.durationWhiteNoise%>\nFingers:,<%=(options.fingers === 0 ) ? 'Thumb and index' : 'Index and middle'%>\nStore data on server:,<%=options.storeData%>\n</script>       
 
     </body>
 </html>

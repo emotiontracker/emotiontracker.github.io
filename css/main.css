@@ -164,7 +164,7 @@ a:link, a:visited, a:hover, a:focus{
 }
 
 .settings-wrapper{
-  background-color: #fcfcfc;
+  background-color: #f8f8f8;
   padding:70px 0 20px;
   overflow-y:auto;
   max-width: 600px;

@@ -1514,8 +1514,6 @@ else {
                 i = 0;
             }
             var self = this;
-            console.log(this.cries.length);
-            console.log('playing ' + (i));
             var cry = this.cries[i];
             cry.on('end', function(){
                 cry.off('end');
@@ -2818,7 +2816,6 @@ else {
             };
             if(config.options.feedback.barbell){
                 this.bubblesEl.innerHTML = '';
-                console.log('Initing bubbles');
                 this.bubbles = new BubbleView({el: this.bubblesEl});
                 this.bubblesEl.style.opacity = 0;
             }
@@ -3007,10 +3004,13 @@ else {
                     PageController.pages.music.playMusic(config.songUri, config.options.duration);
                 }
 
+                var knockDuration = ( config.options.knockOff ? config.options.duration : config.totalDuration ) - config.options.knockOnset;
+                    knockDuration = ( Math.min(config.options.knockDuration, knockDuration)  ) * 1000;
+
                 if(config.knockout == 'name'){
                     setTimeout(function() {
                         PageController.pages.knockout.playRecordings(0);
-                        setTimeout(PageController.pages.knockout.stopRecordings, config.options.musicSelect ? config.options.duration : (config.options.knockDuration * 1000) );
+                        setTimeout(PageController.pages.knockout.stopRecordings, knockDuration );
                     }, 
                     config.options.knockOnset * 1000);
                 }
@@ -3018,7 +3018,7 @@ else {
                     PageController.pages.knockout.loadCries();
                     setTimeout(function() {
                         PageController.pages.knockout.playCries(0);
-                        setTimeout(PageController.pages.knockout.stopCries, config.options.musicSelect ? config.options.duration : (config.options.knockDuration * 1000) );
+                        setTimeout(PageController.pages.knockout.stopCries, knockDuration );
                     }, 
                     config.options.knockOnset * 1000);
                 }

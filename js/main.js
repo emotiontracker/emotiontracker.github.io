@@ -34,6 +34,30 @@ function drawTimer(el, dur) {
     })();
 }
 
+function setStatus(containerEl, msg, type, duration) {
+    if(!containerEl) return;
+
+    msg = msg || '';
+    type = type || 'info';
+    duration = duration || 1000;
+
+    $('<div class="status status-' + type + '">' + msg + '</div>').appendTo(containerEl);
+    var $n = $(containerEl).children().last();
+    var nHeight = $n.outerHeight();
+    $n.css('bottom',-nHeight).addClass('anim').css('bottom',0);
+    setTimeout(function(){
+        $n.css('bottom',-nHeight);
+        setTimeout(function(){
+            $n.remove();
+        }, 1000);
+    }, duration);
+}
+
+function isEmail(email) { 
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+}
+
 function isTouchDevice() {
     return (('ontouchstart' in window) ||
         (navigator.MaxTouchPoints > 0) ||
@@ -53,21 +77,21 @@ function localStorageTest(){
 
 $(function(){
 
-if(!isTouchDevice()) {
+if(1)/*!isTouchDevice()) {
 
     if(navigator.platform.toUpperCase().indexOf('MAC')>=0){
         $("#macDownload").css({display:'block'});
     }
     $("#welcomePage").css({display:'block'}).velocity({opacity:1}, 600);
 }
-else {
+else */{
 
     $("#startPage").css({display:'block', opacity:1});
 
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.1.9', STORELOCAL = localStorageTest();
+    var VERSION = '1.2.0', STORELOCAL = localStorageTest();
 
     if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
         localStorage.clear();
@@ -264,11 +288,13 @@ else {
 
     var rater = { getRating: function(){} };
     var config = {
-        appCreateDate: 'Sunday January 4 2015',
+        appCreateDate: 'Saturday March 28 2015',
         appVersion: VERSION,
         name: '',
         experiment: '',
         experimentTime: '',
+        experimenterId: localStorage["experimenterId"],
+        experimentId: localStorage["experimentId"],
         absoluteTime: 0,
         durationActual: 0,
         setupMaxDist: [],
@@ -369,7 +395,8 @@ else {
                 songArtist: this.songArtist,
                 songAlbum: this.songAlbum,
                 songDuration: this.songDuration,
-                options: this.options
+                options: this.options,
+                settings_id: config.experimentId
             };
 
             return data;
@@ -502,6 +529,82 @@ else {
         return Math.floor(Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)));
     };
 
+    function SelectCollection(title, url, map) {
+        var list = [],
+            els = [];
+
+        map = map || {v : 'v', t: 't'};
+
+        return {
+            get: function(){
+                return list;
+            },
+
+            isEmpty: function(){
+                return list.length == 0;
+            },
+
+            addEl: function(el){
+                els.push(el);
+            },
+
+            fetch: function(params, select, callback){
+                params = params || [];
+
+                $.each(els, function(i, e){
+                    $(e).prop('disabled', true);
+                });
+
+                var self = this;
+                $.ajax({
+                    url: url + (params.length ? '?' + params.join('&') : ''),
+                    type: 'GET',
+                    dataType: 'json',
+                    timeout: 5000,
+                    success: function(data) {
+                        list = data;
+
+                        $.each(els, function(i, e){
+                            $(e).html('<option selected disabled style="display:none">Choose an ' + title + '</option>');
+                            if(!list.length) {
+                                $(e).html('<option selected disabled style="display:none">No ' + title + 's found</option>');
+                                return;
+                            }
+                            $.each(list, function(j, d) {
+                                if(typeof d == 'string') {
+                                    $(e).append('<option value="' + d + '">' + d +'</option>');
+                                }
+                                else {
+                                    $(e).append('<option value="' + d[map.v] + '">' + d[map.t] +'</option>');    
+                                }
+                                
+                            });;
+                        });
+                        select = select || (typeof list[0] === 'string' ? list[0] : list[0][map.v]); 
+                        self.select( select );
+                    },
+                    complete: function(jqXHR) {
+                        $.each(els, function(i, e){
+                            $(e).prop('disabled', false);
+                        });
+                        if(callback) {
+                            callback($.parseJSON(jqXHR.responseText));
+                        }
+                    }
+                });
+            },
+
+            select: function(value) {
+                $.each(els, function(i, e){
+                    $(e).val( value );
+                });
+            }
+        }
+    }
+
+    var experimentCollection = new SelectCollection('experiment', 'http://54.172.59.119/exps', {v: '_id', t: 'exp'});
+    var experimenterCollection = new SelectCollection('experimenter', 'http://54.172.59.119/users', {v: '_id', t: 'name'});
+
     var settingsPage = new (Page.extend({
         id: 'settingsPage',
 
@@ -509,7 +612,24 @@ else {
 
         init: function(){
             this._super();
-            _bindAll(this, 'handleSave', 'showStart', 'floatButtons', 'unFloatButtons', 'showAudioWarn', 'toggleOptionMode', 'toggleOptionFingers', 'generateOptions', 'loadOptions', 'disableAll', 'enableAll', 'uploadOptions');
+            _bindAll(this, 
+                'handleSave', 
+                'showStart', 
+                'floatButtons', 
+                'unFloatButtons', 
+                'showAudioWarn', 
+                'toggleOptionMode', 
+                'toggleOptionFingers', 
+                'generateOptions', 
+                'loadOptions', 
+                'disableAll', 
+                'enableAll', 
+                'uploadOptions',
+                'showRegisterPage',
+                'hideRegisterPage',
+                'handleRegister',
+                'resetUploadButton'
+            );
 
             config.initOptions();
 
@@ -556,6 +676,13 @@ else {
 
             this.exp = this.el.find('#optExp');
             this.expSel = this.el.find('#optExpSel');
+            this.expter = $(this.el.find('#optExpterSel'));
+
+            $(this.expSel).prop('disabled', true);
+            $(this.expter).prop('disabled', true);
+
+            experimentCollection.addEl(this.expSel);
+            experimenterCollection.addEl(this.expter);
 
             this.oldRatingInterval = 0;
 
@@ -568,35 +695,73 @@ else {
                 self.oldRatingInterval = +$(this).val();
             });
 
-            $(this.expSel).on({
+            $(this.expter).on({
                 'change': function() {
-                    self.disableAll();
-                    downloadOptions($(this).val(), null, function(){
-                        self.enableAll();
-                    });
+                    localStorage['experimenterId'] = config.experimenterId = $(this).val();
+                    experimentCollection.fetch(['id='+$(this).val()], null, function(exps){
+                        self.disableAll();
+                        downloadOptions(exps[0]._id);
+                    });    
                 },
                 'touchstart': function(e) {
                     e.preventDefault();
                     var that = this;
-                    $(that).prop('disabled', true);
-                    downloadExperiments($(this).val(), null, function(){
-                        $(that).prop('disabled', false);
-                        var event;
-                        event = document.createEvent('MouseEvents');
+                    if(experimenterCollection.isEmpty()) {
+                        experimenterCollection.fetch([], null, function(){
+                            var event = document.createEvent('MouseEvents');
+                            event.initMouseEvent('mousedown', true, true, window);
+                            $(that)[0].dispatchEvent(event);
+                        });                        
+                    }
+                    else {
+                        var event = document.createEvent('MouseEvents');
                         event.initMouseEvent('mousedown', true, true, window);
                         $(that)[0].dispatchEvent(event);
-                    });
+                    }
+                }
+            });
+
+            $(this.expSel).on({
+                'change': function() {
+                    self.disableAll();
+                    localStorage['experimentId'] = config.experimentId = $(this).val();
+                    downloadOptions($(this).val());
+                },
+                'touchstart': function(e) {
+                    e.preventDefault();
+                    var that = this;
+                    if(experimentCollection.isEmpty()) {
+                        experimentCollection.fetch(['id='+config.experimenterId], null, function(){
+                            var event = document.createEvent('MouseEvents');
+                            event.initMouseEvent('mousedown', true, true, window);
+                            $(that)[0].dispatchEvent(event);
+                        });
+                    }
+                    else {
+                        var event = document.createEvent('MouseEvents');
+                        event.initMouseEvent('mousedown', true, true, window);
+                        $(that)[0].dispatchEvent(event);
+                    }
                 }
             });
 
             this.header = this.el.find('#settingsHeader');
             this.moodWarn = this.el.find("#moodWarn");
             this.modeUpload = $("#modeUploadPage");
+            this.modeRegister = $("#modeRegisterPage");
+            this.registerStatus = this.modeRegister.find('.status-container');
             this.storeWarn = this.el.find('#storeWarn');
 
             this.saveButton = this.el.find('#saveSubmit');
+            this.registerButton = this.el.find('#registerButton');
+            this.registerSubmit = document.body.find('#registerSubmit');
+            this.registerHeader = document.body.find('#registerHeader');
+
             new MBP.fastButton(this.saveButton, this.handleSave);
+            new MBP.fastButton(this.registerSubmit, this.handleRegister);
             new MBP.fastButton(this.el.find('#cancelSubmit'), this.showStart);
+            new MBP.fastButton(this.registerButton, this.showRegisterPage);
+            new MBP.fastButton(document.body.find("#registerClose"), this.hideRegisterPage);
 
             $(this.setupSteps).on('change', function(){
                 if(+$(this).val().trim() === 0){
@@ -608,8 +773,9 @@ else {
             $(this.optionsFingers).on('touchstart', '.btn', this.toggleOptionFingers);
 
             this.uploadSubmit = document.body.find('#uploadSubmit');
-            this.uploadExp = document.body.find("#uploadExperiment");
-            this.uploadKey = document.body.find("#uploadKey");
+            this.uploadExp = this.modeUpload.find("#uploadExperiment");
+            this.uploadEmail = this.modeUpload.find("#uploadEmail");
+            this.uploadPassword = this.modeUpload.find("#uploadPassword");
 
             new MBP.fastButton(document.body.find("#uploadClose"), function(e){
                 e.preventDefault();
@@ -621,23 +787,23 @@ else {
             new MBP.fastButton(this.el.find('#modeUploadBtn'), function(){
                 $(self.el).css({display:'none', opacity: 0});
                 if(config.optionsMode == "server"){
-                    $(self.uploadExp).val($(self.expSel).val());
+                    $(self.uploadExp).val($(self.expSel).children('option:selected').text());
                 }
                 else{
                     $(self.uploadExp).val($(self.exp).val());
                 }
-                $(self.uploadKey).val('');
+                $(self.uploadEmail).val('');
+                $(self.uploadPassword).val('');
                 self.modeUpload.css({display:'table'}).velocity({opacity:1}, 300, function(){
                     window.scrollTo(0, 1);
                 });
             });
 
-            var resetUploadButton = function(){
-                $(self.uploadSubmit).val('Upload').prop('disabled', false).removeClass('btn-success btn-error');
-            };
 
-            $(this.uploadExp).on('change', resetUploadButton);
-            $(this.uploadKey).on('change', resetUploadButton);
+            this.modeUpload.find('input').on('change', this.resetUploadButton);
+/*            $(this.uploadExp).on('change', this.resetUploadButton);
+            $(this.uploadEmail).on('change', this.resetUploadButton);
+            $(this.uploadPassword).on('change', this.resetUploadButton);*/
             new MBP.fastButton(this.uploadSubmit, this.uploadOptions);
             
             $("#audioOk").on('touchstart', function(e){
@@ -703,6 +869,18 @@ else {
 
             $(this.el).on('focus', 'input[type="text"]', this.unFloatButtons);
             $(this.el).on('focusout', 'input[type="text"]', this.floatButtons);
+
+            this.modeRegister.on('focus', '.inpt', function(){
+                self.registerHeader.style.position = 'absolute';
+            });
+
+            this.modeRegister.on('focusout', '.inpt', function(){
+                self.registerHeader.style.position = 'fixed';
+            });
+        },
+
+        resetUploadButton: function(){
+                $(this.uploadSubmit).text('Upload').prop('disabled', false).removeClass('btn-success btn-error');
         },
 
         disableAll: function() {
@@ -713,38 +891,124 @@ else {
             $(this.el).find('input').prop('disabled', false);
         },
 
+        handleRegister: function() {
+            var el = this.modeRegister;
+
+            var fields = {
+                name: el.find('#registerName'),
+                email: el.find('#registerEmail'),
+                password: el.find('#registerPassword'),
+                city: el.find('#registerCity'),
+                university: el.find('#registerUniversity')
+            };
+
+            var vals = {};
+            for(f in fields) {
+                vals[f] = fields[f].val().trim();
+                if(vals[f] == '') {
+                    var cap = f.charAt(0).toUpperCase() + f.slice(1);
+                    fields[f].addClass('invalid');
+                    fields[f].on('focus', function(){
+                        $(this).removeClass('invalid');
+                    });
+                    setStatus(this.registerStatus, cap + ' is required.', 'error', 2500);
+                    return;   
+                }
+            }
+
+            if(vals.password.length < 4) {
+                return setStatus(this.registerStatus, 'Password must be atleast 4 characters long.', 'error', 2500);
+            }
+
+            if(!isEmail(vals.email)) {
+                return setStatus(this.registerStatus, 'Email address is invalid.', 'error', 2500);
+            }
+
+            $(this.registerSubmit).val('Registering...').prop('disabled', true);
+            var self = this;
+            $.ajax({
+                url:'http://54.172.59.119/register',
+                type: 'POST',
+                data: JSON.stringify(vals),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                timeout: 8000,
+                success: function(msg) {
+                    if(msg){
+                        if(msg.error){
+                            setStatus(self.registerStatus, msg.error, 'error', 2500);
+                        }
+                        else if(msg.success){
+                            setStatus(self.registerStatus, 'Successfully registered. You will receive an email once your request has been approved.', 'info', 3500);    
+                            for(f in fields) {
+                                fields[f].val('');
+                            }
+                        }
+                    }
+                    
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                    setStatus(self.registerStatus, 'Error contacting server', 'error', 2500);
+                },
+                complete: function(){
+                    setTimeout(function(){
+                        $(self.registerSubmit).prop('disabled', false).val('Register');
+                    }, 1000);
+                }
+            });
+        },
+
+        showRegisterPage: function(){
+            $(this.el).css({display:'none'}).velocity({opacity: 0}, 300);
+            this.modeRegister.css({display:'block', opacity: 1});
+        },
+
+        hideRegisterPage: function(){
+            this.modeRegister.css({display:'none', opacity: 0});
+            $(this.el).css({display:'block'}).velocity({opacity: 1}, 300);
+        },
+
         uploadOptions: function(e){
             e.preventDefault();
             if($(this.uploadSubmit).prop('disabled')) return false;
             var exp = $(this.uploadExp).val().trim(),
-                key = $(this.uploadKey).val().trim();
+                email = $(this.uploadEmail).val().trim(),
+                password = $(this.uploadPassword).val().trim();
 
-            if(exp === '' || key === '') return false;
+            if(exp === '' || password === '') return false;
 
-            $(this.uploadSubmit).val('Uploading...').prop('disabled', true);
+            $(this.uploadSubmit).text('Uploading...').prop('disabled', true);
 
             var self = this;
             var updatedOptions = self.generateOptions();
             $.ajax({
                 url:'http://54.172.59.119/upload',
                 type: 'POST',
-                data: JSON.stringify({e: exp, k: key, o: updatedOptions}),
+                data: JSON.stringify({e: exp, email: email, password: password, o: updatedOptions}),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 timeout: 8000,
                 success: function(msg) {
                     if(msg && msg.error){
-                       $(self.uploadSubmit).val(msg.error).addClass('btn-error');
+                        $(self.uploadSubmit).text(msg.error).addClass('btn-error');
                     }
                     else{
-                       $(self.uploadSubmit).val('Upload successful').addClass('btn-success');
-                       downloadExperiments(exp);
-                       config.serverOptions = updatedOptions;
+                        $(self.uploadSubmit).text('Upload successful').addClass('btn-success');
+                        if(msg.user_id === config.experimenterId) {
+                            experimentCollection.fetch(['id='+msg.user_id], msg.id);
+                            self.disableAll();
+                            downloadOptions(msg.id);
+                        }
                     }
                     
                 },
                 error: function(jqXHR, textStatus, errorThrown){
-                    $(self.uploadSubmit).val('Error contacting server').addClass('btn-error');
+                    $(self.uploadSubmit).text('Error contacting server').addClass('btn-error');
+                },
+                complete: function(){
+                    setTimeout(function(){
+                        self.resetUploadButton();
+                    }, 2500);
                 }
             });
         },
@@ -777,12 +1041,20 @@ else {
                 }
 
                 $(this.saveButton).css({display:"none"});
+                $(this.registerButton).css({display:"block"});
+                this.expter.parent().css({display:"block"});
+                this.storeData.parent().parent().css({display:"block"});
                 this.loadOptions(config.serverOptions);
             }
             else{
                 $(this.expSel).css({display:"none"});
+                $(this.registerButton).css({display:"none"});
+                this.expter.parent().css({display:"none"});
+                this.storeData.parent().parent().css({display:"none"});
+
                 $(this.exp).css({display:"block"});
                 $(this.saveButton).css({display:"block"});
+
                 this.loadOptions();
             }
         },
@@ -888,6 +1160,7 @@ else {
             $(this.optionsFingers).find("button").removeClass("btn-selected");
             $(this.optionsFingers).find('[data-value='+options.fingers+']').addClass('btn-selected');
 
+            this.enableAll();
         },
 
         handleResize: function(){
@@ -906,6 +1179,7 @@ else {
 
         render: function(){
             if(config.optionsMode == "server") {
+                $(this.expter).val($(PageController.pages.start.experimenterSel).val());
                 $(this.expSel).val($(PageController.pages.start.experimentSel).val());
             }
             else {
@@ -938,6 +1212,7 @@ else {
             this.name = this.el.find('#name');
             this.experiment = this.el.find('#experiment');
             this.experimentSel = this.el.find('#experimentSel');
+            this.experimenterSel = this.el.find('#experimenterSel');
             this.settingsButton = this.el.find('#btnSettings');
             this.submitButton = this.el.find('#startSubmit');
             this.helpButton = this.el.find('#btnInfo');
@@ -949,27 +1224,66 @@ else {
             this.helpShown = false;
 
             var that = this;
+            $(this.experimenterSel).prop('disabled', true);
             $(this.experimentSel).prop('disabled', true);
-            downloadExperiments('', null, function(){
-                $(that.experimentSel).prop('disabled', false);
+
+            experimentCollection.addEl(this.experimentSel);
+            experimenterCollection.addEl(this.experimenterSel);
+
+            if(!config.experimenterId) {
+                experimenterCollection.fetch([], null, function(exptr){
+                    localStorage['experimenterId'] = config.experimenterId = exptr[0]._id;
+                    experimentCollection.fetch(['id='+exptr[0]._id]);  
+                });
+            }
+            else {
+                experimenterCollection.fetch([], config.experimenterId);
+                experimentCollection.fetch(['id='+config.experimenterId]);
+            }
+
+            $(this.experimenterSel).on({
+                'change': function() {
+                    localStorage['experimenterId'] = config.experimenterId = $(this).val();
+                    experimentCollection.fetch(['id='+$(this).val()]);
+                },
+                'touchstart': function(e) {
+                    e.preventDefault();
+                    var self = this;
+                    if(experimenterCollection.isEmpty()) {
+                        experimenterCollection.fetch([], null, function(){
+                            var event = document.createEvent('MouseEvents');
+                            event.initMouseEvent('mousedown', true, true, window);
+                            $(self)[0].dispatchEvent(event);
+                        });                       
+                    }
+                    else {
+                        var event = document.createEvent('MouseEvents');
+                        event.initMouseEvent('mousedown', true, true, window);
+                        $(self)[0].dispatchEvent(event);                    
+                    }
+                }
             });
-            downloadOptions('');
 
             $(this.experimentSel).on({
                 'change': function() {
+                    localStorage['experimentId'] = config.experimentId = $(this).val();
                     downloadOptions($(this).val());
                 },
                 'touchstart': function(e) {
                     e.preventDefault();
                     var self = this;
-                    $(self).prop('disabled', true);
-                    downloadExperiments($(this).val(), null, function(){
-                        $(self).prop('disabled', false);
-                        var event;
-                        event = document.createEvent('MouseEvents');
+                    if(experimentCollection.isEmpty()) {
+                        experimentCollection.fetch(['id='+config.experimenterId], null, function(){
+                            var event = document.createEvent('MouseEvents');
+                            event.initMouseEvent('mousedown', true, true, window);
+                            $(self)[0].dispatchEvent(event);
+                        });                       
+                    }
+                    else {
+                        var event = document.createEvent('MouseEvents');
                         event.initMouseEvent('mousedown', true, true, window);
-                        $(self)[0].dispatchEvent(event);
-                    });
+                        $(self)[0].dispatchEvent(event);                        
+                    }
                 }
             });
 
@@ -1100,9 +1414,12 @@ else {
                 $(this.experiment).css({display: 'none'});
                 $(this.experimentSel).val($(settingsPage.expSel).val());
                 $(this.experimentSel).css({display: 'block'});
+                $(this.experimenterSel).val($(settingsPage.expter).val());
+                $(this.experimenterSel).css({display: 'block'});
             }
             else{
                 $(this.experimentSel).css({display: 'none'});
+                $(this.experimenterSel).css({display: 'none'});
                 $(this.experiment).val($(settingsPage.exp).val());
                 $(this.experiment).css({display: 'block'});
             }
@@ -1137,52 +1454,36 @@ else {
     });
 
 
-    function downloadOptions(exp, error, complete){
+    function downloadOptions(id, error, complete){
         var self = this;
-        exp = (!exp || exp === '') ? 'Default' :  exp;
-        $.ajax({
-            url:'http://54.172.59.119/download?e='+exp,
-            type: 'GET',
-            dataType: 'json',
-            timeout: 8000,
-            success: function(msg) {
-                if(msg && msg.options){
-                    config.serverOptions = msg.options;
-                    for(opt in config.options){
-                        if(!config.serverOptions.hasOwnProperty(opt)){
-                            config.serverOptions[opt] = config.options[opt];
+        if(!id || id === '') {
+            settingsPage.loadOptions();    
+        }
+        else {
+            $.ajax({
+                url:'http://54.172.59.119/download?id=' + id,
+                type: 'GET',
+                dataType: 'json',
+                timeout: 8000,
+                success: function(msg) {
+                    if(msg && msg.options){
+                        config.serverOptions = msg.options;
+                        for(opt in config.options){
+                            if(!config.serverOptions.hasOwnProperty(opt)){
+                                config.serverOptions[opt] = config.options[opt];
+                            }
                         }
+                        settingsPage.loadOptions(config.serverOptions);
                     }
-                    settingsPage.loadOptions(config.serverOptions);
-                }
-            },
-            error: error || function(){},
-            complete: complete
-        });
-    }
+                    else {
+                        settingsPage.loadOptions();    
+                    }
+                },
+                error: error || function(){},
+                complete: complete
+            });            
+        }
 
-    function downloadExperiments(exp, error, complete){
-        var self = this;
-        $.ajax({
-            url: 'http://54.172.59.119/exps',
-            type: 'GET',
-            dataType: 'json',
-            timeout: 5000,
-            success: function(exps) {
-                $(settingsPage.expSel).html('<option selected disabled style="display:none">Choose an experiment</option>');
-                $(PageController.pages.start.experimentSel).html('<option selected disabled style="display:none">Choose an experiment</option>');
-                
-                for(var i=0; i<exps.length; i++){
-                    $(settingsPage.expSel).append('<option value="' + exps[i] + '">' + exps[i] +'</option>');
-                    $(PageController.pages.start.experimentSel).append('<option value="' + exps[i] + '">' + exps[i] +'</option>');
-                }
-                exp = (!exp || exp === '') ? 'Default' :  exp;
-                $(settingsPage.expSel).val(exp);
-                $(PageController.pages.start.experimentSel).val(exp);
-            },
-            error: error || function(){},
-            complete: complete
-        });
     }
 
     function transEl(el1, el2, dur, cb){
@@ -3111,7 +3412,7 @@ else {
             var self = this;
             transEl(self.survey, self.messages, 400, function(){
 
-                if(config.options.storeData){
+                if(config.optionsMode === 'server' && config.options.storeData){
                     $.ajax({
                         url:'http://54.172.59.119/store',
                         type: 'POST',

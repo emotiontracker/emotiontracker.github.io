@@ -110,7 +110,7 @@
 
         <div id="infoPage" style="display:none">
             <h2>Emotion Tracker</h2>
-            <div class="emph">v1.1.9</div>
+            <div class="emph">v1.2.0</div>
             <div class="info-desc">Measure self-reported emotion over time. Currently supports Safari and Chrome browsers on iOS and Android devices. Support for other devices may be added. Let us know what you need. <a href="mailto:denis.pelli@nyu.edu?subject=Emotion%20Tracker">denis.pelli@nyu.edu</a></div>
 
             <div class="light">Copyright © 2014 - 2015 Denis Pelli</div>
@@ -142,8 +142,14 @@
                     <input id="name" class="inpt" type="text" placeholder="Enter your name" />
                 </div>
                 <div>
+                    <select id="experimenterSel" class="inpt" >
+                        <option value="" selected disabled style="display:none">Getting experimenters...</option>
+                    </select>
+                </div>
+                <div>
                     <input id="experiment" class="inpt" type="text" placeholder="Enter experiment name" style="display:none"/>
                     <select id="experimentSel" class="inpt" >
+                        <option value="" selected disabled style="display:none">Choose an experimenter</option>
                     </select>
                 </div>
                 <div>
@@ -151,7 +157,7 @@
                 </div>                   
             </div>  
             <button id="btnInfo"><div class="ico-info"></div></button>
-            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;">v1.1.9</div>
+            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;">v1.2.0</div>
             <button id="btnSettings"><div class="ico-settings"></div></button>
         </div>
 
@@ -160,6 +166,7 @@
                 <div class="col"><h2>Settings</h2></div>
                 <div class="row col-right">
                     <button class="btn btn-primary col" id="saveSubmit" style="display:none">Save & close</button>
+                    <button class="btn btn-success col" id="registerButton">Register</button>
                     <button class="btn btn-img2 col" id="cancelSubmit"><div class="ico-close"></div></button>
                 </div>
             </div>
@@ -173,12 +180,19 @@
                     </div> 
                 </div>
 
+                <div class="field">
+                    <label for="optExpter" class="lbl">Experimenter</label>
+                    <input id="optExpter" type="text" class="inpt" placeholder="" style="display:none"/>
+                    <select id="optExpterSel" class="inpt">
+                        <option value="" selected disabled style="display:none">Getting experimenters...</option>
+                    </select>
+                </div>
 
                 <div class="field">
                     <label for="optExp" class="lbl">Name of experiment</label>
                     <input id="optExp" type="text" class="inpt" placeholder="" style="display:none"/>
                     <select id="optExpSel" class="inpt">
-                        <option value="" selected disabled style="display:none">Getting list of experiments...</option>
+                        <option value="" selected disabled style="display:none">Choose an experimenter</option>
                     </select>
                 </div>
 
@@ -279,7 +293,6 @@
                             <span class="chkbox"><input id="nameSelect" type="checkbox" /></span>
                         </div>
 
-
                         <div class="field-check">
                             <label for="moodSelect" class="lbl">Enable sad mood knockout</label>
                             <span class="chkbox"><input id="moodSelect" type="checkbox" /></span>
@@ -377,6 +390,39 @@
                          
         </div>
 
+        <div id="modeRegisterPage" style="opacity:0;display:none;position: relative;">
+            <div id="registerHeader" class="fixed-wrapper row page-header">
+                <div class="col"><h2>Register <span style="font-size: 17px; opacity:0.9">as an experimenter</span></h2></div>
+                <div class="row col-right">
+                    <button class="btn btn-img col" id="registerClose"><div class="ico-close"></div></button>
+                </div>
+            </div>
+            <div class="settings-wrapper compressed">
+                <div class="field">
+                    <label for="registerName" class="lbl">Name</label>
+                    <input id="registerName" type="text" class="inpt" placeholder="Name of experimenter"/>
+                </div>
+                <div class="field">
+                    <label for="registerEmail" class="lbl">Email address</label>
+                    <input id="registerEmail" type="text" class="inpt"/>
+                </div>
+                <div class="field">
+                    <label for="registerPassword" class="lbl">Password</label>
+                    <input id="registerPassword" type="password" class="inpt"/>
+                </div>
+                <div class="field">
+                    <label for="registerCity" class="lbl">City</label>
+                    <input id="registerCity" type="text" class="inpt"/>
+                </div>
+                <div class="field">
+                    <label for="registerUniversity" class="lbl">University</label>
+                    <input id="registerUniversity" type="text" class="inpt" />
+                </div>
+            </div>
+            <input class="btn btn-primary btn-full" id="registerSubmit" type="submit" value="Register" style="position: absolute; bottom: 0"/>
+            <div class="status-container"></div>
+        </div> 
+
         <div id="modeUploadPage" class="center-text-wrapper" style="opacity:0;display:none">
             <div class="center-text">
                 <div style="width:240px; margin:0 auto">
@@ -385,12 +431,16 @@
                         <input id="uploadExperiment" class="inpt" type="text" placeholder="Name of the experiment" />
                     </div>
                     <div>
-                        <input id="uploadKey" class="inpt" type="password" placeholder="Upload key" />
+                        <input id="uploadEmail" class="inpt" type="email" placeholder="Experimenter email" />
+                    </div>
+
+                    <div>
+                        <input id="uploadPassword" class="inpt" type="password" placeholder="Password" />
                     </div>
                 </div>
 
             </div>
-            <input class="btn btn-primary btn-full" id="uploadSubmit" type="submit" value="Upload" style="bottom:0"/>
+            <button class="btn btn-primary btn-full" id="uploadSubmit" type="submit" style="bottom:0"/>Upload</button>
             <button id="uploadClose" class="btn-img"><div  class="ico-close"></div></button>
         </div> 
 
@@ -567,6 +617,7 @@
                 <div id="landscape"></div>
                 <div class="landscapeText" style="bottom:120px">to landscape mode</div>
             </div>
+
 
         <script src="js/vendor/jquery-2.1.0.min.js"></script>
         <script src="js/vendor/raphael-min.js"></script>

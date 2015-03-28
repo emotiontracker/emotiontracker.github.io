@@ -225,27 +225,28 @@
             border-left: 1px solid #ddd;
         }
 
-        .status {
+        .data-status {
             background:#fff;
             padding: 15px;
-            font-size: 13px;
+            font-size: 12px;
             line-height: 20px;
             color:#888;
         }
 
         #statusText {
             width: 190px;
+            line-height: 20px;
         }
 
-        .status.status-load #statusText {
+        .data-status.data-status-load #statusText {
             width: 160px;
         }
 
-        .status-wrapper{
+        .data-status-wrapper{
             border-top: 1px solid #ddd;
         }
 
-        .status .btn, .status .status-label {
+        .data-status .btn, .data-status .data-status-label {
             background: #ccc;
             color: #fff;
             padding: 0 8px;
@@ -254,23 +255,28 @@
             width: auto;
             font-weight: normal;
             font-size: 11px;
-            line-height: 20px;
             text-transform: uppercase;
             margin: 0;
+            transition: all 0.2s ease;
         }
 
-        .status .status-label {
+        .data-status .data-status-label {
             font-size: 9px;
             display: inline-block;
             padding-left: 0;
         }
 
-        .status-error .status-label{
+        .data-status-error .data-status-label{
             background-color: #c0392b;
             color:#FFA59C; 
         }
 
-        .status .btn:hover {
+        .data-status-error {
+            font-size: 12px;
+
+        }
+
+        .data-status .btn:hover {
             background: #bbb;
         }
 
@@ -306,18 +312,18 @@
             opacity: 0.5;
         }
 
-        .status.status-load {
+        .data-status.data-status-load {
             background-color: #eee;
         }
 
-        .status.status-error{
+        .data-status.data-status-error{
             border-color: #310b07;
             background-color: #c0392b; 
             color:#FFE3E0;
             text-shadow: none;
         }
 
-        .status.status-load .ico-loader {
+        .data-status.data-status-load .ico-loader {
             display:block;
             margin-right: 10px;
         }
@@ -441,9 +447,15 @@
                 <div class="box">
                     <div class="box-wrapper">
                         <div>
-                            <div style="text-align:left"><label for="expName">Choose experiment</label></div>
-                            <select id="expName" class="inpt param">
-                                <option value="" selected disabled style="display:none">Gathering experiments...</option>
+                            <div style="text-align:left"><label for="expterName">Choose experimenter</label></div>
+                            <select id="expterName" class="inpt param">
+                                <option value="" selected disabled style="display:none">Gathering experimenters...</option>
+                            </select>
+                        </div>
+                        <div>
+<!--                             <div style="text-align:left"><label for="expName">Choose experiment</label></div> -->
+                            <select id="expName" class="inpt param" style="margin: 0 0 15px">
+                                <option value="" selected disabled style="display:none">Choose an experimenter</option>
                             </select>
                         </div>
                         <div class="inpt-field-group">
@@ -471,8 +483,8 @@
                     </div> 
 
 
-                    <div class="status-wrapper">
-                        <div class="status row status-load">
+                    <div class="data-status-wrapper">
+                        <div class="data-status row data-status-load">
                             <div class="ico-loader col"></div>
                             <div id="statusText" class="col">Gathering experiments...</div>
                             <div id="statusButtons" class="col-right"></div>
@@ -501,12 +513,13 @@ $(function(){
         $month = $('#expMonth'),
         $year = $('#expYear'),
         $time = $('#expTime'),
+        $expter = $('#expterName'),
         $name = $('#expName'),
         $hour = $('#expHour'),
         $min = $('#expMin'),
         $range = $('#expRange'),
         $updateBtn = $('#timeUpdateBtn'),
-        $status = $('.status'),
+        $status = $('.data-status'),
         $statusText = $('#statusText'),
         $statusButtons = $('#statusButtons'),
         $genBtn = $('#genBtn');
@@ -517,7 +530,7 @@ $(function(){
         }
         $statusButtons.html('');
         $status.velocity({opacity: 0}, 50, function(){
-            $status.attr('class', 'status row status-' + type);
+            $status.attr('class', 'data-status row data-status-' + type);
             $statusText.html(msg);
             if(isFunction(cb)) {
                 cb(); 
@@ -532,7 +545,7 @@ $(function(){
     }
 
     function setAjaxError(jqXHR, textStatus, errorThrown){
-        setStatus('error', '<span class="status-label">Server error</span>' + ((errorThrown) ? ('<span class="light">' + errorThrown + '</span>') : textStatus), function() {
+        setStatus('error', '<span class="data-status-label">Server error</span>' + ((errorThrown) ? ('<span class="light">' + errorThrown + '</span>') : textStatus), function() {
             $closeBtn = $('<div class="ico-close"></div>');
             $closeBtn.on('click', getCount);
             $statusButtons.append($closeBtn);
@@ -555,7 +568,13 @@ $(function(){
     function validateParams() {
         var ret = {};
 
-        var name = $name.val().trim();
+        var expter = $expter.val();
+        if(!expter || expter === ''){
+            return { err: 'Invalid experimenter.' };
+        }
+        ret.expter = expter;
+
+        var name = $name.val();
         if(!name || name === ''){
             return { err: 'Invalid experiment.' };
         }
@@ -563,31 +582,31 @@ $(function(){
 
         var month = +$month.val();
         if(!month || isNaN(month) || month < 1 || month > 12) {
-            return { err: 'Invalid date: month.' };
+            return { err: '<b>Invalid date</b> month.' };
         }
         ret.month = month - 1;
 
         var day = +$day.val();
         if(!day || isNaN(day) || day < 1 || day > 31 || (month == 2 && day > 29)) {
-            return { err: 'Invalid date: day.' };
+            return { err: '<b>Invalid date</b> day.' };
         }
         ret.day = day;
 
         var year = +$year.val();
         if(!year || isNaN(year) || year.toString().length > 4) {
-            return { err: 'Invalid date: year.' };
+            return { err: '<b>Invalid date</b> year.' };
         }
         ret.year = year;
 
         var hour = +$hour.val();
         if(hour === null || isNaN(hour) || hour < 0 || hour > 23) {
-            return { err: 'Invalid time: hours.' };
+            return { err: '<b>Invalid time</b> hours.' };
         }
         ret.hour = hour;
 
         var min = +$min.val();
         if(min === null || isNaN(min) || min < 0 || min > 59) {
-            return { err: 'Invalid time: minutes.' };
+            return { err: '<b>Invalid time</b> minutes.' };
         }
         ret.min = min;
 
@@ -600,11 +619,21 @@ $(function(){
         return ret;
     }
 
-    function getCount(onComplete) {
+    function getCount(id, onComplete) {
 
         var params = validateParams();
         if(params.err) {
-            setStatus('error', params.err);
+            setStatus('error', '<span class="data-status-label">Input error</span>' + params.err, function() {
+                $closeBtn = $('<div class="ico-close"></div>');
+                $closeBtn.on('click', function() {
+                    setStatus('', 'No trials found.', function(){
+                        $reBtn = $('<button class="btn">Refresh</button>');
+                        $reBtn.on('click', getCount);
+                        $statusButtons.html($reBtn);
+                    });
+                });
+                $statusButtons.append($closeBtn);
+            });
             return false;
         }
 
@@ -612,7 +641,7 @@ $(function(){
 
         setStatus('load', 'Counting trials...');
         $.ajax({
-            url: 'http://54.172.59.119/expCount?e=' + params.name + '&t=' + dateObject.getTime() + '&r=' + params.range,
+            url: 'http://54.172.59.119/expcount?id=' + id + '&t=' + dateObject.getTime() + '&r=' + params.range,
             type: 'GET',
             dataType: 'json',
             timeout: 10000,
@@ -628,30 +657,45 @@ $(function(){
         });      
     }
 
-    function getExperiments(onComplete) {
+    function getExperimenters(onComplete) {
         $.ajax({
-            url: 'http://54.172.59.119/exps',
+            url: 'http://54.172.59.119/users',
             type: 'GET',
             dataType: 'json',
             timeout: 10000,
             success: function(exps) {
-                
                 for(var i=0; i<exps.length; i++){
-                    $name.append('<option value="' + exps[i] + '">' + exps[i] +'</option>');
+                    $expter.append('<option value="' + exps[i]._id + '">' + exps[i].name +'</option>');
                 }
-                $name.val('Default');
-                //getCount();
+                $expter.val(exps[0]._id);
             },
             error: setAjaxError,
             complete: onComplete
         });        
     }
 
-    function generateCSV(onComplete) {
+    function getExperiments(userId, onComplete) {
+        $.ajax({
+            url: 'http://54.172.59.119/exps?id=' + userId,
+            type: 'GET',
+            dataType: 'json',
+            timeout: 10000,
+            success: function(exps) {
+                for(var i=0; i<exps.length; i++){
+                    $name.append('<option value="' + exps[i]._id + '">' + exps[i].exp +'</option>');
+                }
+                $name.val(exps[0]._id);
+            },
+            error: setAjaxError,
+            complete: onComplete
+        });        
+    }
+
+    function generateCSV(id, onComplete) {
         var params = validateParams();
         if(params.err) {
             $statusText.text('Input error: ' + params.err);
-            $status.addClass('status-error');
+            $status.addClass('data-status-error');
             return false;
         }
 
@@ -661,7 +705,7 @@ $(function(){
         $genBtn.prop('disabled', true);
 
         $.ajax({
-            url: 'http://54.172.59.119/expdata?e=' + params.name + '&t=' + dt.getTime() + '&r=' + params.range,
+            url: 'http://54.172.59.119/expdata?id=' + params.name + '&t=' + dt.getTime() + '&r=' + params.range,
             type: 'GET',
             dataType: 'json',
             success: function(data) {
@@ -699,9 +743,15 @@ $(function(){
 
     (function(){
         updateDateTime();
-        getExperiments(function(j, s) {
+        getExperimenters(function(j, s) {
             if(s === 'success'){
-                getCount();
+                var id = $.parseJSON(j.responseText)[0]._id;
+                getExperiments(id, function(j, s) {
+                    if(s === 'success'){
+                        var id = $.parseJSON(j.responseText)[0]._id;
+                        getCount(id);
+                    }
+                });
             }
         });
         

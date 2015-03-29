@@ -77,14 +77,14 @@ function localStorageTest(){
 
 $(function(){
 
-if(1)/*!isTouchDevice()) {
+if(!isTouchDevice()) {
 
     if(navigator.platform.toUpperCase().indexOf('MAC')>=0){
         $("#macDownload").css({display:'block'});
     }
     $("#welcomePage").css({display:'block'}).velocity({opacity:1}, 600);
 }
-else */{
+else {
 
     $("#startPage").css({display:'block', opacity:1});
 
@@ -1233,12 +1233,16 @@ else */{
             if(!config.experimenterId) {
                 experimenterCollection.fetch([], null, function(exptr){
                     localStorage['experimenterId'] = config.experimenterId = exptr[0]._id;
-                    experimentCollection.fetch(['id='+exptr[0]._id]);  
+                    experimentCollection.fetch(['id='+exptr[0]._id], null, function(exps){
+                        downloadOptions(exps[0]._id);
+                    });  
                 });
             }
             else {
                 experimenterCollection.fetch([], config.experimenterId);
-                experimentCollection.fetch(['id='+config.experimenterId]);
+                experimentCollection.fetch(['id='+config.experimenterId], config.experimentId, function(exps){
+                    downloadOptions(config.experimentId || exps[0]._id);
+                });
             }
 
             $(this.experimenterSel).on({

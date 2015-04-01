@@ -91,7 +91,7 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.2.0', STORELOCAL = localStorageTest();
+    var VERSION = '1.2.1', STORELOCAL = localStorageTest();
 
     if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
         localStorage.clear();
@@ -553,6 +553,7 @@ else {
 
                 $.each(els, function(i, e){
                     $(e).prop('disabled', true);
+                    $(e).html('<option selected disabled style="display:none">Getting ' + title + '...</option>');
                 });
 
                 var self = this;
@@ -567,7 +568,7 @@ else {
                         $.each(els, function(i, e){
                             $(e).html('<option selected disabled style="display:none">Choose an ' + title + '</option>');
                             if(!list.length) {
-                                $(e).html('<option selected disabled style="display:none">No ' + title + 's found</option>');
+                                $(e).html('<option selected disabled style="display:none" value="">No ' + title + 's found</option>');
                                 return;
                             }
                             $.each(list, function(j, d) {
@@ -580,13 +581,15 @@ else {
                                 
                             });;
                         });
-                        select = select || (typeof list[0] === 'string' ? list[0] : list[0][map.v]); 
-                        self.select( select );
+                        if(data.length > 0) {
+                            select = select || (typeof list[0] === 'string' ? list[0] : list[0][map.v]);
+                            self.select( select );
+                            $.each(els, function(i, e){
+                                $(e).prop('disabled', false);
+                            });
+                        }
                     },
                     complete: function(jqXHR) {
-                        $.each(els, function(i, e){
-                            $(e).prop('disabled', false);
-                        });
                         if(callback) {
                             callback($.parseJSON(jqXHR.responseText));
                         }
@@ -700,7 +703,7 @@ else {
                     localStorage['experimenterId'] = config.experimenterId = $(this).val();
                     experimentCollection.fetch(['id='+$(this).val()], null, function(exps){
                         self.disableAll();
-                        downloadOptions(exps[0]._id);
+                        downloadOptions(exps.length > 0 ? exps[0]._id : null);
                     });    
                 },
                 'touchstart': function(e) {
@@ -1234,14 +1237,14 @@ else {
                 experimenterCollection.fetch([], null, function(exptr){
                     localStorage['experimenterId'] = config.experimenterId = exptr[0]._id;
                     experimentCollection.fetch(['id='+exptr[0]._id], null, function(exps){
-                        downloadOptions(exps[0]._id);
+                        downloadOptions(exps.length > 0 ? exps[0]._id : null);
                     });  
                 });
             }
             else {
                 experimenterCollection.fetch([], config.experimenterId);
                 experimentCollection.fetch(['id='+config.experimenterId], config.experimentId, function(exps){
-                    downloadOptions(config.experimentId || exps[0]._id);
+                    downloadOptions(config.experimentId || (exps.length > 0 ? exps[0]._id : null) );
                 });
             }
 
@@ -1361,6 +1364,9 @@ else {
 
             config.name = $(this.name).val().trim();
             config.experiment = $(this.experiment).val().trim(); 
+            if( config.optionsMode == "server" ) {
+                config.experiment = $(this.experimentSel).val();
+            }
 
             var flag = false;
             if(config.name === ''){
@@ -1368,15 +1374,9 @@ else {
                 flag = true;
             }
 
-            if( config.optionsMode == "here" ) {
-
-                if(config.experiment === ''){
-                    $(this.experiment).addClass('invalid');
-                    flag = true;
-                }
-            }
-            else if( config.optionsMode == "server" ) {
-                config.experiment = $(this.experimentSel).val();
+            if(!config.experiment || config.experiment === ''){
+                $(this.experiment).addClass('invalid');
+                flag = true;
             }
 
             $(this.name).blur();

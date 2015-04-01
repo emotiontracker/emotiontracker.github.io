@@ -217,12 +217,14 @@
         .inpt-btn {
             border-top-left-radius: 0;
             border-bottom-left-radius: 0;
-            width:40px;
+            width:50px;
             margin:0;
             padding: 8px;
             height:38px;
             border:none;
             border-left: 1px solid #ddd;
+            font-size:12px;
+            line-height: 20px;
         }
 
         .data-status {
@@ -348,19 +350,15 @@
             color: #fff;
             padding: 10px;
             text-shadow: none;
-        }
-
-        .file-size {
-            opacity: 0.8;
-            line-height: 20px;
-            font-size: 14px;
-        }
-
-        .file-name {
             font-size: 12px;
             line-height: 20px;
             word-wrap: break-word;
-            width: 180px;
+        }
+
+        .file-size {
+            opacity: 0.5;
+            line-height: 20px;
+            font-size: 14px;
         }
 
         .light {
@@ -448,13 +446,13 @@
                     <div class="box-wrapper">
                         <div>
                             <div style="text-align:left"><label for="expterName">Choose experimenter</label></div>
-                            <select id="expterName" class="inpt param">
+                            <select id="expterName" class="inpt" disabled>
                                 <option value="" selected disabled style="display:none">Gathering experimenters...</option>
                             </select>
                         </div>
                         <div>
 <!--                             <div style="text-align:left"><label for="expName">Choose experiment</label></div> -->
-                            <select id="expName" class="inpt param" style="margin: 0 0 15px">
+                            <select id="expName" class="inpt param" style="margin: 0 0 15px" disabled>
                                 <option value="" selected disabled style="display:none">Choose an experimenter</option>
                             </select>
                         </div>
@@ -466,7 +464,7 @@
                                 <input class="inpt col param" style="width:32px" type="text" id="expDay" placeholder="dd"/>
                                 <div class="inpt-sep col">/</div>
                                 <input class="inpt col param" style="width:50px" type="text" id="expYear" placeholder="yyyy"/>
-                                <button id="timeUpdateBtn" class="btn inpt-btn col-right" data-tooltip="Set current date/time"><img src="../img/ico_update.png" > </button>
+                                <button id="timeUpdateBtn" class="btn inpt-btn col-right" data-tooltip="Set current date/time">Now</button>
                             </div>
 
                             <div class="inpt-field row" style="">
@@ -492,8 +490,8 @@
                     </div>
                     
     <!--                 <div><button class="btn" id="countBtn">Found <span class="count">0</span> trials</button></div> -->
-                    <div id="downloadButton"></div>
-                    <div><button class="btn btn-primary" id="genBtn">Generate CSV</button></div>
+                    <div class="file-status"></div>
+                    <div><button class="btn btn-primary" id="genBtn">Download CSV</button></div>
                 </div>
 
             </div>
@@ -507,6 +505,8 @@
 <script type="text/javascript">
 
 $(function(){
+
+    var SERVER_HOST = 'admin.emotiontracker.com';
 
     var $date = $('#expDate'),
         $day = $('#expDay'),
@@ -574,11 +574,12 @@ $(function(){
         }
         ret.expter = expter;
 
-        var name = $name.val();
-        if(!name || name === ''){
+        var id = $name.val();
+        if(!id || id === ''){
             return { err: 'Invalid experiment.' };
         }
-        ret.name = name;
+        ret.name = $name.children('option:selected').text();
+        ret.id = id;
 
         var month = +$month.val();
         if(!month || isNaN(month) || month < 1 || month > 12) {
@@ -641,7 +642,7 @@ $(function(){
 
         setStatus('load', 'Counting trials...');
         $.ajax({
-            url: 'http://54.172.59.119/expcount?id=' + id + '&t=' + dateObject.getTime() + '&r=' + params.range,
+            url: 'http://' + SERVER_HOST + '/expcount?id=' + params.id + '&t=' + dateObject.getTime() + '&r=' + params.range,
             type: 'GET',
             dataType: 'json',
             timeout: 10000,
@@ -659,32 +660,53 @@ $(function(){
 
     function getExperimenters(onComplete) {
         $.ajax({
-            url: 'http://54.172.59.119/users',
+            url: 'http://' + SERVER_HOST + '/users',
             type: 'GET',
             dataType: 'json',
             timeout: 10000,
             success: function(exps) {
-                for(var i=0; i<exps.length; i++){
-                    $expter.append('<option value="' + exps[i]._id + '">' + exps[i].name +'</option>');
+                $expter.html('');
+                if(exps.length > 0) {
+                    $expter.prop('disabled', false);
+                    for(var i=0; i<exps.length; i++){
+                        $expter.append('<option value="' + exps[i]._id + '">' + exps[i].name +'</option>');
+                    }
+                    $expter.val(exps[0]._id);                    
                 }
-                $expter.val(exps[0]._id);
+                else {
+                    $expter.prop('disabled', true);
+                    $expter.html('<option value="">No experimenters found</option>');     
+                }
+
             },
             error: setAjaxError,
             complete: onComplete
         });        
     }
 
+    $expter.on('change', function() {
+        getExperiments($(this).val());
+    });
+
     function getExperiments(userId, onComplete) {
         $.ajax({
-            url: 'http://54.172.59.119/exps?id=' + userId,
+            url: 'http://' + SERVER_HOST + '/exps?id=' + userId,
             type: 'GET',
             dataType: 'json',
             timeout: 10000,
             success: function(exps) {
-                for(var i=0; i<exps.length; i++){
-                    $name.append('<option value="' + exps[i]._id + '">' + exps[i].exp +'</option>');
+                $name.html('');
+                if(exps.length > 0) {
+                    $name.prop('disabled', false);
+                    for(var i=0; i<exps.length; i++){
+                        $name.append('<option value="' + exps[i]._id + '">' + exps[i].exp +'</option>');
+                    }
+                    $name.val(exps[0]._id);
                 }
-                $name.val(exps[0]._id);
+                else {
+                    $name.prop('disabled', true);
+                    $name.html('<option value="">No experiments found</option>');  
+                }
             },
             error: setAjaxError,
             complete: onComplete
@@ -694,18 +716,27 @@ $(function(){
     function generateCSV(id, onComplete) {
         var params = validateParams();
         if(params.err) {
-            $statusText.text('Input error: ' + params.err);
-            $status.addClass('data-status-error');
+            setStatus('error', '<span class="data-status-label">Input error</span>' + params.err, function() {
+                $closeBtn = $('<div class="ico-close"></div>');
+                $closeBtn.on('click', function() {
+                    setStatus('', 'No trials found.', function(){
+                        $reBtn = $('<button class="btn">Refresh</button>');
+                        $reBtn.on('click', getCount);
+                        $statusButtons.html($reBtn);
+                    });
+                });
+                $statusButtons.append($closeBtn);
+            });
             return false;
         }
 
         var dt = new Date(params.year, params.month, params.day, params.hour, params.min);
 
-        $('#downloadButton').html('');
         $genBtn.prop('disabled', true);
+        $genBtn.text('Generating...');
 
         $.ajax({
-            url: 'http://54.172.59.119/expdata?id=' + params.name + '&t=' + dt.getTime() + '&r=' + params.range,
+            url: 'http://' + SERVER_HOST + '/expdata?id=' + params.id + '&t=' + dt.getTime() + '&r=' + params.range,
             type: 'GET',
             dataType: 'json',
             success: function(data) {
@@ -714,19 +745,21 @@ $(function(){
                 }
                 else{
                     var a = document.createElement('a');
-                    a.href = 'data:attachment/csv,' + data.data;
-                    a.target = '_blank';
+                    a.href = 'data:text/csv,' + data.data;
                     var fromDate = new Date(dt.getTime() - params.range),
                         toDate = new Date(dt.getTime() + params.range);
                     a.download = '[' + params.name + '].' + [dt.getFullYear(), dt.getMonth() + 1, dt.getDate(), fromDate.getHours(), fromDate.getMinutes(), toDate.getHours(), toDate.getMinutes()].join('.') + '.csv';
-                    a.innerHTML = 'Download CSV';
+                    a.click();
+                    $('.file-status').html('<div class="row file-meta">' + a.download + '<span class="file-size"> (' + (data.data.length / 1024).toFixed(2) + 'kB)</span></div>');
+/*                    a.innerHTML = 'Download CSV';
                     $('#downloadButton').append(a);
-                    $('#downloadButton').append('<div class="row file-meta"><div class="col file-name">' + a.download + '</div><div class="col-right file-size">' + (data.data.length / 1000).toFixed(2) + 'kB</div></div>')
+                    $('#downloadButton').append('<div class="row file-meta"><div class="col file-name">' + a.download + '</div><div class="col-right file-size">' + (data.data.length / 1000).toFixed(2) + 'kB</div></div>')*/
                 }
             },
             error: setAjaxError,
             complete: function(jqXHR, textStatus){
                 $genBtn.prop('disabled', false);
+                $genBtn.text('Download CSV');
                 if(isFunction(onComplete)) {
                     onComplete(jqXHR, textStatus);
                 }
@@ -737,7 +770,6 @@ $(function(){
     function onParamsChange() {
         $updateBtn.prop('disabled', false);
         getCount();
-
     }
 
 
@@ -749,7 +781,7 @@ $(function(){
                 getExperiments(id, function(j, s) {
                     if(s === 'success'){
                         var id = $.parseJSON(j.responseText)[0]._id;
-                        getCount(id);
+                        getCount();
                     }
                 });
             }

@@ -91,7 +91,7 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.2.1', STORELOCAL = localStorageTest();
+    var VERSION = '1.2.2', STORELOCAL = localStorageTest();
 
     if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
         localStorage.clear();
@@ -288,7 +288,7 @@ else {
 
     var rater = { getRating: function(){} };
     var config = {
-        appCreateDate: 'Saturday March 28 2015',
+        appCreateDate: 'Sunday May 31 2015',
         appVersion: VERSION,
         name: '',
         experiment: '',
@@ -3086,7 +3086,7 @@ else {
             this.bubblesEl = this.el.find('.barbellFeedback');
             this.feedbacks = new Feedbacks({el:this.el.find('.feedbacks')});
             this.titleTexts = [
-                'Soon, you will continuously rate your pleasure. You\'ll spread your fingers to indicate how much pleasure you are getting from the object at that moment.',
+                'Soon, you will continuously rate your pleasure. You\'ll spread your fingers to indicate how much pleasure you are getting from the object at each moment. Try to continuously report what you feel from the whole experience so far.',
                 'While your fingers are on the screen, keep rating pleasure, even after the object goes away, until I say, <b>"Done"</b>.',
                 ''
                 //'<span class="strong">When you\'re ready, place two fingers to begin.</span>'

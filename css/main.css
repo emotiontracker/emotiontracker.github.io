@@ -1273,6 +1273,15 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
   opacity:0;
 }
 
+#expContactLoss{
+  background-color: rgba(231, 76, 60, 0.5);
+  color: #fff;
+  position: absolute;
+  top:0; right:0; bottom:0; left: 0;
+  z-index: 9999;
+  display: none;
+  opacity: 0;
+}
 
 #changeOrient{
   position:  absolute;

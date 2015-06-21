@@ -503,7 +503,7 @@
             <div class="numericFeedback"></div>
             <div id="calibInstr"></div>
 
-            <div class="center-text-wrapper">
+            <div id="calibTitlesCont" class="center-text-wrapper">
                 <div class="center-text">
                     <div id="calibTitles"></div>
                     <div id="calibTap">Tap to continue</div>           
@@ -575,48 +575,56 @@
                     <div id="expTap">Tap to continue.</div>   
                 </div>
             </div>
-        </div>
 
-            <div id="completePage" style="display:none; opacity:0">
+            <div id="expContactLoss">
                 <div class="center-text-wrapper">
                     <div class="center-text">
-                        <div id="completeSurvey">
-                            <div class="strong survey-wrapper">During this trial, did you get the feeling of beauty from the object?</div>
-                            <div class="survey-wrapper">
-                                <button id="pleasureSurvey3" class="survey-btn" value="3">Yes, definitely</button>
-                                <button id="pleasureSurvey2" class="survey-btn" value="2">Perhaps yes</button>
-                                <button id="pleasureSurvey1" class="survey-btn" value="1">Perhaps no</button>
-                                <button id="pleasureSurvey0" class="survey-btn" value="0">Definitely not</button>
-                            </div>
-
-                            <button id="completeSurveyTap">Tap here to continue</button>
-                        </div>
-
-                        <div id="completeMessages" style="display:none;opacity:0">
-                            <div id="completeThank" class="emph" style="opacity:0">Thank You!</div>
-                            <div id="completeStatusContainer">
-                                <span class="loader-small"></span>
-                                <span id="completeStatus">Sending data...</span>                 
-                            </div>                           
-                        </div>
-
-<!--                         <div id="completeMessage" style="display:none; opacity:0">
-                            <div class="emph">Thank you!</div>
-                            <div id="completeStatus"></div>
-                        </div> -->
+                        <div>I can't feel you. Please press harder.</div> 
                     </div>
                 </div>
-                <div id="completeButtons" style="display:none">
-                    <a id="btnReSend" class="btn btn-full" href="#">Re-send data as e-mail</a>
-                    <a id="btnRestart" class="btn btn-full btn-success">Start new experiment</a>
+            </div>
+        </div>
+
+        <div id="completePage" style="display:none; opacity:0">
+            <div class="center-text-wrapper">
+                <div class="center-text">
+                    <div id="completeSurvey">
+                        <div class="strong survey-wrapper">During this trial, did you get the feeling of beauty from the object?</div>
+                        <div class="survey-wrapper">
+                            <button id="pleasureSurvey3" class="survey-btn" value="3">Yes, definitely</button>
+                            <button id="pleasureSurvey2" class="survey-btn" value="2">Perhaps yes</button>
+                            <button id="pleasureSurvey1" class="survey-btn" value="1">Perhaps no</button>
+                            <button id="pleasureSurvey0" class="survey-btn" value="0">Definitely not</button>
+                        </div>
+
+                        <button id="completeSurveyTap">Tap here to continue</button>
+                    </div>
+
+                    <div id="completeMessages" style="display:none;opacity:0">
+                        <div id="completeThank" class="emph" style="opacity:0">Thank You!</div>
+                        <div id="completeStatusContainer">
+                            <span class="loader-small"></span>
+                            <span id="completeStatus">Sending data...</span>                 
+                        </div>                           
+                    </div>
+
+<!--                         <div id="completeMessage" style="display:none; opacity:0">
+                        <div class="emph">Thank you!</div>
+                        <div id="completeStatus"></div>
+                    </div> -->
                 </div>
             </div>
-
-            <div id="changeOrient" style="display:none">
-                <div class="landscapeText" style="top:120px">Rotate your device</div>
-                <div id="landscape"></div>
-                <div class="landscapeText" style="bottom:120px">to landscape mode</div>
+            <div id="completeButtons" style="display:none">
+                <a id="btnReSend" class="btn btn-full" href="#">Re-send data as e-mail</a>
+                <a id="btnRestart" class="btn btn-full btn-success">Start new experiment</a>
             </div>
+        </div>
+
+        <div id="changeOrient" style="display:none">
+            <div class="landscapeText" style="top:120px">Rotate your device</div>
+            <div id="landscape"></div>
+            <div class="landscapeText" style="bottom:120px">to landscape mode</div>
+        </div>
 
         <script src="js/vendor/jquery-2.1.0.min.js"></script>
         <script src="js/vendor/raphael-min.js"></script>

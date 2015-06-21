@@ -1605,7 +1605,7 @@ else {
         onTap: function(e){
             e.preventDefault();
             var self = this;
-            document.removeEventListener('touchstart', this.onTap);
+            window.removeEventListener('touchstart', this.onTap);
 
             $(this.tap).velocity({opacity:0}, 100);
             $(this.titlesText).velocity({opacity:0}, 100, function(){
@@ -1628,7 +1628,7 @@ else {
             $(this.titlesText).velocity({opacity:1}, 500, function(){
                 //setTimeout(function(){
                     $(self.tap).velocity({opacity: 1}, 100, function(){
-                        document.addEventListener('touchstart', self.onTap);
+                        window.addEventListener('touchstart', self.onTap);
                     });
                 //}, 50);                    
             });
@@ -1868,7 +1868,7 @@ else {
         },
 
         end: function(){
-            document.removeEventListener('touchstart', this.abort);
+            window.removeEventListener('touchstart', this.abort);
             PageController.transition("experiment", function(){
                 this.begin();
             });           
@@ -1876,7 +1876,7 @@ else {
 
         onTap: function(e){
             e.preventDefault();
-            document.removeEventListener('touchstart', this.onTap);
+            window.removeEventListener('touchstart', this.onTap);
 
             var self = this;
             $(this.tap).velocity({opacity:0}, 100);
@@ -1887,7 +1887,7 @@ else {
                     self.timer.style.display = 'block';
                     drawTimer(self.timer, config.options.moodDuration);
                     self.timeout = setTimeout(self.onEnd, config.options.moodDuration * 1000);   // 3 minutes
-                    document.addEventListener('touchstart', self.abort);
+                    window.addEventListener('touchstart', self.abort);
                 }
                 else{
                     self.showTitle();
@@ -1924,7 +1924,7 @@ else {
             $(this.titlesText).velocity({opacity:1}, 150, function(){
                 setTimeout(function(){
                     $(self.tap).velocity({opacity: 1}, 300, function(){
-                        document.addEventListener('touchstart', self.onTap);
+                        window.addEventListener('touchstart', self.onTap);
                     });
                 }, 100);                    
             });
@@ -2267,33 +2267,31 @@ else {
     var BubbleView = View.extend({
 
         bubble: function(){
-            return {
-                x: 0,
-                y: 0,
-                r: 40,
-                circle: null,
-                //line: null,
-                selected: false,
-                update: function(){
-                    this.circle.attr("cx", this.x);
-                    this.circle.attr("cy", this.y);
-                    //this.line.attr("path", "M" + window.innerWidth/2 + " " + window.innerHeight/2 + "L" + this.x + " " + this.y);
-                },
+            this.x = 0;
+            this.y = 0;
+            this.r = 40;
+            this.circle = null;
+            this.selected = false;
+            this.update = function(){
+                this.circle.attr("cx", this.x);
+                this.circle.attr("cy", this.y);
+                //this.line.attr("path", "M" + window.innerWidth/2 + " " + window.innerHeight/2 + "L" + this.x + " " + this.y);
+            };
 
-                toggleSelected: function(){
-                    if(this.selected !== false){
-                        this.circle.animate({
-                            "fill-opacity": 0.2,
-                            "r": 40
-                        }, 100, "bounce");  
-                        this.selected = false;                      
-                    }
-                    else{
-                        this.circle.animate({
-                            "fill-opacity": 0.6,
-                            "r": 60
-                        }, 80, "bounce");                     
-                    }
+            this.toggleSelected = function(){
+                if(this.selected !== false){
+                    this.circle.animate({
+                        "fill-opacity": 0.2,
+                        "r": 40
+                    }, 100, "bounce");  
+                    this.selected = false;                      
+                }
+                else{
+                    this.circle.animate({
+                        "fill-opacity": 0.6,
+                        "r": 60
+                    }, 80, "bounce");
+                    this.selected = true;                   
                 }
             };
         },
@@ -2322,10 +2320,10 @@ else {
             shapes.bubbles[0].y = shapes.bubbles[1].y = window.innerHeight/2;
             shapes.bubbles.selected = function(){
                 return (this[0].selected !== false && this[1].selected !== false);
-            } 
+            }; 
             shapes.bubbles.distance = function(){
                 return getDistance(this[0].x, this[0].y, this[1].x, this[1].y);
-            } 
+            }; 
 
             shapes.joinLine = this.paper.path('');
             shapes.joinLine.attr('stroke', '#c6003b');
@@ -2333,7 +2331,7 @@ else {
             shapes.joinLine.bubbles = shapes.bubbles;
             shapes.joinLine.updatePos = function(){
                 this.attr("path", "M" + this.bubbles[0].x + " " + this.bubbles[0].y + "L" + this.bubbles[1].x + " " + this.bubbles[1].y);
-            }
+            };
             shapes.joinLine.updatePos(); 
 
             var self = this;
@@ -2366,14 +2364,30 @@ else {
             }
         },
 
+        sortBubbles: function(touch) {
+            this.shapes.bubbles.sort(function(a,b) {
+                var da = getDistance(a.x, a.y, touch.x, touch.y);
+                var db = getDistance(b.x, b.y, touch.x, touch.y);
+
+                if(da < db) {
+                    return -1;
+                }
+                else if(da > db) {
+                    return 1;
+                }
+                return 0;
+            });
+        },
+
         onTouchStart: function(touch){
             var b;
+            this.sortBubbles(touch);
             for(var i = 0; i < 2; i++){
                 b = this.shapes.bubbles[i];
                 if(b.selected === false){
-                    if(this.drag && !b.circle.isPointInside(touch.x, touch.y)){
+/*                    if(this.drag && !b.circle.isPointInside(touch.x, touch.y)){
                         continue;
-                    }
+                    }*/
                     b.x = touch.x;
                     b.y = touch.y;
                     b.update();
@@ -2387,6 +2401,7 @@ else {
 
         onTouchMove: function(touch){
             var b;
+            this.sortBubbles(touch);
             for(var i = 0; i < 2 ; i++){
                 b = this.shapes.bubbles[i];
                 if(b.selected === touch.id){
@@ -2401,6 +2416,7 @@ else {
 
         onTouchEnd: function(touch){
             var b;
+            this.sortBubbles(touch);
             for(var i = 0; i < 2 ; i++){
                 b = this.shapes.bubbles[i];
                 if(b.selected === touch.id){
@@ -2409,7 +2425,6 @@ else {
                 }
             }
         }
-
     });
 
 
@@ -2435,6 +2450,7 @@ else {
             this.titleText = this.el.find('#calibTitle');
             this.instrText = this.el.find('#calibInstr');
             this.titlesText = this.el.find('#calibTitles');
+            this.titlesCont = this.el.find('#calibTitlesCont');
             this.tapText = this.el.find('#calibTap');
 
             this.feedbacks = new Feedbacks({el:this.el, disableBarbell:true});
@@ -2469,7 +2485,7 @@ else {
             if(getOrientation() == 'portrait'){
                 return false;
             }
-            document.removeEventListener('touchstart', this.onTap);
+            window.removeEventListener('touchstart', this.onTap);
 
             $(this.tapText).velocity({opacity:0}, 100);
             $(this.titlesText).velocity({opacity:0}, 100, function(){
@@ -2495,6 +2511,7 @@ else {
 
         showTitle: function(){
             var self = this;
+            $(this.titlesCont).css({display: 'table'});
 
             this.titlesText.innerHTML = this.titleTexts[this.trialParams.phase][this.titlePhase][this.titleIndex];
             $(this.titlesText).show();
@@ -2502,7 +2519,7 @@ else {
 
                 //setTimeout(function(){
                     $(self.tapText).velocity({opacity: 1}, 300, function(){
-                        document.addEventListener('touchstart', self.onTap);
+                        window.addEventListener('touchstart', self.onTap);
                     });
                 //}, 50);                    
             });
@@ -2654,7 +2671,7 @@ else {
                             self.showTitle();
                         }
                         else{
-                            document.removeEventListener('touchstart', this.onTap);
+                            window.removeEventListener('touchstart', this.onTap);
                             self.titleTexts[self.trialParams.phase].onEnd();
                         }
                    
@@ -2668,7 +2685,9 @@ else {
         },
 
         startTrial: function(trialIndex){
-            
+            window.removeEventListener('touchstart', this.onTap);
+            $(this.titlesCont).css({display: 'none'});
+
             var trial = this.trials[trialIndex];
 
             this.trialParams.cur = trialIndex;
@@ -3079,10 +3098,11 @@ else {
 
         init: function(){
             this._super();
-            _bindAll(this, 'begin', 'stop', 'sampleRating', 'onTap', 'close', 'abort', 'showReadyTitle');
+            _bindAll(this, 'begin', 'stop', 'sampleRating', 'onTap', 'close', 'abort', 'showReadyTitle', 'handleContactLoss');
             
             this.titleText = this.el.find('#expTitle');
             this.tapText = this.el.find('#expTap');
+            this.contactLoss = this.el.find('#expContactLoss');
             this.bubblesEl = this.el.find('.barbellFeedback');
             this.feedbacks = new Feedbacks({el:this.el.find('.feedbacks')});
             this.titleTexts = [
@@ -3097,6 +3117,7 @@ else {
         render: function(){
             this._super();
             this.titleText.style.opacity = 0;
+            $(this.contactLoss).css({display: 'none', opacity: 0});
         },
 
         begin: function(){
@@ -3106,7 +3127,7 @@ else {
             this.valid = [];
             this.timers = {
                 end: null,
-                cancel: null,
+                contact: null,
                 sample: null,
                 clearAll: function(){
                     clearTimeout(this.end);
@@ -3148,7 +3169,7 @@ else {
             if(getOrientation() == 'portrait'){
                 return false;
             }
-            document.removeEventListener('touchstart', this.onTap);
+            window.removeEventListener('touchstart', this.onTap);
             var self = this;
 
             $(this.tapText).velocity({opacity:0}, 100);
@@ -3169,10 +3190,10 @@ else {
             
             this.feedbacks.enable();
 
-            document.addEventListener('touchstart', this.handleTouchStart);
-            document.addEventListener('touchmove', this.handleTouchMove);
-            document.addEventListener('touchend', this.handleTouchEnd);
-            document.addEventListener('touchcancel', this.handleTouchEnd);   
+            window.addEventListener('touchstart', this.handleTouchStart);
+            window.addEventListener('touchmove', this.handleTouchMove);
+            window.addEventListener('touchend', this.handleTouchEnd);
+            window.addEventListener('touchcancel', this.handleTouchEnd);   
         },
 
         showTitle: function(){
@@ -3192,7 +3213,7 @@ else {
                 else{
                     //setTimeout(function(){
                         $(self.tapText).velocity({opacity: 1}, 300, function(){
-                            document.addEventListener('touchstart', self.onTap);
+                            window.addEventListener('touchstart', self.onTap);
                         });
                     //}, 50);                    
                 }
@@ -3207,7 +3228,7 @@ else {
                 rating = rater.getRating(touches).toFixed(1),
                 dist = getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
             
-            if(touches[0].id === false || touches[1].id === false /* && rating !== this.samples[this.samples.length-1]*/){
+            if(touches[0].id === false && touches[1].id === false /* && rating !== this.samples[this.samples.length-1]*/){
             }
             else{
                 //this.valid.push(1);
@@ -3222,12 +3243,13 @@ else {
         close: function(){
             PageController.pages.music.stop();
             this.bubblesEl.style.opacity = 0;
+            $(this.contactLoss).css({display: 'none', opacity: 0});
             this.timers.clearAll();
-            document.removeEventListener('touchstart', this.abort);
-            document.removeEventListener('touchstart', this.handleTouchStart);
-            document.removeEventListener('touchmove', this.handleTouchMove);
-            document.removeEventListener('touchend', this.handleTouchEnd);
-            document.removeEventListener('touchcancel', this.handleTouchEnd); 
+            window.removeEventListener('touchstart', this.abort);
+            window.removeEventListener('touchstart', this.handleTouchStart);
+            window.removeEventListener('touchmove', this.handleTouchMove);
+            window.removeEventListener('touchend', this.handleTouchEnd);
+            window.removeEventListener('touchcancel', this.handleTouchEnd); 
 
             this.sampleRating();
             if(config.knockout == 'name') {
@@ -3290,7 +3312,8 @@ else {
         },
 
         handleDoubleTouchStart: function(){
-            //clearTimeout(this.timers.cancel);
+            clearTimeout(this.timers.contact);
+            $(this.contactLoss).css({display: 'none', opacity: 0});
             //this.status.canceled = false;
             this.feedbacks.onStart(this.touches);
 
@@ -3327,18 +3350,21 @@ else {
                     }, 
                     config.options.knockOnset * 1000);
                 }
-                document.addEventListener('touchstart', this.abort);
+                window.addEventListener('touchstart', this.abort);
             }
         },
 
         handleDoubleTouchEnd: function(){
             this.feedbacks.onEnd(this.touches);
-            //this.timers.cancel = setTimeout(this.stop, config.cancelTime);
-            //this.status.canceled = new Date();
+            this.timers.contact = setTimeout(this.handleContactLoss, 2000);
         },
 
         handleDoubleTouchMove: function(){
             this.feedbacks.onMove(this.touches);
+        },
+
+        handleContactLoss: function() {
+            $(this.contactLoss).css({display: 'block'}).velocity({opacity: 1}, 500);
         }
 
     });

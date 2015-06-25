@@ -1206,7 +1206,7 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
   width:100%;
 }
 
-#expTap, #calibTap, #completeSurveyTap, #moodTap, #knockNameTap{
+#expTap, #calibTap, #completeSurveyTap, #moodTap, #knockNameTap, #contactNote{
   font-size:12px;
   text-transform:uppercase;
   padding-top:25px;
@@ -1274,13 +1274,22 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
 }
 
 #expContactLoss{
-  background-color: rgba(231, 76, 60, 0.5);
-  color: #fff;
+  background-color: rgba(231, 76, 60, 0.85);
+  color: #750D1B;
   position: absolute;
   top:0; right:0; bottom:0; left: 0;
-  z-index: 9999;
+  z-index: 9998;
   display: none;
   opacity: 0;
+  font-size: 1.4em;
+}
+
+#contactNote {
+  color: #fff;
+  padding: 50px 20px 0 20px;
+  text-transform: none;
+  font-size: 15px;
+  opacity: 0.8;
 }
 
 #changeOrient{
@@ -1288,6 +1297,7 @@ a.btn-error, a.btn-error:visited, a.btn-error:hover{
   top:0;left:0;right:0;bottom:0;
   height:100%;
   background:#fff;
+  z-index: 9999;
 }
 
 #landscape{

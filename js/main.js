@@ -91,7 +91,7 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.2.2', STORELOCAL = localStorageTest();
+    var VERSION = '1.2.3', STORELOCAL = localStorageTest();
 
     if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
         localStorage.clear();
@@ -1635,7 +1635,10 @@ else {
         },
 
         end: function(){
-            this.recs = shuffle(this.recs);
+            if(this.recs.length > 0) {
+                this.recs = shuffle(this.recs);    
+            }
+            
             if(config.options.musicSelect){
                 PageController.transition("stimulus");                    
             }
@@ -3131,7 +3134,7 @@ else {
                 sample: null,
                 clearAll: function(){
                     clearTimeout(this.end);
-                    clearTimeout(this.cancel);
+                    clearTimeout(this.contact);
                     clearTimeout(this.sample);
                 }
             };
@@ -3242,9 +3245,11 @@ else {
 
         close: function(){
             PageController.pages.music.stop();
+            this.timers.clearAll();
+
             this.bubblesEl.style.opacity = 0;
             $(this.contactLoss).css({display: 'none', opacity: 0});
-            this.timers.clearAll();
+
             window.removeEventListener('touchstart', this.abort);
             window.removeEventListener('touchstart', this.handleTouchStart);
             window.removeEventListener('touchmove', this.handleTouchMove);
@@ -3274,7 +3279,6 @@ else {
         },
 
         stop: function(){
-
             this.close();
 
             notifier.play("done");

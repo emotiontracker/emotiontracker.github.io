@@ -330,7 +330,15 @@
                     </div>
                     <label for="durationWhiteNoise" class="lbl">Duration of white noise <span class="light"> (s)</span></label>
                     <input id="durationWhiteNoise" type="text" value="120" class="inpt" pattern="[0-9]*"/>
-                </div>  
+                </div>
+
+                <div class="field">
+                    <label class="lbl">Input mode</label>
+                    <div id="optionsInput" class="option-btn-group">
+                        <button id="modeSpread" class="btn" data-value="0">Spread</button>
+                        <button id="modeSqueeze" class="btn" data-value="1">Squeeze</button>
+                    </div> 
+                </div>
 
                 <div class="field">
                     <label class="lbl">Fingers</label>
@@ -338,6 +346,11 @@
                         <button id="modeThumbBtn" class="btn" data-value="0">Thumb and index </button>
                         <button id="modeMiddleBtn" class="btn" data-value="1">Index and middle</button>
                     </div> 
+                </div>
+
+                <div class="field">
+                    <label for="labquestURL" class="lbl">Labquest URL</label>
+                    <input id="labquestURL" type="text" value="10.0.0.1" class="inpt" />
                 </div>
                 
                 <div class="field" style="margin-bottom:60px">

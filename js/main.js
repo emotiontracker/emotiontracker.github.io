@@ -433,6 +433,8 @@ else {
                 postStimulusDuration: 120,
                 durationWhiteNoise: 120,
                 fingers: 0,
+                input: 0,
+                labquestURL: '10.0.0.1',
                 storeData: false
             };
 
@@ -622,7 +624,8 @@ else {
                 'unFloatButtons', 
                 'showAudioWarn', 
                 'toggleOptionMode', 
-                'toggleOptionFingers', 
+                'toggleOptionFingers',
+                'toggleOptionInput', 
                 'generateOptions', 
                 'loadOptions', 
                 'disableAll', 
@@ -674,6 +677,8 @@ else {
             this.durationWhiteNoise = $(this.el.find('#durationWhiteNoise'));
             this.optionsMode = this.el.find("#optionsMode");
             this.optionsFingers = $(this.el.find('#optionsFingers'));
+            this.optionsInput = $(this.el.find('#optionsInput'));
+            this.labquestURL = $(this.el.find('#labquestURL'));
             this.storeData = $(this.el.find('#storeData'));
             this.loadOptions();
 
@@ -774,6 +779,7 @@ else {
 
             $(this.optionsMode).on('touchstart', '.btn', this.toggleOptionMode);
             $(this.optionsFingers).on('touchstart', '.btn', this.toggleOptionFingers);
+            $(this.optionsInput).on('touchstart', '.btn', this.toggleOptionInput);
 
             this.uploadSubmit = document.body.find('#uploadSubmit');
             this.uploadExp = this.modeUpload.find("#uploadExperiment");
@@ -1016,6 +1022,24 @@ else {
             });
         },
 
+        toggleOptionInput: function(e) {
+            e.preventDefault();
+            if(!e.target) return false;
+
+            var optionTarget = e.target;
+            $(this.optionsInput).find(".btn-selected").removeClass("btn-selected");
+            $(optionTarget).addClass("btn-selected");
+
+            if(+$(optionTarget).data('value') === 0) {
+                $(this.labquestURL).parent().hide();
+                $(this.optionsFingers).parent().show();
+            }
+            else if(+$(optionTarget).data('value') === 1){
+                $(this.optionsFingers).parent().hide();
+                $(this.labquestURL).parent().show();
+            }         
+        },
+
         toggleOptionFingers: function(e) {
             e.preventDefault();
             if(!e.target) return false;
@@ -1119,6 +1143,8 @@ else {
                 postStimulusDuration: +$(this.postStimulusDuration).val(),
                 durationWhiteNoise: +$(this.durationWhiteNoise).val(),
                 fingers:  +$(this.optionsFingers).find(".btn-selected").first().data('value'),
+                input:  +$(this.optionsInput).find(".btn-selected").first().data('value'),
+                labquestURL: $(this.labquestURL).val().trim(),
                 storeData: $(this.storeData).prop('checked')
             };
             return options;
@@ -1162,6 +1188,18 @@ else {
 
             $(this.optionsFingers).find("button").removeClass("btn-selected");
             $(this.optionsFingers).find('[data-value='+options.fingers+']').addClass('btn-selected');
+
+            $(this.optionsInput).find("button").removeClass("btn-selected");
+            $(this.optionsInput).find('[data-value='+options.input+']').addClass('btn-selected');
+
+            $(this.labquestURL).val(options.labquestURL);
+
+            if(options.input === 0) {
+                $(this.labquestURL).parent().hide();
+            }
+            else if(options.input === 1) {
+                $(this.optionsFingers).parent().hide(); 
+            }
 
             this.enableAll();
         },

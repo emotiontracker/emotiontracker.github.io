@@ -91,7 +91,7 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.2.3', STORELOCAL = localStorageTest();
+    var VERSION = '1.2.4', STORELOCAL = localStorageTest();
 
     if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
         localStorage.clear();
@@ -1365,7 +1365,7 @@ else {
             config.name = $(this.name).val().trim();
             config.experiment = $(this.experiment).val().trim(); 
             if( config.optionsMode == "server" ) {
-                config.experiment = $(this.experimentSel).val();
+                config.experiment = $(this.experimentSel).find('option:selected').html();
             }
 
             var flag = false;
@@ -1383,11 +1383,10 @@ else {
             $(this.experiment).blur();
             $(this.experimentSel).blur();
 
-
             if(flag === false){
                 if(config.optionsMode == "server") {
                     config.options = config.serverOptions;
-                    $(settingsPage.expSel).val(config.experiment);
+                    $(settingsPage.expSel).val($(this.experimentSel).val());
                 }
                 else {
                     $(settingsPage.exp).val(config.experiment);

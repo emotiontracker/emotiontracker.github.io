@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <title>Emotion Tracker | Labquest</title>
+        <meta name="description" content="">
+        <meta name="HandheldFriendly" content="True">
+        <meta name="MobileOptimized" content="320">
+        <meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0">
+        <meta http-equiv="cleartype" content="on">
+
+        <link rel="icon" type="image/png" href="favicon.png">
+
+        <meta name="mobile-web-app-capable" content="yes">
+
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="Emotion Tracker">
+
+        <link rel="stylesheet" href="../css/normalize.css">
+        <link rel="stylesheet" href="../css/main.css">
+
+        <script src="../js/vendor/modernizr-2.7.1.min.js"></script>
+    </head>
+    <body>
+
+        
+        <div id="welcomePage" style="background-color:#7a6ed1;position:absolute;top:0;left:0;right:0;bottom:0;color:#fff;display:none;opacity:0">
+            <div class="page page-center" style="width:800px;text-align:center;height:590px;">
+                <div class="logo-welcome"></div>
+                <div style="font-size:24px;margin:40px 0">Sorry, this device is not touch friendly :(</div>
+                <div style="color:#c9cdff;font-size:16px;padding:10px 20px;border:2px solid #c9cdff;border-radius:3px;display:inline-block">Try opening this page on a touch-screen device such as a smartphone or tablet.</div>
+                <div id="macDownload">
+                    <a class="btn btn-success" href="mac.zip">Download for Mac (v1.1.0)</a>                
+                </div>
+            </div>
+        </div>
+
+        <div id="helpPage" style="display:none">
+            <div id="helpHeader" class="page-header">
+                <div>
+                    Welcome to the
+                    <h2>Emotion Tracker App</h2>
+                </div>
+            </div> 
+            <div class="row" style="padding-top:0;margin-bottom:30px">
+                <button id="showCreditsBtn" class="btn btn-primary btn-full">View credits</button> 
+            </div>
+            <button id="helpClose" class="btn btn-img2"><div class="ico-close"></div></button>  
+
+            <div class="row">
+                <div class="help-title">What is it for?</div>
+                <div class="help-text">This app tracks​ any subjective magnitude (e.g. pleasure) over time. ​The participant keeps the tips of two fingers on the smartphone screen, and reports magnitude by finger spread over time. The app ​takes a reading every second (or any rate you like), ​converts ​each analog ​spread into a numerical rating, ​and, at the end of the trial, emails the data as a spreadsheet file (.CSV) to the experimenter (you). You can use the app with virtually any stimulus – music, art, ​​video, live performance,​ ​or even discussion.​</div>
+            </div>  
+
+            <div class="row">
+                <div class="help-title">Music</div>
+                <div class="help-text">The app can present music from spotify, selected by the participant. However, this is data-intense and our Spotify license only allows us to serve one user at a time, in the whole world.</div>
+            </div>     
+
+            <div class="row">
+                <div class="help-title">Who can use it?</div>
+                <div class="help-text">With this app, you can collect data on any touch​screen device​ (iOS or Android)​ with internet access, including iPhone, iPad, and Samsung Galaxy. ​ ​Anyone can use it.​  It's free.  If you publish your data, please cite us.  (See credit page for full citation.)</div>
+            </div>
+
+            <div class="row">
+                <div class="help-title">What features can I change?</div>
+                <div class="help-text">You can set the duration, feedback, ​calibration details, and your email address, to which the data file will be sent. [Soon, you will be able to select the name for the magnitude (emotion) that the participant will be asked to report, e.g. "pleasure" or "anxiety".] You edit the settings by clicking on the gear icon on the home screen.</div>
+            </div>
+
+            <div class="row">
+                <div class="help-title">Group data for lecture or classroom demonstration</div>
+                <div class="help-text">For lecture use, a group ​data ​feature (under development)​​ collects data from multiple observers during the same session​ (e.g. everyone watching a movie), each responding through their own device. Our server provides a data page from which you can request a summary data file that summarizes all the data files on the server for a particular experiment and time window. All the data files are aligned by absolute time before the summary is made. Saving data on the server is optional. It is only needed to get a group data summary. Your data belong to you.​ <a href="http://emotiontracker.com/data">emotiontracker.com/data</a></div>
+            </div>
+
+            <div class="row">
+                <div class="help-text light">Denis G. Pelli, December 6, 2014</div>
+            </div>
+        </div>
+
+        <div id="infoPage" style="display:none">
+            <h2>Emotion Tracker</h2>
+            <div class="emph">v1.2.4</div>
+            <div class="info-desc">Measure self-reported emotion over time. Currently supports Safari and Chrome browsers on iOS and Android devices. Support for other devices may be added. Let us know what you need. <a href="mailto:denis.pelli@nyu.edu?subject=Emotion%20Tracker">denis.pelli@nyu.edu</a></div>
+
+            <div class="light">Copyright © 2014 - 2015 Denis Pelli</div>
+            <div class="row">
+                <div class="col info-label">Design</div>
+                <div class="info-text">Denis Pelli<br/>Professor of Psychology and Neural Science at NYU<br/><a href="http://psych.nyu.edu/pelli">psych.nyu.edu/pelli</a></div>
+            </div>
+            <div class="row">
+                <div class="col info-label">Implementation</div>
+                <div class="info-text">Jugal Manjeshwar<br/><a href="http://jugalm.com/">jugalm.com</a></div>
+            </div>
+            <div class="row">
+                <div class="col info-label">UX Design</div>
+                <div class="info-text">Lauren Vale<br/><a href="mailto:lauren.vale@nyu.edu?subject=Emotion%20Tracker">lauren.vale@nyu.edu</a></div>
+            </div>
+            <div class="row">
+                <div class="col info-label">Citation</div>
+                <div class="info-text">Pelli, D. G. and Vale, L. (2014) Lingering pleasure in the experience of beauty. International Association for Empirical Aesthetics, New York, New York, August 22-24, 2014.<br/><a href="http://psych.nyu.edu/pelli/pubs/pelli2014iaea-beauty-poster.pdf">View poster</a></div>
+            </div>
+            <div style="width:100%;text-align:center; margin:40px 0 0;font-size:15px;opacity:0.6;border-top: 1px solid #d6d4e5;
+            padding-top:15px"><a href="http://emotiontracker.com">emotiontracker.com</a></div>
+            <button id="infoClose" class="btn btn-img2"><div class="ico-close"></div></button>
+        </div>
+
+        <div id="startPage" style="display:none;opacity:0">
+            <div class="page page-center start-wrapper" >
+                <div id="logo"></div>
+                <div>
+                    <input id="name" class="inpt" type="text" placeholder="Enter your name" />
+                </div>
+                <div>
+                    <select id="experimenterSel" class="inpt" >
+                        <option value="" selected disabled style="display:none">Getting experimenters...</option>
+                    </select>
+                </div>
+                <div>
+                    <input id="experiment" class="inpt" type="text" placeholder="Enter experiment name" style="display:none"/>
+                    <select id="experimentSel" class="inpt" >
+                        <option value="" selected disabled style="display:none">Choose an experimenter</option>
+                    </select>
+                </div>
+                <div>
+                    <input class="btn btn-primary btn-wide" id="startSubmit" type="submit" value="Continue"/>
+                </div>                   
+            </div>  
+            <button id="btnInfo"><div class="ico-info"></div></button>
+            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;">v1.2.4</div>
+            <button id="btnSettings"><div class="ico-settings"></div></button>
+        </div>
+
+        <div id="settingsPage" style="display:none;opacity:0">
+            <div id="settingsHeader" class="fixed-wrapper row page-header">
+                <div class="col"><h2>Settings</h2></div>
+                <div class="row col-right">
+                    <button class="btn btn-primary col" id="saveSubmit" style="display:none">Save & close</button>
+                    <button class="btn btn-success col" id="registerButton">Register</button>
+                    <button class="btn btn-img2 col" id="cancelSubmit"><div class="ico-close"></div></button>
+                </div>
+            </div>
+
+            <div class="settings-wrapper">
+                <div class="field">
+                    <label class="lbl">Use settings from</label>
+                    <div id="optionsMode" class="option-btn-group">
+                        <button id="modeDownloadBtn" class="btn btn-selected" data-name="server">Server</button>
+                        <button id="modePrivateBtn" class="btn" data-name="here">Here</button>
+                    </div> 
+                </div>
+
+                <div class="field">
+                    <label for="optExpter" class="lbl">Experimenter</label>
+                    <input id="optExpter" type="text" class="inpt" placeholder="" style="display:none"/>
+                    <select id="optExpterSel" class="inpt">
+                        <option value="" selected disabled style="display:none">Getting experimenters...</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="optExp" class="lbl">Name of experiment</label>
+                    <input id="optExp" type="text" class="inpt" placeholder="" style="display:none"/>
+                    <select id="optExpSel" class="inpt">
+                        <option value="" selected disabled style="display:none">Choose an experimenter</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="labquestURL" class="lbl">Labquest URL</label>
+                    <input id="labquestURL" type="text" class="inpt" placeholder="http://10.0.0.1" />
+                </div>
+
+                <div class="field">
+                    <label for="inputHighCriterion" class="lbl">High criterion (Pa)</label>
+                    <input id="inputHighCriterion" type="text" class="inpt" placeholder="" />
+                </div>
+                <div class="field">
+                    <label for="inputLowCriterion" class="lbl">Low criterion (Pa)</label>
+                    <input id="inputLowCriterion" type="text" class="inpt" placeholder="" />
+                </div>
+                <div class="field">
+                    <label for="inputStdCriterion" class="lbl">Std criterion (Pa)</label>
+                    <input id="inputStdCriterion" type="text" class="inpt" placeholder="" />
+                </div>
+                <div class="field">
+                    <label for="inputSetInterval" class="lbl">Settling interval (s)</label>
+                    <input id="inputSetInterval" type="text" class="inpt" placeholder="" />
+                </div>
+
+                
+                <div class="field">
+                    <label for="duration" class="lbl">Max stimulus duration <span class="light"> (s)</span></label>
+                    <input id="duration" type="text" value="120" class="inpt" pattern="[0-9]*"/>
+                </div>
+
+                <div class="field">
+                    <label for="postStimulusDuration" class="lbl">Experiment duration after end of stimulus<span class="light"> (s)</span></label>
+                    <input id="postStimulusDuration" type="text" value="120" class="inpt" pattern="[0-9]*"/>
+                </div>
+
+                <div class="field">
+                    <label for="setupSteps" class="lbl">Setup settings</label>
+                    <input id="setupSteps" type="text" value="2" class="inpt" pattern="[0-9]*" />
+                </div>
+
+                <div class="field">
+                    <label for="preSteps" class="lbl">Initial practice ratings</label>
+                    <input id="preSteps" type="text" value="2" class="inpt" pattern="[0-9]*" />
+                </div>
+
+                <div class="field">
+                    <label for="postSteps" class="lbl">Final practice ratings</label>
+                    <input id="postSteps" type="text" value="1" class="inpt" pattern="[0-9]*" />
+                </div>
+
+                <div class="field">
+                    <div class="field-check">
+                        <label for="skipRepeat" class="lbl">Skip setup and practice on repeat trials</label>
+                        <span class="chkbox"><input id="skipRepeat" type="checkbox" /></span>
+                    </div>
+                </div> 
+
+                <div class="field">
+                    <label for="repeatInterval" class="lbl">Max time between repeats <span class="light"> (s)</span></label>
+                    <input id="repeatInterval" type="text" value="1" class="inpt" pattern="[0-9]*" />
+                </div>
+
+                <div class="field">
+                    <div class="field-check">
+                        <label for="postInMedian" class="lbl">Include practice in reference</label>
+                        <span class="chkbox"><input id="postInMedian" type="checkbox" /></span>
+                    </div>
+                </div> 
+
+                <div class="field">
+                    <label for="ratingInterval" class="lbl">Sampling interval <span class="light"> (s)</span></label>
+                    <input id="ratingInterval" type="text" value="1" class="inpt" />
+                </div>
+
+                <div class="field">
+                    <label for="minRating" class="lbl">Minimum allowed rating</label>
+                    <input id="minRating" type="text" value="1" class="inpt" pattern="[0-9]*" />
+                </div>
+
+                <div class="field">
+                    <label class="lbl lbl-title">Feedback</label>
+                    <div class="field-check">
+                        <label for="feedBarbell" class="lbl">Barbell</label>
+                        <span class="chkbox"><input id="feedBarbell" type="checkbox" /></span>
+                    </div>
+                    <div class="field-check">
+                        <label for="feedRange" class="lbl">Bar</label>
+                        <span class="chkbox"><input id="feedRange" type="checkbox" /></span>
+                    </div>
+                    <div class="field-check">
+                        <label for="feedBarVaries" class="lbl">Bar color varies</label>
+                        <span class="chkbox"><input id="feedBarVaries" type="checkbox" /></span>
+                    </div>
+                    <div class="field-check">
+                        <label for="feedNumeric" class="lbl">Number</label>
+                        <span class="chkbox"><input id="feedNumeric" type="checkbox" /></span>
+                    </div>
+                    <div class="field-check">
+                        <label for="feedAuditory" class="lbl">Tone</label>
+                        <span class="chkbox"><input id="feedAuditory" type="checkbox" /></span>
+                    </div>
+                    <div class="field-check">
+                        <label for="feedTactile" class="lbl">Ticks</label>
+                        <span class="chkbox"><input id="feedTactile" type="checkbox" /></span>
+                    </div>
+
+                </div>    
+ 
+
+                <div class="field">
+                    <label class="lbl lbl-title">Knockout</label>
+                    <div>
+                        <div class="field-check">
+                            <label for="nameSelect" class="lbl">Enable name knockout</label>
+                            <span class="chkbox"><input id="nameSelect" type="checkbox" /></span>
+                        </div>
+
+                        <div class="field-check">
+                            <label for="moodSelect" class="lbl">Enable sad mood knockout</label>
+                            <span class="chkbox"><input id="moodSelect" type="checkbox" /></span>
+                        </div>
+
+                        <div class="field-check">
+                            <label for="crySelect" class="lbl">Enable crying knockout</label>
+                            <span class="chkbox"><input id="crySelect" type="checkbox" /></span>
+                        </div>
+
+                        <div class="field-check">
+                            <label for="knockOff" class="lbl">Stimulus offset turns off knockout</label>
+                            <span class="chkbox"><input id="knockOff" type="checkbox" /></span>
+                        </div>
+                    </div>
+
+                    <label for="moodDuration" class="lbl">Duration of mood induction <span class="light"> (s)</span></label>
+                    <input id="moodDuration" type="text" value="180" class="inpt"/>
+
+                    <label for="knockOnset" class="lbl">Knockout onset time <span class="light"> (s)</span></label>
+                    <input id="knockOnset" type="text" value="0" class="inpt"/>
+
+                    <label for="knockDuration" class="lbl">Knockout max duration <span class="light"> (s)</span></label>
+                    <input id="knockDuration" type="text" value="30" class="inpt"/>
+
+                </div>
+
+                <div class="field">
+                    <label class="lbl lbl-title">Music</label>
+                    <div>
+                        <div class="field-check">
+                            <label for="musicSelect" class="lbl">Enable music selection</label>
+                            <span class="chkbox"><input id="musicSelect" type="checkbox" /></span>
+                        </div>
+                    </div>
+                    <label for="durationWhiteNoise" class="lbl">Duration of white noise <span class="light"> (s)</span></label>
+                    <input id="durationWhiteNoise" type="text" value="120" class="inpt" pattern="[0-9]*"/>
+                </div>  
+
+                <div class="field">
+                    <label class="lbl">Fingers</label>
+                    <div id="optionsFingers" class="option-btn-group">
+                        <button id="modeThumbBtn" class="btn" data-value="0">Thumb and index </button>
+                        <button id="modeMiddleBtn" class="btn" data-value="1">Index and middle</button>
+                    </div> 
+                </div>
+                
+                <div class="field" style="margin-bottom:60px">
+                    <div class="field-check">
+                        <label for="storeData" class="lbl">Store data on server</label>
+                        <span class="chkbox"><input id="storeData" type="checkbox" /></span>
+                    </div>
+                </div>
+
+                <button id="modeUploadBtn" class="btn btn-primary btn-full">Upload settings</button>
+
+            </div>   
+
+            <div id="moodWarn" class="center-text-wrapper dialog-overlay" style="opacity:0;display:none">
+                <div class="center-text">
+                    <div class="dialog">
+                        <div class="dialog-title">Are you sure?</div>
+                        <div class="dialog-content">Please use sad mood induction with care.</div>
+                        <div class="dialog-buttons row">
+                            <button id="moodYes" class="dialog-btn" style="width:50%">Yes</button>
+                            <button id="moodNo" class="dialog-btn" style="width:50%">No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>   
+
+            <div id="audioWarn" class="center-text-wrapper dialog-overlay" style="opacity:0;display:none">
+                <div class="center-text">
+                    <div class="dialog">
+                        <div class="dialog-title">No audio</div>
+                        <div class="dialog-content">This device has limited audio capabilities. Try updating your software.</div>
+                        <div class="dialog-buttons row">
+                            <button id="audioOk" class="dialog-btn" style="width:100%">Ok</button>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+
+            <div id="storeWarn" class="center-text-wrapper dialog-overlay" style="opacity:0;display:none">
+                <div class="center-text">
+                    <div class="dialog">
+                        <div class="dialog-title">Caution</div>
+                        <div class="dialog-content">Needed only for group data.</div>
+                        <div class="dialog-buttons row">
+                            <button id="storeOk" class="dialog-btn" style="width:100%">Ok</button>
+                        </div>
+                    </div>
+                </div>
+            </div>     
+                         
+        </div>
+
+        <div id="modeRegisterPage" style="opacity:0;display:none;position: relative;">
+            <div id="registerHeader" class="fixed-wrapper row page-header">
+                <div class="col"><h2>Register <span style="font-size: 17px; opacity:0.9">as an experimenter</span></h2></div>
+                <div class="row col-right">
+                    <button class="btn btn-img col" id="registerClose"><div class="ico-close"></div></button>
+                </div>
+            </div>
+            <div class="settings-wrapper compressed">
+                <div class="field">
+                    <label for="registerName" class="lbl">Name</label>
+                    <input id="registerName" type="text" class="inpt" placeholder="Name of experimenter"/>
+                </div>
+                <div class="field">
+                    <label for="registerEmail" class="lbl">Email address</label>
+                    <input id="registerEmail" type="text" class="inpt"/>
+                </div>
+                <div class="field">
+                    <label for="registerPassword" class="lbl">Password</label>
+                    <input id="registerPassword" type="password" class="inpt"/>
+                </div>
+                <div class="field">
+                    <label for="registerCity" class="lbl">City</label>
+                    <input id="registerCity" type="text" class="inpt"/>
+                </div>
+                <div class="field">
+                    <label for="registerUniversity" class="lbl">University</label>
+                    <input id="registerUniversity" type="text" class="inpt" />
+                </div>
+            </div>
+            <input class="btn btn-primary btn-full" id="registerSubmit" type="submit" value="Register" style="position: absolute; bottom: 0"/>
+            <div class="status-container"></div>
+        </div> 
+
+        <div id="modeUploadPage" class="center-text-wrapper" style="opacity:0;display:none">
+            <div class="center-text">
+                <div style="width:240px; margin:0 auto">
+                    <h2>Upload settings</h2>
+                    <div>
+                        <input id="uploadExperiment" class="inpt" type="text" placeholder="Name of the experiment" />
+                    </div>
+                    <div>
+                        <input id="uploadEmail" class="inpt" type="email" placeholder="Experimenter email" />
+                    </div>
+
+                    <div>
+                        <input id="uploadPassword" class="inpt" type="password" placeholder="Password" />
+                    </div>
+                </div>
+
+            </div>
+            <button class="btn btn-primary btn-full" id="uploadSubmit" type="submit" style="bottom:0"/>Upload</button>
+            <button id="uploadClose" class="btn-img"><div  class="ico-close"></div></button>
+        </div> 
+
+        <div id="knockoutPage" style="display:none;opacity:0">
+            <div id="knockSelector" class="page page-center" style="height:180px;text-align:center;display:none;opacity:0">
+                <div style="font-size:22px;">Please select a condition</div>
+                <div class="knockSelBtns">
+                    <button class="btn" id="knockSkipBtn">Regular</button>
+                    <button class="btn" id="knockNameBtn">Name</button>
+                    <button class="btn" id="knockMoodBtn">Mood</button>
+                    <button class="btn" id="knockCryBtn">Cry</button>
+                </div>              
+            </div>
+
+            <div id="knockNameContainer">
+                <div id="knockNameTitlesCont">
+                    <div class="center-text-wrapper" style="max-width:600px;margin:0 auto;padding:30px;box-sizing:border-box;">
+                        <div class="center-text">
+                            <div id="knockNameTitles"></div>
+                            <div id="knockNameTap">Tap to continue</div>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="knockNameForm" enctype="multipart/form-data" style="display:none">
+                    <input id="knockFileEl" name="file" type="file" accept="video/*" style="display:none"/>
+                </form>
+                <div id="knockRecordings">
+                </div>
+                <div id="knockNameMessages">
+                </div>
+                <div class="fixed-btn-wrapper">
+                    <div>
+                        <button class="btn btn-success" id="knockNameAddBtn">Add</button>
+                        <button class="btn btn-primary" id="knockNameEndBtn">Continue</button>
+                    </div>
+                </div>
+                
+            </div>
+            
+        </div>
+
+        <div id="moodPage" style="display:none;opacity:0">
+            <div class="center-text-wrapper">
+                <div class="center-text">
+                    <svg width="100" height="100" viewbox="0 0 100 100" class="timer">
+                      <path id="border" transform="translate(50, 50)"/>
+                      <path id="loader" transform="translate(50, 50) scale(.84)"/>
+                    </svg> 
+                    <div id="moodTitles"></div>
+                    <div id="moodTap">Tap when ready</div>           
+                </div>     
+            </div>          
+        </div>
+
+        <div id="calibrationPage" style="display:none;opacity:0">
+            <div id="calibTitle" class="title"></div>
+            <div id="calibTracker"></div>
+            <div class="rangeFeedback"></div>
+            <div class="numericFeedback"></div>
+            <div id="calibInstr"></div>
+
+            <div id="calibTitlesCont" class="center-text-wrapper">
+                <div class="center-text">
+                    <div id="calibTitles"></div>
+                    <div id="calibTap">Tap to continue</div>           
+                </div>
+            </div>
+        </div>
+
+        <div id="stimulusPage" style="display:none;opacity:0">
+            <div id="stimulusSong">
+                <div style="position:relative">
+                    <input type="text" class="inpt" style="" id="songInput" placeholder="Find the music you enjoy most"/>
+                    <div id="songSearchBtn"></div>
+                    <div id="songLoader" class="loader-small"></div>
+                </div>
+                <div id="songList"></div>
+            </div>
+
+            <div class="row">
+                <div class="piece img border"></div>
+            </div>
+            <div class="row">
+                <div class="piece img border"></div>
+                <div></div>
+                <div></div>
+            </div>
+            <div class="row">
+                <div class="piece img border"></div>
+                <div></div>
+                <div></div>
+            </div>
+            <div id="stimulusOther">
+                <div class="song" data-uri="spotify:track:7lxB9FziYc80prwwiUtAZc">
+                    <div class="song-duration">324</div>
+                    <div class="song-title">Just A little Bit Of Love</div>
+                    <span class="song-artist">Celine Dion</span>
+                    <span class="song-album">LET'S TALK ABOUT LOVE</span>
+                </div>
+                <div class="song" data-uri="whitenoise">
+                    <div class="song-title">White Noise</div>
+                </div>         
+            </div>
+            <div id="stimulusSelect" class="row">
+                <div class="col stimulus-final-text"><span class="stimulus-final-warning">This song will be silenced after the maximum play time. </span><!-- You will be rating pleasure for <span id="stimulusFinalDuration">720</span> seconds. --></div>
+                <div class="col-right"><button id="stimulusSubmit" class="btn btn-primary" style="width: 100px;">Continue</button></div>           
+            </div>
+
+        </div>
+
+        <div id="musicPage" style="display:none;opacity:0">
+            <div class="center-text-wrapper"> 
+                <div class="center-text">
+                    <span class="loader-small"></span>
+                    <span class="light-emph">Queueing your music...</span>
+                    <div id="musicTime">0:0</div>
+                </div>
+            </div>            
+        </div>
+
+        <div id="experimentPage" style="display:none; opacity:0">
+            <div class="feedbacks">
+                <div class="barbellFeedback"></div>
+                <div class="rangeFeedback"></div>
+                <div class="numericFeedback"></div>
+            </div>
+
+            <div class="center-text-wrapper">
+                <div class="center-text">
+                    <div id="expTitle"></div>
+                    <div id="expTap">Tap to continue.</div>   
+                </div>
+            </div>
+
+            <div id="expContactLoss">
+                <div class="center-text-wrapper">
+                    <div class="center-text">
+                        <div>I can't feel you. Please press harder.</div>
+                        <div id="contactNote">If that doesn't work, release both fingers and try making contact again.</div>   
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="completePage" style="display:none; opacity:0">
+            <div class="center-text-wrapper">
+                <div class="center-text">
+                    <div id="completeSurvey">
+                        <div class="strong survey-wrapper">During this trial, did you get the feeling of beauty from the object?</div>
+                        <div class="survey-wrapper">
+                            <button id="pleasureSurvey3" class="survey-btn" value="3">Yes, definitely</button>
+                            <button id="pleasureSurvey2" class="survey-btn" value="2">Perhaps yes</button>
+                            <button id="pleasureSurvey1" class="survey-btn" value="1">Perhaps no</button>
+                            <button id="pleasureSurvey0" class="survey-btn" value="0">Definitely not</button>
+                        </div>
+
+                        <button id="completeSurveyTap">Tap here to continue</button>
+                    </div>
+
+                    <div id="completeMessages" style="display:none;opacity:0">
+                        <div id="completeThank" class="emph" style="opacity:0">Thank You!</div>
+                        <div id="completeStatusContainer">
+                            <span class="loader-small"></span>
+                            <span id="completeStatus">Sending data...</span>                 
+                        </div>                           
+                    </div>
+
+<!--                         <div id="completeMessage" style="display:none; opacity:0">
+                        <div class="emph">Thank you!</div>
+                        <div id="completeStatus"></div>
+                    </div> -->
+                </div>
+            </div>
+            <div id="completeButtons" style="display:none">
+                <a id="btnReSend" class="btn btn-full" href="#">Re-send data as e-mail</a>
+                <a id="btnRestart" class="btn btn-full btn-success">Start new experiment</a>
+            </div>
+        </div>
+
+        <div id="changeOrient" style="display:none">
+            <div class="landscapeText" style="top:120px">Rotate your device</div>
+            <div id="landscape"></div>
+            <div class="landscapeText" style="bottom:120px">to landscape mode</div>
+        </div>
+
+        <script src="../js/vendor/jquery-2.1.0.min.js"></script>
+        <script src="../js/vendor/raphael-min.js"></script>
+        <script src="../js/helper.js"></script>
+        <script src="../js/plugins.js"></script>
+        <script src="../js/util.js"></script>
+        <script src="labquest.js"></script>
+        
+
+<script type="text/plain" id="data_tmpl">Experiment:,<%=experiment + ((aborted == true) ? ',ABORTED!' : '')%>\nSettings from:,<%=optionsMode%>\nObserver:,<%=name%>\nEmail to:,<%=options.email%>\nApp:,<%=url%>\nApp version:,<%=appVersion%>\nApp created:,<%=appCreateDate%>\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime/1000)%>\nTime (s):,<%=times.join(",")%>\nRating (<%=options.minRating%> to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=deviceInfo.type%>\nModel:,<%=deviceInfo.model%>\nOS:,<%=os%>\nBrowser:,<%=browser%>\nLocal storage:,<%=localStore%>\n"Screen (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (lat., long.):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nNear:,"<%=location.near%>"\nInterval between ratings (s):,<%=options.ratingInterval%>\nMinimum allowed rating:,<%=options.minRating%>\nMaximum stimulus duration (s):,<%=options.duration%>\nExperiment duration after end of stimulus (s):,<%=options.postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (<%=options.minRating%> to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nSkip setup and practice on repeat trials:,<%=options.skipRepeat%>\nMax time between repeats (s):,<%=options.repeatInterval%>\nFeedback barbell:,<%=options.feedback.barbell%>\nFeedback bar:,<%=options.feedback.range%>\nFeedback bar color varies:,<%=options.feedback.barVaries%>\nFeedback number:,<%=options.feedback.numeric%>\nFeedback tone:,<%=options.feedback.auditory%>\nFeedback ticks:,<%=options.feedback.tactile%>\nInclude practice in reference:,<%=options.postInMedian%>\nKnockout:,<%=knockout%>\nEnable name knockout:,<%=options.nameSelect%>\nEnable sad mood knockout:,<%=options.moodSelect%>\nEnable crying knockout:,<%=options.crySelect%>\nStimulus offset turns off knockout:,<%=options.knockOff%>\nDuration of mood induction (s):,<%=options.moodDuration%>\nKnockout onset time:,<%=options.knockOnset%>\nKnockout max duration:,<%=options.knockDuration%>\nEnable music selection:,<%=options.musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\nDuration of white noise (s):,<%=options.durationWhiteNoise%>\nFingers:,<%=(options.fingers === 0 ) ? 'Thumb and index' : 'Index and middle'%>\nStore data on server:,<%=options.storeData%>\n</script>       
+
+    </body>
+</html>

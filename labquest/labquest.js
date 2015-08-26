@@ -110,46 +110,34 @@ else {
     }
 
     var Page = View.extend({
-        shown: true,
         limitOrient: true,
-        el: '',
+        el: undefined,
 
         init: function(start) {
             this._super();
             _bindAll(this, 'show', 'hide');
-            if(!start) {
-                this.shown = false;
-            }
         },
 
-        show: function(callback){
-            callback = callback || function(){};
-            if(!this.shown){
-                this.shown = true;
+        shown: function() {
+            return !($(this.el).css('display') === 'none' && +$(this.el).css('opacity') === 0);
+        },
 
-                if(!this.render()){
-                    $(this.el).css('display', 'block');
-                    $(this.el).animate({opacity:1}, 300, _bind(function() {
-                        this.post_render();
-                        callback();
-                    }, this));
-                }
-            
-            }
-
+        show: function(callback) {
+            this.render();
+            $(this.el).css('display', 'block');
+            $(this.el).animate({opacity:1}, 300, _bind(function() {
+                this.post_render();
+                callback();
+            }, this));
         },
 
         hide: function(callback){
-            if(this.shown){
-                this.shown = false;
-
-                this.pre_conceal();
-                $(this.el).animate({opacity:0}, 100, _bind(function(){
-                    this.conceal();
-                    callback();
-                    $(this.el).css('display', 'none');
-                }, this));
-            }
+            this.pre_conceal();
+            $(this.el).animate({opacity:0}, 100, _bind(function(){
+                $(this.el).css('display', 'none');
+                this.conceal();
+                callback();
+            }, this));
         },
 
         conceal: function(){},
@@ -260,10 +248,10 @@ else {
         currentPlaying: null,
 
         sounds: {
-            contactLoss: new Howl({urls:['alerts/contact_loss.mp3'], volume: 0.2}),
-            contact: new Howl({urls:['alerts/contact.mp3'], volume: 0.5}),
-            done: new Howl({urls:['alerts/done.mp3']}),
-            click: new Howl({urls:['alerts/click.mp3'], volume: 0.9})
+            contactLoss: new Howl({urls:['../alerts/contact_loss.mp3'], volume: 0.2}),
+            contact: new Howl({urls:['../alerts/contact.mp3'], volume: 0.5}),
+            done: new Howl({urls:['../alerts/done.mp3']}),
+            click: new Howl({urls:['../alerts/click.mp3'], volume: 0.9})
         },
 
         init: function(){
@@ -611,6 +599,47 @@ else {
             }
         }
     }
+
+    var slides = Page.extend({
+        id: 'slidesPage',
+        slides: [
+            'Slide 1',
+            'Slide 2'
+        ],
+        narrate: true,
+        narrateTransition: true,
+        init: function(options) {
+            this._super();
+            _extend(this, options || {});
+            _bindAll(this, 'start', 'onActivate', 'onPause');
+        },
+
+        start: function() {
+            var self = this;
+            $(self.el).swipeshow({
+                autostart: false,
+                initial: 0,
+                speed: 700,
+                friction: 0.3,
+                onactivate: self.onActivate,
+                onpause: self.onPause 
+            });
+        },
+
+        onActivate: function(currSlide, currSlideIndex, prevSlide, prevSlideIndex) {
+            console.log(currSlide, currSlideIndex);
+        },
+        onPause: function() {},
+
+        render: function() {
+            var $slidesContainer = $(this.el).find('ul.slides');
+            console.log($slidesContainer);
+            this.slides.forEach(function(slideText) {
+                $slidesContainer.append('<div class="slide">' + slideText + '</div>');
+            });
+            this.start();
+        }
+    });
 
     var experimentCollection = new SelectCollection('experiment', 'http://54.172.59.119/exps', {v: '_id', t: 'exp'});
     var experimenterCollection = new SelectCollection('experimenter', 'http://54.172.59.119/users', {v: '_id', t: 'name'});
@@ -1162,6 +1191,7 @@ else {
             $(this.minRating).val(options.minRating);
 
             $(this.labquestURL).val(options.labquestURL);
+
             $(this.inputHighCriterion).val(options.input.highCriterion);
             $(this.inputLowCriterion).val(options.input.lowCriterion);
             $(this.inputStdCriterion).val(options.input.stdCriterion);
@@ -1418,7 +1448,7 @@ else {
                     $(settingsPage.exp).val(config.experiment);
                 }
                 config.totalDuration = config.options.duration + config.options.postStimulusDuration;
-                PageController.transition("knockout");
+                PageController.transition("slides");
             }
 
         },
@@ -1549,11 +1579,11 @@ else {
             this.nameMessages = this.el.find("#knockNameMessages");
             this.recs = [];
             this.cries = [            
-                new Howl({urls:['alerts/baby-crying-01.mp3']}),
-                new Howl({urls:['alerts/baby-crying-02.mp3']}),
-                new Howl({urls:['alerts/baby-crying-03.mp3']}),
-                new Howl({urls:['alerts/baby-crying-04.mp3']}),
-                new Howl({urls:['alerts/baby-crying-05.mp3']})
+                new Howl({urls:['../alerts/baby-crying-01.mp3']}),
+                new Howl({urls:['../alerts/baby-crying-02.mp3']}),
+                new Howl({urls:['../alerts/baby-crying-03.mp3']}),
+                new Howl({urls:['../alerts/baby-crying-04.mp3']}),
+                new Howl({urls:['../alerts/baby-crying-05.mp3']})
             ];
             this.nameAlert = null;
             this.titles = [
@@ -1968,7 +1998,7 @@ else {
         init: function(){
             this._super();
             _bindAll(this, 'playWhiteNoise', 'stop', 'onMessage', 'playSong', 'stopSong', 'updateWaitTime', 'startBuffering');
-            this.catcher = new Worker('js/audiocatcher.js');
+            this.catcher = new Worker('../js/audiocatcher.js');
 
             this.waitTime = this.el.find("#musicTime");
             this.timeTimeout = null;
@@ -3519,6 +3549,7 @@ else {
     var PageController = new (Class.extend({
 
         pages: {
+            "slides" : new slides(),
             "start" : new startPage(),
             "calibration": new calibrationPage(),
             "knockout": new knockoutPage(),
@@ -3540,12 +3571,13 @@ else {
         transition: function(pageName, callback){
             var page = this.pages[pageName];
             callback = callback || function(){}
-            
+            console.log(page.el);
             if(page){
                 this.curPage.hide(_bind(function(){
                     this.curPage = page;
                     this.curPageName = pageName;
                     this.handleResize();
+                    console.log(page)
                     page.show(_bind(callback, page));
                 }, this));
             }

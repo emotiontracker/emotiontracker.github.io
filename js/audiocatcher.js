@@ -2,7 +2,7 @@ var socket;
 
 self.onmessage = function(e){
 	if(e.data.type == "req"){
-		socket = new WebSocket("ws://54.208.237.243:9000");
+		socket = new WebSocket("ws://52.1.248.212:9000");
 		socket.binaryType = "arraybuffer";
 
 		socket.onmessage = function(event){

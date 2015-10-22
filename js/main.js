@@ -4,6 +4,8 @@ function decimalPlaces(number) {
   return ((+number).toFixed(20)).replace(/^-?\d*\.?|0+$/g, '').length;
 }
 
+function padN(n) { return ("0" + n).slice(-2); }
+
 function drawTimer(el, dur) {
 
     var loader = el.find('#loader'),
@@ -2806,7 +2808,24 @@ else {
 
     var generateExperimentString = function(){
         var time = config.experimentTime;
-        var subjectParams = [config.experiment + ((config.aborted == true) ? ',ABORTED!' : ''), config.name, time.getFullYear(), time.getMonth() + 1, time.getDate(), time.getHours(), time.getMinutes(), time.getSeconds()];
+        //var subjectParams = [config.experiment + ((config.aborted == true) ? ',ABORTED!' : ''), config.name, time.getFullYear(), time.getMonth() + 1, time.getDate(), time.getHours(), time.getMinutes(), time.getSeconds()];
+        //
+        // #################################################################
+        // Hormet Yiltiz Thu Oct 22 16:36:55 EDT 2015
+        // pad in the date as asked by Aenne
+        //
+        // This could be a quick hack to pad in the leading zeros
+        // ("0" + this.getDate()).slice(-2)
+        // ("0" + (this.getMonth() + 1)).slice(-2)
+        //
+        //
+        // A better way would be using the standard toISOString() function
+        // var d = new Date();
+        // var n = d.toISOString();
+        // #################################################################
+        //
+        var subjectParams = [config.experiment + ((config.aborted == true) ? ',ABORTED!' : ''), config.name, time.getFullYear(), padN(time.getMonth() + 1) , padN(time.getDate()), padN(time.getHours()), padN(time.getMinutes()), padN(time.getSeconds())];
+        //var subjectParams = [config.experiment + ((config.aborted == true) ? ',ABORTED!' : ''), config.name, time.toISOString()];
         return subjectParams.join('.');        
     }
 

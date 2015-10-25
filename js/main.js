@@ -2441,7 +2441,8 @@ $(function(){
           instr: 'Using two fingers, drag the pink dots as far apart as comfortably possible.',
           configVar: 'Max'
         }, {
-          title: 'Indicate <span class="strong">minimum</span> pleasure.',
+
+          title: 'Indicate <span class="strong">neither pleasure nor displeasure</span> pleasure.',
           instr: 'Using two fingers, drag the pink dots to whatever spread is most natural, requiring least effort.',
           configVar: 'Min'
         }],
@@ -2550,7 +2551,7 @@ $(function(){
                   '​You will <b>indicate maximum pleasure by spreading your fingers as far apart as you can comfortably maintain</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.'
                 ],
                 mid: [
-                  'Next, indicate <b>minimum</b> pleasure by <b>relaxing</b> your two fingers to whatever spread feels <b>most natural and requires least effort</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.'
+                  'Next, indicate <b>neither pleasure nor displeasure</b> pleasure by <b>relaxing</b> your two fingers to whatever spread feels <b>most natural and requires least effort</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.'
                 ],
                 end:[],
                 afterMid: function(){

@@ -553,8 +553,6 @@ else {
         var extra = !col ? '' : '\ncolumn: ' + col;
         extra += !error ? '' : '\nerror: ' + error;
 
-        // You can view the information in an alert to see things working like this:
-        console.log("Error: " + msg + "\nurl: " + url + "\nline: " + line + extra);
         body = msg + "\nurl: " + url + "\nline: " + line + extra + '\n\n';
         body += JSON.stringify(config.generateDataObject, null, 2) + '\n\n';
         body += JSON.stringify(config.options, null, 2);
@@ -1341,7 +1339,7 @@ else {
                 }
             });
 
-            thi.name.on("change", this.removeInvalidHighlight);
+            this.name.on("change", this.removeInvalidHighlight);
             this.experiment.on("change", this.removeInvalidHighlight);
 
             new MBP.fastButton(this.submitButton, this.handleSubmit);

@@ -13,9 +13,9 @@ function drawTimer(el, dur) {
         t = ( dur * 1000 ) / 360;
 
     (function draw() {
-      alpha++;
-      alpha %= 360;
-      var r = ( alpha * pi / 180 ),
+        alpha++;
+        alpha %= 360;
+        var r = ( alpha * pi / 180 ),
         x = Math.sin( r ) * 50,
         y = Math.cos( r ) * - 50,
         mid = ( alpha > 180 ) ? 1 : 0,
@@ -24,12 +24,12 @@ function drawTimer(el, dur) {
             x  + ' ' +
             y  + ' z';
      
-      loader.setAttribute( 'd', anim );
-      border.setAttribute( 'd', anim );
+        loader.setAttribute( 'd', anim );
+        border.setAttribute( 'd', anim );
       
-      if(alpha !== 0){
-        setTimeout(draw, t); // Redraw
-      }
+        if(alpha !== 0){
+            setTimeout(draw, t); // Redraw
+        }
       
     })();
 }
@@ -91,7 +91,10 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.2.4', STORELOCAL = localStorageTest();
+    var VERSION = '1.2.5', STORELOCAL = localStorageTest();
+
+    var EMOTION_DATA_HOST = 'http://52.1.23.102';
+    var EMOTION_RECORDER_HOST = 'http://pleasure-back-env-pgjp3eennr.elasticbeanstalk.com';
 
     if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
         localStorage.clear();
@@ -511,6 +514,53 @@ else {
         })();
     }
 
+    function sendMail(to, subject, body, callback) {
+        callback = callback || function(){};
+        var msg = {
+                "key": "DIE-Gm5EhIT4k_u8R-VhhQ",
+                "message": {
+                    "text": body,
+                    "subject": '[Error] ' + (subject || ''),
+                    "from_email": "tracker@emotiontracker.com",
+                    "from_name": "Emotion Tracker",
+                    "to": [
+                        {
+                            "email": to,
+                            "type": "to"
+                        }
+                    ],
+                    "important": true
+                },
+                "async": false
+        }   
+
+        $.ajax({
+            type: "POST",
+            url: "https://mandrillapp.com/api/1.0/messages/send.json",
+            data: JSON.stringify(msg),
+            timeout: 10000,
+            success: function(res){
+                callback(res);
+            },
+            error: function(res) {
+                callback(res);
+            }
+        });   
+    }
+
+
+    window.onerror = function(msg, url, line, col, error) {
+        var extra = !col ? '' : '\ncolumn: ' + col;
+        extra += !error ? '' : '\nerror: ' + error;
+
+        // You can view the information in an alert to see things working like this:
+        console.log("Error: " + msg + "\nurl: " + url + "\nline: " + line + extra);
+        body = msg + "\nurl: " + url + "\nline: " + line + extra + '\n\n';
+        body += JSON.stringify(config.generateDataObject, null, 2) + '\n\n';
+        body += JSON.stringify(config.options, null, 2);
+        sendMail("jugalm9@gmail.com", msg, body);
+    };
+
     function saveLocation(location) {
         config.location.lat = location.coords.latitude;
         config.location.long = location.coords.longitude;
@@ -605,8 +655,8 @@ else {
         }
     }
 
-    var experimentCollection = new SelectCollection('experiment', 'http://54.172.59.119/exps', {v: '_id', t: 'exp'});
-    var experimenterCollection = new SelectCollection('experimenter', 'http://54.172.59.119/users', {v: '_id', t: 'name'});
+    var experimentCollection = new SelectCollection('experiment', EMOTION_DATA_HOST + '/exps', {v: '_id', t: 'exp'});
+    var experimenterCollection = new SelectCollection('experimenter', EMOTION_DATA_HOST + '/users', {v: '_id', t: 'name'});
 
     var settingsPage = new (Page.extend({
         id: 'settingsPage',
@@ -804,9 +854,6 @@ else {
 
 
             this.modeUpload.find('input').on('change', this.resetUploadButton);
-/*            $(this.uploadExp).on('change', this.resetUploadButton);
-            $(this.uploadEmail).on('change', this.resetUploadButton);
-            $(this.uploadPassword).on('change', this.resetUploadButton);*/
             new MBP.fastButton(this.uploadSubmit, this.uploadOptions);
             
             $("#audioOk").on('touchstart', function(e){
@@ -930,7 +977,7 @@ else {
             $(this.registerSubmit).val('Registering...').prop('disabled', true);
             var self = this;
             $.ajax({
-                url:'http://54.172.59.119/register',
+                url:EMOTION_DATA_HOST + '/register',
                 type: 'POST',
                 data: JSON.stringify(vals),
                 contentType: 'application/json; charset=utf-8',
@@ -985,7 +1032,7 @@ else {
             var self = this;
             var updatedOptions = self.generateOptions();
             $.ajax({
-                url:'http://54.172.59.119/upload',
+                url:EMOTION_DATA_HOST + '/upload',
                 type: 'POST',
                 data: JSON.stringify({e: exp, email: email, password: password, o: updatedOptions}),
                 contentType: 'application/json; charset=utf-8',
@@ -1294,7 +1341,7 @@ else {
                 }
             });
 
-            this.name.on("change", this.removeInvalidHighlight);
+            thi.name.on("change", this.removeInvalidHighlight);
             this.experiment.on("change", this.removeInvalidHighlight);
 
             new MBP.fastButton(this.submitButton, this.handleSubmit);
@@ -1464,7 +1511,7 @@ else {
         }
         else {
             $.ajax({
-                url:'http://54.172.59.119/download?id=' + id,
+                url:EMOTION_DATA_HOST + '/download?id=' + id,
                 type: 'GET',
                 dataType: 'json',
                 timeout: 8000,
@@ -1500,8 +1547,7 @@ else {
     var knockoutPage = Page.extend({
         id: 'knockoutPage',
         limitOrient: false,
-        serverUrl: 'http://pleasure-back-env-pgjp3eennr.elasticbeanstalk.com',
-        //serverUrl: 'http://10.0.0.24:8081',
+        serverUrl: EMOTION_RECORDER_HOST,
 
         init: function(){
             this._super();
@@ -3447,7 +3493,7 @@ else {
 
                 if(config.optionsMode === 'server' && config.options.storeData){
                     $.ajax({
-                        url:'http://54.172.59.119/store',
+                        url:EMOTION_DATA_HOST + '/store',
                         type: 'POST',
                         data: JSON.stringify(config.generateDataObject()),
                         contentType: 'application/json; charset=utf-8',

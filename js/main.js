@@ -80,37 +80,30 @@ $(function(){
 if(!isTouchDevice()) {
 
     if(navigator.platform.toUpperCase().indexOf('MAC')>=0){
-        $("#macDownload").css({display:'block'});
+        $('#macDownload').css({display:'block'});
     }
-    $("#welcomePage").css({display:'block'}).velocity({opacity:1}, 600);
+    $('#welcomePage').css({display:'block'}).velocity({opacity:1}, 600);
 }
 else {
 
-    $("#startPage").css({display:'block', opacity:1});
+    $('#startPage').css({display:'block', opacity:1});
 
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.2.5', STORELOCAL = localStorageTest();
+    var VERSION = '1.2.6', STORELOCAL = localStorageTest();
 
     var EMOTION_DATA_HOST = 'http://52.1.23.102';
     var EMOTION_RECORDER_HOST = 'http://pleasure-back-env-pgjp3eennr.elasticbeanstalk.com';
+    var MANDRILL_KEY = 'DIE-Gm5EhIT4k_u8R-VhhQ';
 
-    if(!localStorage["VERSION"] || localStorage["VERSION"] !== VERSION) {
+    if(!localStorage['VERSION'] || localStorage['VERSION'] !== VERSION) {
         localStorage.clear();
         if(STORELOCAL) {
-            localStorage["VERSION"] = VERSION;
+            localStorage['VERSION'] = VERSION;
         }
     }
 
-    function utf8_to_b64( str ) {
-        return window.btoa(unescape(encodeURIComponent( str )));
-    }
-
-    function shuffle(o){
-        for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
-        return o;
-    }
 
     var Page = View.extend({
         shown: true,
@@ -296,8 +289,8 @@ else {
         name: '',
         experiment: '',
         experimentTime: '',
-        experimenterId: localStorage["experimenterId"],
-        experimentId: localStorage["experimentId"],
+        experimenterId: localStorage['experimenterId'],
+        experimentId: localStorage['experimentId'],
         absoluteTime: 0,
         durationActual: 0,
         setupMaxDist: [],
@@ -340,7 +333,7 @@ else {
         browser: ua_parser.getBrowser().name + ' ' + ua_parser.getBrowser().major,
         localStore: STORELOCAL,
         
-        optionsMode: "server",
+        optionsMode: 'server',
         options:{},
         serverOptions: {},
 
@@ -439,9 +432,9 @@ else {
                 storeData: false
             };
 
-            if(localStorage["options"]){
+            if(localStorage['options']){
                 try {
-                    this.options = JSON.parse(localStorage["options"]);
+                    this.options = JSON.parse(localStorage['options']);
                 } catch(e){}
             }
         },
@@ -487,7 +480,7 @@ else {
                 config.knockout = 'Name';
             }
 
-            return tmpl("data_tmpl", this);
+            return tmpl('data_tmpl', this);
         }
     };
 
@@ -517,26 +510,26 @@ else {
     function sendMail(to, subject, body, callback) {
         callback = callback || function(){};
         var msg = {
-                "key": "DIE-Gm5EhIT4k_u8R-VhhQ",
-                "message": {
-                    "text": body,
-                    "subject": '[Error] ' + (subject || ''),
-                    "from_email": "tracker@emotiontracker.com",
-                    "from_name": "Emotion Tracker",
-                    "to": [
+                'key': MANDRILL_KEY,
+                'message': {
+                    'text': body,
+                    'subject': '[Error] ' + (subject || ''),
+                    'from_email': 'tracker@emotiontracker.com',
+                    'from_name': 'Emotion Tracker',
+                    'to': [
                         {
-                            "email": to,
-                            "type": "to"
+                            'email': to,
+                            'type': 'to'
                         }
                     ],
-                    "important": true
+                    'important': true
                 },
-                "async": false
+                'async': false
         }   
 
         $.ajax({
-            type: "POST",
-            url: "https://mandrillapp.com/api/1.0/messages/send.json",
+            type: 'POST',
+            url: 'https://mandrillapp.com/api/1.0/messages/send.json',
             data: JSON.stringify(msg),
             timeout: 10000,
             success: function(res){
@@ -2867,7 +2860,7 @@ else {
 
     var mailDataMandrill = function(data, callback){
         var msg = {
-                "key": "DIE-Gm5EhIT4k_u8R-VhhQ",
+                "key": MANDRILL_KEY,
                 "message": {
                     "html": generateMailBody(),
                     "subject": '[Emotion Data] ' + generateExperimentString(),

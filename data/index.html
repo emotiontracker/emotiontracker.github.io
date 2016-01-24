@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pleasure data</title>
+    <title>Emotion data</title>
     <meta name="description" content="">
     <meta name="HandheldFriendly" content="True">
     <meta name="MobileOptimized" content="320">
@@ -13,11 +13,40 @@
     <link rel="stylesheet" href="../css/main.css">
 
     <style>
-        h1{
-            font-size:32px;
-            font-weight:lighter;
-            color:#5B529E;
-            margin-bottom:10px;
+        body{
+            font-family: "Helvetica Neue","Helvetica",Arial,sans-serif;
+        }
+
+        .center-text-wrapper {
+            background-color:#5F55A1;
+            background-image: -o-linear-gradient(bottom, #384594 0%, #5F55A1 100%);
+            background-image: -moz-linear-gradient(bottom, #384594 0%, #5F55A1 100%);
+            background-image: -webkit-linear-gradient(bottom, #384594 0%, #5F55A1 100%);
+            background-image: -ms-linear-gradient(bottom, #384594 0%, #5F55A1 100%);
+            background-image: linear-gradient(to bottom, #384594 0%, #5F55A1 100%);    
+        }
+
+        .header{
+            position:relative;
+            text-align:center;
+            padding-bottom: 80px;          
+        }
+
+        .logo {
+            background-image: url(../img/logo_d.png);
+            width: 128px;
+            height: 96px;
+            position: absolute;
+            top:-110px;
+            left: 50%;
+            margin-left: -64px;
+        }
+
+        h1.title{
+            font-size:28px;
+            font-weight:normal;
+            color:#fff;
+            color:rgba(255,255,255,0.8);
         }
 
         .btn{
@@ -26,116 +55,749 @@
         }
 
         .msg-error{
-            padding: 8px 20px;
+            padding: 8px 10px;
             border:none;
             border-radius:3px;
+            display:block;
         }
 
         a.btn{
             display:inline-block;
             padding: 10px 50px;
         }
+
+        .content {
+            width: 300px;
+            margin: 0 auto;
+            text-align:left;
+        }
+
+        .box{
+            color:#5b5b65;
+            text-shadow: 0 1px 0 #fff;
+            -webkit-box-sizing: border-box;
+               -moz-box-sizing: border-box;
+                    box-sizing: border-box;
+            background-color:#F5F5F7;
+            box-shadow: inset 0 1px 0 #fff, 0 2px 6px rgba(0,0,0,0.2);
+            border-radius: 6px;
+        }
+
+        .box-wrapper {
+            padding: 30px 30px 20px 30px;
+        }
+
+        #expCount {
+            font-size: 12px;
+            font-weight:bold;
+        }
+
+        .count {
+            font-weight:bold;
+        }
+
+        .inpt, .inpt-field {
+            width: 100%;
+            height: 40px;
+            box-sizing: border-box;
+            background: #fff;
+            padding: 0 6px 0;
+            font-size: 15px;
+            color: #000;
+            border: 1px solid #cececf;
+            border-top-color: #b5b5b6;
+            border-bottom-color: #dededf;
+            box-shadow: inset 0 1px 1px rgba(124,124,127,0.1),0 1px 0 rgba(255,255,255,0.7),0 0 4px rgba(86,149,219,0);
+            border-radius: 4px;
+        }
+        select.inpt{
+            margin-left: 0;
+        }
+
+        .btn{
+            width: 100%;
+            -webkit-box-sizing: border-box;
+               -moz-box-sizing: border-box;
+                    box-sizing: border-box;
+            margin-bottom: 0;
+            text-align: left;
+            font-size:15px;
+            font-weight:bold;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            padding: 12px;
+        }
+
+        .btn-primary {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            margin:0;
+        }
+
+        .inpt-field {
+            padding-right: 0;
+            margin-bottom: 10px;
+        }
+
+        .inpt-field .inpt {
+            margin:0;
+            height: 38px;
+            margin-left: 5px;
+            border:none;
+            -webkit-box-shadow: none;
+                  box-shadow: none;
+        }
+
+/*         .inpt-field:focus, .inpt-field:active, select:active, select:focus{
+    border-color: #637ce9;
+    box-shadow: 0 0 4px #4e67d3;
+    position: relative;
+    z-index: 99;
+}
+ */
+        .inpt-field .inpt:active, .inpt-field .inpt:focus {
+            outline: 0;
+            border: none !important;
+            box-shadow: none;
+        }
+
+
+        .inpt-field-group .inpt-field:first-child{
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            margin-bottom:0;
+        }
+
+        .inpt-field-group .inpt-field:last-child{
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            border-top: none;
+            box-shadow: none;
+        }
+
+        .inpt-field-sep {
+            width:0px;
+            height:38px;
+            margin: 0 10px;
+            border-left: 1px solid #ddd;
+        }
+
+        .inpt-sep{
+            color:#bbb;
+            line-height: 34px;
+            font-size: 20px;
+            margin: 0;
+            position: relative;
+            top:2px;
+            
+        }
+
+        .inpt-label {
+            font-size:0.8em;
+            color:#aaa;
+            line-height:38px;
+        }
+
+        .inpt-ico {
+            display: inline-block;
+            background-repeat: no-repeat;
+        }
+
+        .inpt-field .inpt-ico {
+            position: relative;
+            top: 9px;
+            left: 2px;
+            opacity: 0.2;
+            width:20px;
+            height:20px;
+            background-size: 20px 20px;  
+            margin-right: 5px;
+        }
+
+        .inpt-btn {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            width:50px;
+            margin:0;
+            padding: 8px;
+            height:38px;
+            border:none;
+            border-left: 1px solid #ddd;
+            font-size:12px;
+            line-height: 20px;
+        }
+
+        .data-status {
+            background:#fff;
+            padding: 15px;
+            font-size: 12px;
+            line-height: 20px;
+            color:#888;
+        }
+
+        #statusText {
+            width: 190px;
+            line-height: 20px;
+        }
+
+        .data-status.data-status-load #statusText {
+            width: 160px;
+        }
+
+        .data-status-wrapper{
+            border-top: 1px solid #ddd;
+        }
+
+        .data-status .btn, .data-status .data-status-label {
+            background: #ccc;
+            color: #fff;
+            padding: 0 8px;
+            border-radius: 10px;
+            border: none;
+            width: auto;
+            font-weight: normal;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin: 0;
+            transition: all 0.2s ease;
+        }
+
+        .data-status .data-status-label {
+            font-size: 9px;
+            display: inline-block;
+            padding-left: 0;
+        }
+
+        .data-status-error .data-status-label{
+            background-color: #c0392b;
+            color:#FFA59C; 
+        }
+
+        .data-status-error {
+            font-size: 12px;
+
+        }
+
+        .data-status .btn:hover {
+            background: #bbb;
+        }
+
+        .ico-time {
+            background-image:url(../img/ico_time.png);  
+        }
+
+        .ico-date {
+            background-image:url(../img/ico_date.png);  
+        }
+
+        .ico-plusminus {
+            background-image:url(../img/ico_plusminus.png);   
+        }
+
+        .ico-loader {
+            margin-top:-5px;
+            width:20px; height:20px;
+            background-size: 20px 20px;
+            background-image:url(../img/data_loader.gif); 
+            display:none
+        }
+
+        .ico-close {
+            width: 20px;
+            height: 20px;
+            background-size: 20px 20px;
+            background-image:url(../img/close.png);
+            opacity: 0.3;
+            margin-top: 1px;
+        }
+        .ico-close:hover {
+            opacity: 0.5;
+        }
+
+        .data-status.data-status-load {
+            background-color: #eee;
+        }
+
+        .data-status.data-status-error{
+            border-color: #310b07;
+            background-color: #c0392b; 
+            color:#FFE3E0;
+            text-shadow: none;
+        }
+
+        .data-status.data-status-load .ico-loader {
+            display:block;
+            margin-right: 10px;
+        }
+
+        #downloadButton a {
+            background-color: #1abc9c;
+            color: #fff;
+            display: block;
+            text-shadow: none;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 15px 10px;
+        }
+
+        #downloadButton a:hover {
+            background-color: #16a085;
+        }
+
+        .file-meta {
+            background-color: #517A72;
+            color: #fff;
+            padding: 10px;
+            text-shadow: none;
+            font-size: 12px;
+            line-height: 20px;
+            word-wrap: break-word;
+        }
+
+        .file-size {
+            opacity: 0.5;
+            line-height: 20px;
+            font-size: 14px;
+        }
+
+        .light {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        [data-tooltip] {
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        /* Hide the tooltip content by default */
+        [data-tooltip]:before,
+        [data-tooltip]:after {
+          visibility: hidden;
+            -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+            filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Position tooltip above the element */
+        [data-tooltip]:before {
+            position: absolute;
+            bottom: 150%;
+            left: 50%;
+            margin-bottom: 5px;
+            margin-left: -80px;
+            padding: 7px;
+            width: 130px;
+            -webkit-border-radius: 3px;
+            -moz-border-radius:    3px;
+            border-radius:         3px;
+            background-color: #000;
+            background-color: hsla(0, 0%, 20%, 0.9);
+            color: #fff;
+            content: attr(data-tooltip);
+            text-align: center;
+            font-size: 13px;
+            line-height: 1.2;
+            font-weight: normal;
+        }
+
+        /* Triangle hack to make tooltip look like a speech bubble */
+        [data-tooltip]:after {
+            position: absolute;
+            bottom: 150%;
+            left: 50%;
+            margin-left: -5px;
+            width: 0;
+            border-top: 5px solid #000;
+            border-top: 5px solid hsla(0, 0%, 20%, 0.9);
+            border-right: 5px solid transparent;
+            border-left: 5px solid transparent;
+            content: " ";
+            font-size: 0;
+            line-height: 0;
+        }
+
+        /* Show tooltip content on hover */
+        [data-tooltip]:hover:before,
+        [data-tooltip]:hover:after {
+            visibility: visible;
+            -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+            filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+            opacity: 1;
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="wrapper">
 
-        <div class="center-text-wrapper">
-            <div class="center-text">
-                <h1>Pleasure data</h1>
-                <div style="margin-bottom:30px;">    
-                    <div>
-                        <input class="inpt" type="text" id="expName" placeholder="Enter name of experiment"/>
+    <div class="center-text-wrapper">
+        <div class="center-text">
+            <div class="content">
+                <div class="header">
+                    <div class="logo"></div>
+                    <h1 class="title">Emotion data</h1>
+                </div>
+            
+                <div class="box">
+                    <div class="box-wrapper">
+                        <div>
+                            <div style="text-align:left"><label for="expterName">Choose experimenter</label></div>
+                            <select id="expterName" class="inpt" disabled>
+                                <option value="" selected disabled style="display:none">Gathering experimenters...</option>
+                            </select>
+                        </div>
+                        <div>
+<!--                             <div style="text-align:left"><label for="expName">Choose experiment</label></div> -->
+                            <select id="expName" class="inpt param" style="margin: 0 0 15px" disabled>
+                                <option value="" selected disabled style="display:none">Choose an experimenter</option>
+                            </select>
+                        </div>
+                        <div class="inpt-field-group">
+                            <div class="inpt-field row">
+                                <div class="inpt-ico ico-date col" title="Date (mm/dd/yyyy)"></div>
+                                <input class="inpt col param" style="width:36px" type="text" id="expMonth" placeholder="mm"/>
+                                <div class="inpt-sep col">/</div>
+                                <input class="inpt col param" style="width:32px" type="text" id="expDay" placeholder="dd"/>
+                                <div class="inpt-sep col">/</div>
+                                <input class="inpt col param" style="width:50px" type="text" id="expYear" placeholder="yyyy"/>
+                                <button id="timeUpdateBtn" class="btn inpt-btn col-right" data-tooltip="Set current date/time">Now</button>
+                            </div>
+
+                            <div class="inpt-field row" style="">
+                                <div class="inpt-ico ico-time col" title="Time (hh:mm)"></div>
+                                <input class="inpt col param" style="width:32px" type="text" id="expHour" placeholder="hh"/>
+                                <div class="inpt-sep col">:</div>
+                                <input class="inpt col param" style="width:36px" type="text" id="expMin" placeholder="mm"/>
+                                <div class="inpt-field-sep col"></div>
+                                <div class="inpt-ico ico-plusminus col" title="Time range"></div>
+                                <input class="inpt col param" id="expRange" type="number" value="2" min="2" step="2" max="60" style="width:32px;height:20px;margin:8px 5px 0px 10px;padding:0;">
+                                <div class="inpt-label">min.</div>
+                            </div>
+                        </div>                    
+                    </div> 
+
+
+                    <div class="data-status-wrapper">
+                        <div class="data-status row data-status-load">
+                            <div class="ico-loader col"></div>
+                            <div id="statusText" class="col">Gathering experiments...</div>
+                            <div id="statusButtons" class="col-right"></div>
+                        </div>
                     </div>
-                    <div>
-                        <span>Date</span>
-                        <span>
-                        <input class="inpt" style="width:170px" type="text" id="expDate" placeholder="mm/dd/yyyy"/></span>
-                    </div>
-                    <div>
-                        <span>Time</span>
-                        <span>
-                        <input class="inpt" style="width:170px" type="text" id="expTime" placeholder="hh:mm"/></span>
-                    </div>
-                    <button class="btn btn-primary" id="genBtn">Generate</button>
-                    <span class="loader-small" style="opacity:0"></span>
+                    
+    <!--                 <div><button class="btn" id="countBtn">Found <span class="count">0</span> trials</button></div> -->
+                    <div class="file-status"></div>
+                    <div><button class="btn btn-primary" id="genBtn">Download CSV</button></div>
                 </div>
 
-                <div id="genButtons"></div>
-                <span class="msg-error" style="opacity:0">Hola</span>
             </div>
         </div>
     </div>
+
     
 <script src="../js/vendor/jquery-2.1.0.min.js"></script>
 <script src="../js/plugins.js"></script>
+<script src="../js/util.js"></script>
 <script type="text/javascript">
 
-    function showError(msg){
-        $('.msg-error').html(msg);
-        $('.msg-error').velocity({opacity:1}, 100, function(){
-            setTimeout(function(){
-                $('.msg-error').velocity({opacity:0}, 1000);
-            },3000);
+$(function(){
+
+    var SERVER_HOST = 'admin.emotiontracker.com';
+
+    var $date = $('#expDate'),
+        $day = $('#expDay'),
+        $month = $('#expMonth'),
+        $year = $('#expYear'),
+        $time = $('#expTime'),
+        $expter = $('#expterName'),
+        $name = $('#expName'),
+        $hour = $('#expHour'),
+        $min = $('#expMin'),
+        $range = $('#expRange'),
+        $updateBtn = $('#timeUpdateBtn'),
+        $status = $('.data-status'),
+        $statusText = $('#statusText'),
+        $statusButtons = $('#statusButtons'),
+        $genBtn = $('#genBtn');
+
+    function setStatus(type, msg, cb) {
+        if(['', 'load', 'error'].indexOf(type) == -1) {
+            return false;
+        }
+        $statusButtons.html('');
+        $status.velocity({opacity: 0}, 50, function(){
+            $status.attr('class', 'data-status row data-status-' + type);
+            $statusText.html(msg);
+            if(isFunction(cb)) {
+                cb(); 
+            }
+            $status.velocity({opacity: 1}, 100);
+        });
+    }
+
+    function isFunction(functionToCheck) {
+        var getType = {};
+        return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+    }
+
+    function setAjaxError(jqXHR, textStatus, errorThrown){
+        setStatus('error', '<span class="data-status-label">Server error</span>' + ((errorThrown) ? ('<span class="light">' + errorThrown + '</span>') : textStatus), function() {
+            $closeBtn = $('<div class="ico-close"></div>');
+            $closeBtn.on('click', getCount);
+            $statusButtons.append($closeBtn);
+        });
+    }
+
+    function updateDateTime(){
+        $updateBtn.prop('disabled', true);
+        var now = new Date();
+        $day.val(("0" + now.getDate()).slice(-2));
+        $month.val(("0" + (now.getMonth() + 1)).slice(-2));
+        $year.val(now.getFullYear());
+        $hour.val(("0" + now.getHours()).slice(-2));
+        $min.val(("0" + now.getMinutes()).slice(-2));
+        setTimeout(function() {
+            $updateBtn.prop('disabled', false);
+        }, (60 - now.getSeconds()) * 1000 ); 
+    }
+
+    function validateParams() {
+        var ret = {};
+
+        var expter = $expter.val();
+        if(!expter || expter === ''){
+            return { err: 'Invalid experimenter.' };
+        }
+        ret.expter = expter;
+
+        var id = $name.val();
+        if(!id || id === ''){
+            return { err: 'Invalid experiment.' };
+        }
+        ret.name = $name.children('option:selected').text();
+        ret.id = id;
+
+        var month = +$month.val();
+        if(!month || isNaN(month) || month < 1 || month > 12) {
+            return { err: '<b>Invalid date</b> month.' };
+        }
+        ret.month = month - 1;
+
+        var day = +$day.val();
+        if(!day || isNaN(day) || day < 1 || day > 31 || (month == 2 && day > 29)) {
+            return { err: '<b>Invalid date</b> day.' };
+        }
+        ret.day = day;
+
+        var year = +$year.val();
+        if(!year || isNaN(year) || year.toString().length > 4) {
+            return { err: '<b>Invalid date</b> year.' };
+        }
+        ret.year = year;
+
+        var hour = +$hour.val();
+        if(hour === null || isNaN(hour) || hour < 0 || hour > 23) {
+            return { err: '<b>Invalid time</b> hours.' };
+        }
+        ret.hour = hour;
+
+        var min = +$min.val();
+        if(min === null || isNaN(min) || min < 0 || min > 59) {
+            return { err: '<b>Invalid time</b> minutes.' };
+        }
+        ret.min = min;
+
+        var range = +$range.val();
+        if(!range || isNaN(range) || range < 2 || range > 60) {
+            return { err: 'Invalid time range.' };
+        }
+        ret.range = range * 60 * 1000;
+
+        return ret;
+    }
+
+    function getCount(id, onComplete) {
+
+        var params = validateParams();
+        if(params.err) {
+            setStatus('error', '<span class="data-status-label">Input error</span>' + params.err, function() {
+                $closeBtn = $('<div class="ico-close"></div>');
+                $closeBtn.on('click', function() {
+                    setStatus('', 'No trials found.', function(){
+                        $reBtn = $('<button class="btn">Refresh</button>');
+                        $reBtn.on('click', getCount);
+                        $statusButtons.html($reBtn);
+                    });
+                });
+                $statusButtons.append($closeBtn);
+            });
+            return false;
+        }
+
+        var dateObject = new Date(params.year, params.month, params.day, params.hour, params.min);
+
+        setStatus('load', 'Counting trials...');
+        $.ajax({
+            url: 'http://' + SERVER_HOST + '/expcount?id=' + params.id + '&t=' + dateObject.getTime() + '&r=' + params.range,
+            type: 'GET',
+            dataType: 'json',
+            timeout: 10000,
+            success: function(exps) {
+                setStatus('', ((exps.count > 0) ? ('<b>' + exps.count + '</b>') : 'No') + ' trials found.', function(){
+                    $reBtn = $('<button class="btn">Refresh</button>');
+                    $reBtn.on('click', getCount);
+                    $statusButtons.html($reBtn);
+                });
+            },
+            error: setAjaxError,
+            complete: onComplete
+        });      
+    }
+
+    function getExperimenters(onComplete) {
+        $.ajax({
+            url: 'http://' + SERVER_HOST + '/users',
+            type: 'GET',
+            dataType: 'json',
+            timeout: 10000,
+            success: function(exps) {
+                $expter.html('');
+                if(exps.length > 0) {
+                    $expter.prop('disabled', false);
+                    for(var i=0; i<exps.length; i++){
+                        $expter.append('<option value="' + exps[i]._id + '">' + exps[i].name +'</option>');
+                    }
+                    $expter.val(exps[0]._id);                    
+                }
+                else {
+                    $expter.prop('disabled', true);
+                    $expter.html('<option value="">No experimenters found</option>');     
+                }
+
+            },
+            error: setAjaxError,
+            complete: onComplete
         });        
     }
 
-    var now = new Date();
-    var $date = $('#expDate'),
-        $time = $('#expTime');
+    $expter.on('change', function() {
+        getExperiments($(this).val());
+    });
 
-    $date.val((now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear());
-    $time.val(now.getHours() + ':' + now.getMinutes());
-
-    $('#genBtn').on('click', function(e){
-        e.preventDefault();
-
-        var exp = $('#expName').val().trim();
-        if(exp === '') return false;
-
-        var date = $date.val().trim().split('/');
-        if(date.length != 3) return false;
-        date[0] = +date[0] - 1;
-
-        var time = $time.val().trim().split(':');
-        if(time.length != 2) return false;
-
-        var dateObject = new Date(date[2], date[0], date[1], time[0], time[1]);
-        $('#genButtons').html('');
-        $(this).prop('disabled', true);
-        $('.loader-small').css({opacity:1});
-        var self = this;
+    function getExperiments(userId, onComplete) {
         $.ajax({
-            url: 'http://ec2-54-210-113-201.compute-1.amazonaws.com/expdata?e=' + exp + '&t=' + dateObject.getTime(),
+            url: 'http://' + SERVER_HOST + '/exps?id=' + userId,
             type: 'GET',
             dataType: 'json',
-            timeout: 5000,
+            timeout: 10000,
+            success: function(exps) {
+                $name.html('');
+                if(exps.length > 0) {
+                    $name.prop('disabled', false);
+                    for(var i=0; i<exps.length; i++){
+                        $name.append('<option value="' + exps[i]._id + '">' + exps[i].exp +'</option>');
+                    }
+                    $name.val(exps[0]._id);
+                }
+                else {
+                    $name.prop('disabled', true);
+                    $name.html('<option value="">No experiments found</option>');  
+                }
+            },
+            error: setAjaxError,
+            complete: onComplete
+        });        
+    }
+
+    function generateCSV(id, onComplete) {
+        var params = validateParams();
+        if(params.err) {
+            setStatus('error', '<span class="data-status-label">Input error</span>' + params.err, function() {
+                $closeBtn = $('<div class="ico-close"></div>');
+                $closeBtn.on('click', function() {
+                    setStatus('', 'No trials found.', function(){
+                        $reBtn = $('<button class="btn">Refresh</button>');
+                        $reBtn.on('click', getCount);
+                        $statusButtons.html($reBtn);
+                    });
+                });
+                $statusButtons.append($closeBtn);
+            });
+            return false;
+        }
+
+        var dt = new Date(params.year, params.month, params.day, params.hour, params.min);
+
+        $genBtn.prop('disabled', true);
+        $genBtn.text('Generating...');
+
+        $.ajax({
+            url: 'http://' + SERVER_HOST + '/expdata?id=' + params.id + '&t=' + dt.getTime() + '&r=' + params.range,
+            type: 'GET',
+            dataType: 'json',
             success: function(data) {
                 if(data && data.error) {
-                    showError(data.error);
+                    setAjaxError(null, data.error);
                 }
                 else{
                     var a = document.createElement('a');
-                    a.href = 'data:attachment/csv,' + data.data;
-                    a.target = '_blank';
-                    a.innerHTML = 'Download CSV';
-                    a.className = 'btn btn-success';
-                    a.download = exp + '.csv';
-                    $('#genButtons').append(a);
+                    a.href = 'data:text/csv,' + data.data;
+                    var fromDate = new Date(dt.getTime() - params.range),
+                        toDate = new Date(dt.getTime() + params.range);
+                    a.download = '[' + params.name + '].' + [dt.getFullYear(), dt.getMonth() + 1, dt.getDate(), fromDate.getHours(), fromDate.getMinutes(), toDate.getHours(), toDate.getMinutes()].join('.') + '.csv';
+                    a.click();
+                    $('.file-status').html('<div class="row file-meta">' + a.download + '<span class="file-size"> (' + (data.data.length / 1024).toFixed(2) + 'kB)</span></div>');
+/*                    a.innerHTML = 'Download CSV';
+                    $('#downloadButton').append(a);
+                    $('#downloadButton').append('<div class="row file-meta"><div class="col file-name">' + a.download + '</div><div class="col-right file-size">' + (data.data.length / 1000).toFixed(2) + 'kB</div></div>')*/
                 }
             },
-
-            error: function(){
-                showError('Unable to contact server');
-            },
-
-            complete: function(){
-                $(self).prop('disabled', false);
-                $('.loader-small').css({opacity:0});
+            error: setAjaxError,
+            complete: function(jqXHR, textStatus){
+                $genBtn.prop('disabled', false);
+                $genBtn.text('Download CSV');
+                if(isFunction(onComplete)) {
+                    onComplete(jqXHR, textStatus);
+                }
             }
-        });        
-    });
+        }); 
+    }
+
+    function onParamsChange() {
+        $updateBtn.prop('disabled', false);
+        getCount();
+    }
+
+
+    (function(){
+        updateDateTime();
+        getExperimenters(function(j, s) {
+            if(s === 'success'){
+                var id = $.parseJSON(j.responseText)[0]._id;
+                getExperiments(id, function(j, s) {
+                    if(s === 'success'){
+                        var id = $.parseJSON(j.responseText)[0]._id;
+                        getCount();
+                    }
+                });
+            }
+        });
+        
+        $updateBtn.on('click', function() {
+            updateDateTime();
+            getCount();
+        });
+
+        $('.param').on('change', _debounce(onParamsChange, 300) );
+        $genBtn.on('click', generateCSV);
+    })();
+
+
+});
 
 
 </script>

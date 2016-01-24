@@ -2,30 +2,14 @@
 <html class="no-js">
     <head>
         <meta charset="utf-8">
-        <title>Emotion Tracker</title>
+        <title>Emotion Tracker | Labquest</title>
         <meta name="description" content="">
         <meta name="HandheldFriendly" content="True">
         <meta name="MobileOptimized" content="320">
         <meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0">
         <meta http-equiv="cleartype" content="on">
 
-        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="img/touch/apple-touch-icon-144x144-precomposed.png">
-        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/touch/apple-touch-icon-114x114-precomposed.png">
-        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/touch/apple-touch-icon-72x72-precomposed.png">
-        <link rel="apple-touch-icon-precomposed" href="img/touch/apple-touch-icon-57x57-precomposed.png">
-        <link rel="shortcut icon" sizes="196x196" href="img/touch/touch-icon-196x196.png">
-        <link rel="shortcut icon" href="img/touch/apple-touch-icon.png">
         <link rel="icon" type="image/png" href="favicon.png">
-
-        <!-- Tile icon for Win8 (144x144 + tile color) -->
-        <meta name="msapplication-TileImage" content="img/touch/apple-touch-icon-144x144-precomposed.png">
-        <meta name="msapplication-TileColor" content="#222222">
-
-        <!-- SEO: If mobile URL is different from desktop URL, add a canonical link to the desktop page -->
-        <!--
-        <link rel="canonical" href="http://www.example.com/" >
-        -->
-
 
         <meta name="mobile-web-app-capable" content="yes">
 
@@ -33,24 +17,10 @@
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="Emotion Tracker">
 
-        <!-- This script prevents links from opening in Mobile Safari. https://gist.github.com/1042026 -->
-        <!--
-        <script>(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>
-        -->
+        <link rel="stylesheet" href="../css/normalize.css">
+        <link rel="stylesheet" href="../css/main.css">
 
-        <link rel="stylesheet" href="css/normalize.css">
-        <link rel="stylesheet" href="css/main.css">
-
-<!--        <script>
-            (function(_,e,rr,s){_errs=[s];var c=_.onerror;_.onerror=function(){var a=arguments;_errs.push(a);
-            c&&c.apply(this,a)};var b=function(){var c=e.createElement(rr),b=e.getElementsByTagName(rr)[0];
-            c.src="//beacon.errorception.com/"+s+".js";c.async=!0;b.parentNode.insertBefore(c,b)};
-            _.addEventListener?_.addEventListener("load",b,!1):_.attachEvent("onload",b)})
-            (window,document,"script","542ed55fe361eb023f0006cb");
-        </script>
--->
-
-        <script src="js/vendor/modernizr-2.7.1.min.js"></script>
+        <script src="../js/vendor/modernizr-2.7.1.min.js"></script>
     </head>
     <body>
 
@@ -110,7 +80,7 @@
 
         <div id="infoPage" style="display:none">
             <h2>Emotion Tracker</h2>
-            <div class="emph">v1.2.5</div>
+            <div class="emph">v1.2.4</div>
             <div class="info-desc">Measure self-reported emotion over time. Currently supports Safari and Chrome browsers on iOS and Android devices. Support for other devices may be added. Let us know what you need. <a href="mailto:denis.pelli@nyu.edu?subject=Emotion%20Tracker">denis.pelli@nyu.edu</a></div>
 
             <div class="light">Copyright © 2014 - 2015 Denis Pelli</div>
@@ -157,7 +127,7 @@
                 </div>                   
             </div>  
             <button id="btnInfo"><div class="ico-info"></div></button>
-            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;">v1.2.5</div>
+            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;">v1.2.4</div>
             <button id="btnSettings"><div class="ico-settings"></div></button>
         </div>
 
@@ -197,9 +167,27 @@
                 </div>
 
                 <div class="field">
-                    <label for="email" class="lbl">Email address of the experimenter</label>
-                    <input id="email" type="email" class="inpt" placeholder="" />
+                    <label for="labquestURL" class="lbl">Labquest URL</label>
+                    <input id="labquestURL" type="text" class="inpt" placeholder="http://10.0.0.1" />
                 </div>
+
+                <div class="field">
+                    <label for="inputHighCriterion" class="lbl">High criterion (Pa)</label>
+                    <input id="inputHighCriterion" type="text" class="inpt" placeholder="" />
+                </div>
+                <div class="field">
+                    <label for="inputLowCriterion" class="lbl">Low criterion (Pa)</label>
+                    <input id="inputLowCriterion" type="text" class="inpt" placeholder="" />
+                </div>
+                <div class="field">
+                    <label for="inputStdCriterion" class="lbl">Std criterion (Pa)</label>
+                    <input id="inputStdCriterion" type="text" class="inpt" placeholder="" />
+                </div>
+                <div class="field">
+                    <label for="inputSetInterval" class="lbl">Settling interval (s)</label>
+                    <input id="inputSetInterval" type="text" class="inpt" placeholder="" />
+                </div>
+
                 
                 <div class="field">
                     <label for="duration" class="lbl">Max stimulus duration <span class="light"> (s)</span></label>
@@ -627,12 +615,12 @@
             <div class="landscapeText" style="bottom:120px">to landscape mode</div>
         </div>
 
-        <script src="js/vendor/jquery-2.1.0.min.js"></script>
-        <script src="js/vendor/raphael-min.js"></script>
-        <script src="js/helper.js"></script>
-        <script src="js/plugins.js"></script>
-        <script src="js/util.js"></script>
-        <script src="js/main.js"></script>
+        <script src="../js/vendor/jquery-2.1.0.min.js"></script>
+        <script src="../js/vendor/raphael-min.js"></script>
+        <script src="../js/helper.js"></script>
+        <script src="../js/plugins.js"></script>
+        <script src="../js/util.js"></script>
+        <script src="labquest.js"></script>
         
 
 <script type="text/plain" id="data_tmpl">Experiment:,<%=experiment + ((aborted == true) ? ',ABORTED!' : '')%>\nSettings from:,<%=optionsMode%>\nObserver:,<%=name%>\nEmail to:,<%=options.email%>\nApp:,<%=url%>\nApp version:,<%=appVersion%>\nApp created:,<%=appCreateDate%>\nTime zero:,<%=getDateString(experimentTime)%>\nTime since 1/1/70 (s):,<%=(absoluteTime/1000)%>\nTime (s):,<%=times.join(",")%>\nRating (<%=options.minRating%> to 10):,<%=ratings.join(",")%>\nSpread (pix):,<%=ratingsPx.join(",")%>\nFeeling of beauty (0 to 3):,<%=feltPleasure%>\nDevice:,<%=deviceInfo.type%>\nModel:,<%=deviceInfo.model%>\nOS:,<%=os%>\nBrowser:,<%=browser%>\nLocal storage:,<%=localStore%>\n"Screen (pix):",<%=screenHeight + ',' + screenWidth%>\n"Window (pix):",<%=windowHeight + ',' + windowWidth%>\n"<%=((location.accuracy == null || location.accuracy > 500)?'Approximate location':'Location')%> (lat., long.):",<%=(location.lat || 0) + ',' + (location.long || 0)%>\nNear:,"<%=location.near%>"\nInterval between ratings (s):,<%=options.ratingInterval%>\nMinimum allowed rating:,<%=options.minRating%>\nMaximum stimulus duration (s):,<%=options.duration%>\nExperiment duration after end of stimulus (s):,<%=options.postStimulusDuration%>\nRecorded duration (s):,<%=durationActual%>\nSet up min & max (pix):,<%=setupMinMax.join(",")%>\nReference min & max (pix):,<%=medianMinDist%>,<%=medianMaxDist%>\nInitial practice min & max (pix):,<%=preMinMax.join(",")%>\nFinal practice min & max (pix):,<%=postMinMax.join(",")%>\nMedian practice min & max (<%=options.minRating%> to 10):,<%=medianMinRating%>,<%=medianMaxRating%>\nSkip setup and practice on repeat trials:,<%=options.skipRepeat%>\nMax time between repeats (s):,<%=options.repeatInterval%>\nFeedback barbell:,<%=options.feedback.barbell%>\nFeedback bar:,<%=options.feedback.range%>\nFeedback bar color varies:,<%=options.feedback.barVaries%>\nFeedback number:,<%=options.feedback.numeric%>\nFeedback tone:,<%=options.feedback.auditory%>\nFeedback ticks:,<%=options.feedback.tactile%>\nInclude practice in reference:,<%=options.postInMedian%>\nKnockout:,<%=knockout%>\nEnable name knockout:,<%=options.nameSelect%>\nEnable sad mood knockout:,<%=options.moodSelect%>\nEnable crying knockout:,<%=options.crySelect%>\nStimulus offset turns off knockout:,<%=options.knockOff%>\nDuration of mood induction (s):,<%=options.moodDuration%>\nKnockout onset time:,<%=options.knockOnset%>\nKnockout max duration:,<%=options.knockDuration%>\nEnable music selection:,<%=options.musicSelect%>\nMusic title:,"<%=songName%>"\nMusic artist:,"<%=songArtist%>"\nMusic album:,"<%=songAlbum%>"\nMusic duration (s):,<%=songDuration%>\nDuration of white noise (s):,<%=options.durationWhiteNoise%>\nFingers:,<%=(options.fingers === 0 ) ? 'Thumb and index' : 'Index and middle'%>\nStore data on server:,<%=options.storeData%>\n</script>       

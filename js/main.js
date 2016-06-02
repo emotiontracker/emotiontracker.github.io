@@ -1,7 +1,47 @@
 window.URL = window.URL || window.webkitURL;
 
+editableTextFields = {
+    textCalibrationSetup1: 'This app lets you use your fingers to make pleasure ratings. You indicate how much pleasure you\'re feeling by how much you spread your fingers. ',
+    textFinger0: 'Please use your thumb and index finger.',
+    textFinger1: 'Please use your first two fingers: index and middle finger.',
+    textCalibrationSetup2: 'First, we must calibrate your fingers. When you see the pink dots on the next screen, place and hold your fingertips on the screen. The pink dots will follow your fingertips.',
+    textCalibrationSetup3: 'You will <b>indicate maximum pleasure by spreading your fingers as far apart as you can comfortably maintain</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.',
+    textCalibrationSetup4: 'Next, indicate <b>minimum</b> pleasure by <b>relaxing</b> your two fingers to whatever spread feels <b>most natural and requires least effort</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.',
+    textCalibrationPre1: 'Next we\'ll practice making ratings. We encourage you to play during practice.',
+    textCalibrationPre2: 'In the actual experiment, later, you\'ll be spreading your fingers to continually rate pleasure. You can play now, to get used to it. On the next screen, try spreading and closing your fingers. Once the setting is right, lift your fingers to proceed.',
+    textCalibrationTrial1Title: 'Indicate <span class="strong">maximum</span> pleasure.',
+    textCalibrationTrial1Instr: 'Using two fingers, drag the pink dots as far apart as comfortably possible.',
+    textCalibrationTrial2Title: 'Indicate <span class="strong">minimum</span> pleasure.',
+    textCalibrationTrial2Instr: 'Using two fingers, drag the pink dots to whatever spread is most natural, requiring least effort.',
+    textExperiment1: 'Soon, you will continuously rate your pleasure. You\'ll spread your fingers to indicate how much pleasure you are getting from the object at each moment. Try to continuously report what you feel from the whole experience so far.',
+    textExperiment2: 'While your fingers are on the screen, keep rating pleasure, even after the object goes away, until I say, <b>"Done"</b>.',
+    //textStimulusInstruction: '<div class="song-info">Type in the title of your favorite music above and hit the search button. Narrow down the results by adding the name of the artist/album.</div>',
+    textWaitWithMusic: '<span class="strong">When you\'re ready, place two fingers to begin.</span>',
+    textWaitWithoutMusic: '<span style="font-size:1.5em; color:#6e65b0">Wait!</span><br/><span class="strong">When the experimenter tells you, please begin by pressing two fingers on the screen.</span>',
+    textKnockOut1: 'In the following screen, you will be prompted to select atleast 5 recordings of yourself speaking your name. Try and vary your tone in each recording (ex. happy, sad, angry, excited, funny).',
+    textKnockOut2: 'Tap the <span class="instr-green">Add</span> button to select an existing recording from your device, or simply record a new video.',
+    textKnockOut3: 'Wait for a second after hitting the record button. Then speak your name as clearly as possible into the microphone of your device.',
+    textKnockOut4: 'Once you select a recording, it will be converted and saved under your name for your own use in future trials.',
+    textKnockOut5: 'After your recording is processed, it will show up in a list, where you can play or delete each inidividual recording. Once you\'re happy with your selections, tap the <span class="instr-purple">Continue</span> button to proceed.',
+    textMood1: 'Make yourself comfortable, and focus your attention on the instructions you are about to see.',
+    textMood2: 'Imagine a situation that you think would make you feel sad. It could be a hypothetical situation, or a real event in your past.',
+    textMood3: 'Imagine the situation as vividly as you can. Picture the events happening to you.',
+    textMood4: 'See all the details of the situation. See the people or the objects; hear the sounds; think the thoughts you would actually think in this situation.',
+    textMood5: 'Feel the same sad feelings you would feel. Let yourself react as if you were actually there.',
+    textMood6: 'Keep imagining the situation until I say <b>"Done"</b>',
+    textSurveyQuestion: 'During this trial, did you get the feeling of beauty from the object?',
+    textSurveyOption0: 'Definitely not',
+    textSurveyOption1: 'Perhaps no',
+    textSurveyOption2: 'Perhaps yes',
+    textSurveyOption3: 'Yes, definitely'
+};
+
 function decimalPlaces(number) {
   return ((+number).toFixed(20)).replace(/^-?\d*\.?|0+$/g, '').length;
+}
+
+function padDigits(number, digits) {
+  return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
 }
 
 function drawTimer(el, dur) {
@@ -23,14 +63,14 @@ function drawTimer(el, dur) {
             mid + ' 1 ' +
             x  + ' ' +
             y  + ' z';
-     
+
         loader.setAttribute( 'd', anim );
         border.setAttribute( 'd', anim );
-      
+
         if(alpha !== 0){
             setTimeout(draw, t); // Redraw
         }
-      
+
     })();
 }
 
@@ -53,7 +93,7 @@ function setStatus(containerEl, msg, type, duration) {
     }, duration);
 }
 
-function isEmail(email) { 
+function isEmail(email) {
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
 }
@@ -91,7 +131,8 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.2.6', STORELOCAL = localStorageTest();
+    var VERSION = '1.3.0', STORELOCAL = localStorageTest();
+    $(".version-string").html(VERSION);
 
     var EMOTION_DATA_HOST = 'http://52.1.23.102';
     var EMOTION_RECORDER_HOST = 'http://pleasure-back-env-pgjp3eennr.elasticbeanstalk.com';
@@ -130,7 +171,7 @@ else {
                         callback();
                     }, this));
                 }
-            
+
             }
 
         },
@@ -252,7 +293,7 @@ else {
     });
 
     var notifier = {
-        
+
         currentPlaying: null,
 
         sounds: {
@@ -332,7 +373,7 @@ else {
         os: ua_parser.getOS().name + ' ' + ua_parser.getOS().version,
         browser: ua_parser.getBrowser().name + ' ' + ua_parser.getBrowser().major,
         localStore: STORELOCAL,
-        
+
         optionsMode: 'server',
         options:{},
         serverOptions: {},
@@ -410,7 +451,7 @@ else {
                 skipRepeat: false,
                 repeatInterval: 30,
                 feedback:{
-                    barbell: false,
+                    barbell: true,
                     range: false,
                     numeric: false,
                     auditory: false,
@@ -424,13 +465,18 @@ else {
                 crySelect: false,
                 knockOff: false,
                 knockOnset: 0,
-                knockDuration: 30,
-                moodDuration: 180,
+                knockDuration: 0,
+                moodDuration: 0,
                 postStimulusDuration: 120,
-                durationWhiteNoise: 120,
-                fingers: 0,
+                durationWhiteNoise: 0,
+                fingers: 1,
                 storeData: false
             };
+
+                    var thisObj = this;
+                    Object.keys(editableTextFields).forEach(function(i) {
+                        thisObj.options[i] = editableTextFields[i];
+                    });
 
             if(localStorage['options']){
                 try {
@@ -447,7 +493,7 @@ else {
 
             this.medianMaxDist = (this.refValid) ? this.refMax : (this.postInMedian) ? findMedian(this.setupMaxDist.concat(this.preMaxDist, this.postMaxDist)) : findMedian(this.setupMaxDist);
             this.medianMinDist = (this.refValid) ? this.refMin : (this.postInMedian) ? findMedian(this.setupMinDist.concat(this.preMinDist, this.postMinDist)) : findMedian(this.setupMinDist);
-            
+
             this.refMax = this.medianMaxDist;
             this.refMin = this.medianMinDist;
             this.refValid = (new Date()).getTime() + this.options.repeatInterval*1000;
@@ -458,7 +504,7 @@ else {
             this.medianMinRating = (this.refValid) ? this.refMinRating : findMedian(this.practiceMinRatings).toFixed(1);
             this.refMaxRating = this.medianMaxRating;
             this.refMinRating = this.medianMinRating;
-            
+
             var distNames = ['setup', 'pre', 'post'];
             for(var i = 0; i<distNames.length; i++){
                 var dist = distNames[i];
@@ -525,7 +571,7 @@ else {
                     'important': true
                 },
                 'async': false
-        }   
+        }
 
         $.ajax({
             type: 'POST',
@@ -538,7 +584,7 @@ else {
             error: function(res) {
                 callback(res);
             }
-        });   
+        });
     }
 
 
@@ -617,9 +663,9 @@ else {
                                     $(e).append('<option value="' + d + '">' + d +'</option>');
                                 }
                                 else {
-                                    $(e).append('<option value="' + d[map.v] + '">' + d[map.t] +'</option>');    
+                                    $(e).append('<option value="' + d[map.v] + '">' + d[map.t] +'</option>');
                                 }
-                                
+
                             });;
                         });
                         if(data.length > 0) {
@@ -656,18 +702,18 @@ else {
 
         init: function(){
             this._super();
-            _bindAll(this, 
-                'handleSave', 
-                'showStart', 
-                'floatButtons', 
-                'unFloatButtons', 
-                'showAudioWarn', 
-                'toggleOptionMode', 
-                'toggleOptionFingers', 
-                'generateOptions', 
-                'loadOptions', 
-                'disableAll', 
-                'enableAll', 
+            _bindAll(this,
+                'handleSave',
+                'showStart',
+                'floatButtons',
+                'unFloatButtons',
+                'showAudioWarn',
+                'toggleOptionMode',
+                'toggleOptionFingers',
+                'generateOptions',
+                'loadOptions',
+                'disableAll',
+                'enableAll',
                 'uploadOptions',
                 'showRegisterPage',
                 'hideRegisterPage',
@@ -713,6 +759,12 @@ else {
             this.knockDuration = $(this.el.find('#knockDuration'));
 
             this.durationWhiteNoise = $(this.el.find('#durationWhiteNoise'));
+
+                    var thisObj = this;
+                    Object.keys(editableTextFields).forEach(function(i) {
+                        thisObj[i] = $(thisObj.el.find('#' + i));
+                    });
+
             this.optionsMode = this.el.find("#optionsMode");
             this.optionsFingers = $(this.el.find('#optionsFingers'));
             this.storeData = $(this.el.find('#storeData'));
@@ -745,7 +797,7 @@ else {
                     experimentCollection.fetch(['id='+$(this).val()], null, function(exps){
                         self.disableAll();
                         downloadOptions(exps.length > 0 ? exps[0]._id : null);
-                    });    
+                    });
                 },
                 'touchstart': function(e) {
                     e.preventDefault();
@@ -755,7 +807,7 @@ else {
                             var event = document.createEvent('MouseEvents');
                             event.initMouseEvent('mousedown', true, true, window);
                             $(that)[0].dispatchEvent(event);
-                        });                        
+                        });
                     }
                     else {
                         var event = document.createEvent('MouseEvents');
@@ -791,6 +843,7 @@ else {
 
             this.header = this.el.find('#settingsHeader');
             this.moodWarn = this.el.find("#moodWarn");
+                    this.settingsWarn = this.el.find("#settingsWarn");
             this.modeUpload = $("#modeUploadPage");
             this.modeRegister = $("#modeRegisterPage");
             this.registerStatus = this.modeRegister.find('.status-container');
@@ -846,7 +899,7 @@ else {
 
             this.modeUpload.find('input').on('change', this.resetUploadButton);
             new MBP.fastButton(this.uploadSubmit, this.uploadOptions);
-            
+
             $("#audioOk").on('touchstart', function(e){
                 e.preventDefault();
                 $('#audioWarn').velocity({opacity:0}, 200, function(){
@@ -863,6 +916,24 @@ else {
                 $(document).on("touchmove", self.onDialogScroll);
                 $(self.moodWarn).css({display:'table', width: window.innerWidth + 'px', height: window.innerHeight + 'px'}).velocity({opacity:1}, 100);
             });
+
+                    $("#settingsNo").on('touchstart', function(e){
+                        e.preventDefault();
+                        $(self.settingsWarn).velocity({opacity:0}, 200, function(){
+                            $(self.settingsWarn).css({display:'none'});
+                            $(document).off('touchmove', self.onDialogScroll);
+                            self.showStart(e);
+                        });
+                    });
+
+                    $("#settingsYes").on('touchstart', function(e){
+                        e.preventDefault();
+                        $(self.settingsWarn).velocity({opacity:0}, 200, function(){
+                            $(self.settingsWarn).css({display:'none'});
+                            $(document).off('touchmove', self.onDialogScroll);
+                        });
+                        location.reload();
+                    });
 
             $("#moodYes").on('touchstart', function(e){
                 e.preventDefault();
@@ -953,7 +1024,7 @@ else {
                         $(this).removeClass('invalid');
                     });
                     setStatus(this.registerStatus, cap + ' is required.', 'error', 2500);
-                    return;   
+                    return;
                 }
             }
 
@@ -980,13 +1051,13 @@ else {
                             setStatus(self.registerStatus, msg.error, 'error', 2500);
                         }
                         else if(msg.success){
-                            setStatus(self.registerStatus, 'Successfully registered. You will receive an email once your request has been approved.', 'info', 3500);    
+                            setStatus(self.registerStatus, 'Successfully registered. You will receive an email once your request has been approved.', 'info', 3500);
                             for(f in fields) {
                                 fields[f].val('');
                             }
                         }
                     }
-                    
+
                 },
                 error: function(jqXHR, textStatus, errorThrown){
                     setStatus(self.registerStatus, 'Error contacting server', 'error', 2500);
@@ -1041,7 +1112,7 @@ else {
                             downloadOptions(msg.id);
                         }
                     }
-                    
+
                 },
                 error: function(jqXHR, textStatus, errorThrown){
                     $(self.uploadSubmit).text('Error contacting server').addClass('btn-error');
@@ -1122,6 +1193,13 @@ else {
                 if(STORELOCAL){
                     localStorage["options"] = JSON.stringify(config.options);
                 }
+                        /*
+                        $(document).on("touchmove", self.onDialogScroll);
+                        $(this.settingsWarn).css({display:'table', width: window.innerWidth + 'px', height: window.innerHeight + 'px'}).velocity({opacity:1}, 100);
+                    } else {
+                        this.showStart(e);
+                    }
+                        */
             }
             this.showStart(e);
         },
@@ -1159,6 +1237,12 @@ else {
                 fingers:  +$(this.optionsFingers).find(".btn-selected").first().data('value'),
                 storeData: $(this.storeData).prop('checked')
             };
+
+                    var thisObj = this;
+                    Object.keys(editableTextFields).forEach(function(i) {
+                        options[i] = $(thisObj[i]).val();
+                    });
+
             return options;
         },
 
@@ -1196,6 +1280,12 @@ else {
             $(this.knockDuration).val(options.knockDuration);
             $(this.moodDuration).val(options.moodDuration);
             $(this.durationWhiteNoise).val(options.durationWhiteNoise);
+
+                    var thisObj = this;
+                    Object.keys(editableTextFields).forEach(function(i) {
+                        $(thisObj[i]).val(options[i]);
+                    });
+
             $(this.storeData).prop('checked', options.storeData);
 
             $(this.optionsFingers).find("button").removeClass("btn-selected");
@@ -1206,6 +1296,7 @@ else {
 
         handleResize: function(){
             $(this.moodWarn).css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
+                    $(this.settingsWarn).css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
             $(this.storeWarn).css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
             $("#audioWarn").css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
         },
@@ -1276,7 +1367,7 @@ else {
                     localStorage['experimenterId'] = config.experimenterId = exptr[0]._id;
                     experimentCollection.fetch(['id='+exptr[0]._id], null, function(exps){
                         downloadOptions(exps.length > 0 ? exps[0]._id : null);
-                    });  
+                    });
                 });
             }
             else {
@@ -1299,12 +1390,12 @@ else {
                             var event = document.createEvent('MouseEvents');
                             event.initMouseEvent('mousedown', true, true, window);
                             $(self)[0].dispatchEvent(event);
-                        });                       
+                        });
                     }
                     else {
                         var event = document.createEvent('MouseEvents');
                         event.initMouseEvent('mousedown', true, true, window);
-                        $(self)[0].dispatchEvent(event);                    
+                        $(self)[0].dispatchEvent(event);
                     }
                 }
             });
@@ -1322,12 +1413,12 @@ else {
                             var event = document.createEvent('MouseEvents');
                             event.initMouseEvent('mousedown', true, true, window);
                             $(self)[0].dispatchEvent(event);
-                        });                       
+                        });
                     }
                     else {
                         var event = document.createEvent('MouseEvents');
                         event.initMouseEvent('mousedown', true, true, window);
-                        $(self)[0].dispatchEvent(event);                        
+                        $(self)[0].dispatchEvent(event);
                     }
                 }
             });
@@ -1339,7 +1430,7 @@ else {
             new MBP.fastButton(this.settingsButton, this.showSettings);
             new MBP.fastButton(this.helpButton, this.showHelp);
             new MBP.fastButton(this.creditsButton, this.showInfo);
-            
+
             $(this.infoClose).on('touchstart', this.hideInfo);
             $(this.helpClose).on('touchstart', this.hideHelp);
             $(this.el).on('focus', 'input[type="text"]', this.unFloatButtons);
@@ -1397,11 +1488,11 @@ else {
             }
         },
 
-        handleSubmit: function(e){      
+        handleSubmit: function(e){
             e.preventDefault();
 
             config.name = $(this.name).val().trim();
-            config.experiment = $(this.experiment).val().trim(); 
+            config.experiment = $(this.experiment).val().trim();
             if( config.optionsMode == "server" ) {
                 config.experiment = $(this.experimentSel).find('option:selected').html();
             }
@@ -1475,7 +1566,7 @@ else {
             config.preMaxDist = [];
             config.preMinDist = [];
             config.postMaxDist = [];
-            config.postMinDist = []; 
+            config.postMinDist = [];
             config.practiceMinRatings = [];
             config.practiceMaxRatings = [];
             config.times = [];
@@ -1498,7 +1589,7 @@ else {
     function downloadOptions(id, error, complete){
         var self = this;
         if(!id || id === '') {
-            settingsPage.loadOptions();    
+            settingsPage.loadOptions();
         }
         else {
             $.ajax({
@@ -1517,12 +1608,12 @@ else {
                         settingsPage.loadOptions(config.serverOptions);
                     }
                     else {
-                        settingsPage.loadOptions();    
+                        settingsPage.loadOptions();
                     }
                 },
                 error: error || function(){},
                 complete: complete
-            });            
+            });
         }
 
     }
@@ -1559,7 +1650,7 @@ else {
             this.nameForm = this.el.find("#knockNameForm");
             this.nameMessages = this.el.find("#knockNameMessages");
             this.recs = [];
-            this.cries = [            
+            this.cries = [
                 new Howl({urls:['alerts/baby-crying-01.mp3']}),
                 new Howl({urls:['alerts/baby-crying-02.mp3']}),
                 new Howl({urls:['alerts/baby-crying-03.mp3']}),
@@ -1567,14 +1658,6 @@ else {
                 new Howl({urls:['alerts/baby-crying-05.mp3']})
             ];
             this.nameAlert = null;
-            this.titles = [
-                'In the following screen, you will be prompted to select atleast 5 recordings of yourself speaking your name. Try and vary your tone in each recording (ex. happy, sad, angry, excited, funny).',
-                'Tap the <span class="instr-green">Add</span> button to select an existing recording from your device, or simply record a new video.',
-                'Wait for a second after hitting the record button. Then speak your name as clearly as possible into the microphone of your device.',
-                'Once you select a recording, it will be converted and saved under your name for your own use in future trials.',
-                'After your recording is processed, it will show up in a list, where you can play or delete each inidividual recording. Once you\'re happy with your selections, tap the <span class="instr-purple">Continue</span> button to proceed.'
-                //'<span class="strong">When you\'re ready, place two fingers to begin.</span>'
-            ];
             this.titleIndex = 0;
             this.titleCont = this.el.find("#knockNameTitlesCont");
             this.titlesText = this.el.find("#knockNameTitles");
@@ -1589,12 +1672,12 @@ else {
             new MBP.fastButton(this.moodBtn, function(e){
                 e.preventDefault();
                 config.knockout = 'mood';
-                self.end();  
+                self.end();
             });
             new MBP.fastButton(this.cryBtn, function(e){
                 e.preventDefault();
                 config.knockout = 'cry';
-                self.end();  
+                self.end();
             });
             this.skipBtn.on('touchstart', this.end);
 
@@ -1646,8 +1729,8 @@ else {
             $(this.tap).velocity({opacity:0}, 100);
             $(this.titlesText).velocity({opacity:0}, 100, function(){
                 self.titleIndex++;
-                
-                if(self.titleIndex == self.titles.length){ 
+
+                if(self.titleIndex == self.titles.length){
                     $(self.titleCont).velocity({opacity:0}, 200, function(){
                         $(self.titleCont).css({display:'none'});
                     });
@@ -1660,29 +1743,37 @@ else {
 
         showTitle: function(){
             var self = this;
+                    this.titles = [
+                        config.options.textKnockOut1,
+                        config.options.textKnockOut2,
+                        config.options.textKnockOut3,
+                        config.options.textKnockOut4,
+                        config.options.textKnockOut5
+                            //'<span class="strong">When you\'re ready, place two fingers to begin.</span>'
+                    ];
             this.titlesText.innerHTML = this.titles[this.titleIndex];
             $(this.titlesText).velocity({opacity:1}, 500, function(){
                 //setTimeout(function(){
                     $(self.tap).velocity({opacity: 1}, 100, function(){
                         window.addEventListener('touchstart', self.onTap);
                     });
-                //}, 50);                    
+                //}, 50);
             });
         },
 
         end: function(){
             if(this.recs.length > 0) {
-                this.recs = shuffle(this.recs);    
+                this.recs = shuffle(this.recs);
             }
-            
+
             if(config.options.musicSelect){
-                PageController.transition("stimulus");                    
+                PageController.transition("stimulus");
             }
             else{
                 PageController.transition("calibration", function(){
                     this.begin("setup");
-                });                    
-            }     
+                });
+            }
         },
 
         handleAddRecording: function(){
@@ -1717,7 +1808,7 @@ else {
                 cache: false,
                 contentType: false,
                 processData: false
-            }); 
+            });
         },
 
         showNameError: function(msg){
@@ -1749,7 +1840,7 @@ else {
             config.knockout = 'name';
             var self = this;
             $.ajax({
-                url: this.serverUrl + '/converted?q=' + encodeURIComponent(config.name), 
+                url: this.serverUrl + '/converted?q=' + encodeURIComponent(config.name),
                 type: 'GET',
                 success: function(recs){
                     self.recordings.innerHTML = '';
@@ -1761,16 +1852,16 @@ else {
                         self.nameAlert = $('<div class="knock-msg msg-alert row"> \
                             <div class="col"><span style="font-weight:bold">' + recs.length + '</span> recording' + ((recs.length == 1) ? ' was' : 's were') + ' found for your name.</div> \
                             <div class="knock-msg-btn col-right">clear all</div> \
-                            </div>');  
+                            </div>');
                         self.nameAlert.css('bottom', '-42px');
                         $(self.nameMessages).append(self.nameAlert);
                         setTimeout(function(){self.nameAlert.velocity({bottom: 0}, [80, 12]);},5);
                         (self.nameAlert.find('.knock-msg-btn')[0]).on('touchstart', _bind(self.clearRecordings, self, function(){
                             self.nameAlert.velocity({bottom: '-42px'}, [80, 12], function(){
                                 $(self.nameAlert).remove();
-                                self.nameAlert = null;                                
+                                self.nameAlert = null;
                             });
-                        }));      
+                        }));
                     }
                 },
 
@@ -1883,19 +1974,12 @@ else {
             this._super();
             _bindAll(this, 'onTap', 'onEnd', 'abort', 'showTitle');
 
-            this.titles = [
-                'Make yourself comfortable, and focus your attention on the instructions you are about to see.',
-                'Imagine a situation that you think would make you feel sad. It could be a hypothetical situation, or a real event in your past.',
-                'Imagine the situation as vividly as you can. Picture the events happening to you.',
-                'See all the details of the situation. See the people or the objects; hear the sounds; think the thoughts you would actually think in this situation.',
-                'Feel the same sad feelings you would feel. Let yourself react as if you were actually there.',
-                'Keep imagining the situation until i say <b>"Done"</b>'];
             this.titleIndex = 0;
             this.timer = this.el.find('.timer');
             this.tap = this.el.find('#moodTap');
             this.titlesText = this.el.find('#moodTitles');
             this.timeout = null;
-                
+
         },
 
         render: function(){
@@ -1910,7 +1994,7 @@ else {
             window.removeEventListener('touchstart', this.abort);
             PageController.transition("experiment", function(){
                 this.begin();
-            });           
+            });
         },
 
         onTap: function(e){
@@ -1921,8 +2005,8 @@ else {
             $(this.tap).velocity({opacity:0}, 100);
             $(this.titlesText).velocity({opacity:0}, 100, function(){
                 self.titleIndex++;
-                
-                if(self.titleIndex == self.titles.length ){ 
+
+                if(self.titleIndex == self.titles.length ){
                     self.timer.style.display = 'block';
                     drawTimer(self.timer, config.options.moodDuration);
                     self.timeout = setTimeout(self.onEnd, config.options.moodDuration * 1000);   // 3 minutes
@@ -1946,7 +2030,7 @@ else {
         onEnd: function(){
             this.timer.style.display = 'none';
             this.titlesText.innerHTML = '<span class="strong" style="font-size:2em;font-weight:normal">Done</span>';
-            
+
             var self = this;
             notifier.play("done");
             $(self.titlesText).velocity({opacity:1}, 200, function(){
@@ -1959,13 +2043,21 @@ else {
 
         showTitle: function(){
             var self = this;
+                    this.titles = [
+                        config.options.textMood1,
+                        config.options.textMood2,
+                        config.options.textMood3,
+                        config.options.textMood4,
+                        config.options.textMood5,
+                        config.options.textMood6,
+                    ];
             this.titlesText.innerHTML = this.titles[this.titleIndex];
             $(this.titlesText).velocity({opacity:1}, 150, function(){
                 setTimeout(function(){
                     $(self.tap).velocity({opacity: 1}, 300, function(){
                         window.addEventListener('touchstart', self.onTap);
                     });
-                }, 100);                    
+                }, 100);
             });
         }
     });
@@ -2001,7 +2093,7 @@ else {
                 else{
                     PageController.transition("experiment", function(){
                         this.begin();
-                    });                     
+                    });
                 }
                 return true;
             }
@@ -2024,7 +2116,7 @@ else {
                 }
                 else if(!this.playing && !this.ended){
                     this.playSong();
-                }        
+                }
             }
             else{
                 if(data.type == "error"){
@@ -2038,12 +2130,12 @@ else {
                 else if(data.type == "status"){
                     if(data.msg == 'canplay' && PageController.curPageName === 'music'){
                         if(config.knockout == 'mood'){
-                            PageController.transition("mood"); 
+                            PageController.transition("mood");
                         }
                         else{
                             PageController.transition("experiment", function(){
                                 this.begin();
-                            }); 
+                            });
                         }
                     }
                     else if(data.msg == 'inqueue'){
@@ -2052,7 +2144,7 @@ else {
                         this.waitTime.style.display = "block";
                     }
                 }
-            }         
+            }
         },
 
         updateWaitTime: function(time){
@@ -2062,7 +2154,7 @@ else {
             var minutes = Math.floor(time / 60);
             var seconds = time - minutes * 60;
             this.waitTime.innerHTML = minutes + ':' + ("0" + seconds).slice(-2);
-            this.timeTimeout = setTimeout(_bind(this.updateWaitTime, this, ((time <= 0) ? 0 : time-1 )),1000);          
+            this.timeTimeout = setTimeout(_bind(this.updateWaitTime, this, ((time <= 0) ? 0 : time-1 )),1000);
         },
 
         playWhiteNoise: function(){
@@ -2086,7 +2178,7 @@ else {
             gainNode.connect(AUDIOCTX.destination);
 
             this.playing = true;
-            this.soundNode = whiteNoise;     
+            this.soundNode = whiteNoise;
         },
 
         startBuffering: function(cb){
@@ -2106,7 +2198,7 @@ else {
             var self = this;
             bufSource.onended = function(){
                 self.playing = false;
-                self.playSong();  
+                self.playSong();
             }
             bufSource.connect(AUDIOCTX.destination);
             bufSource.noteOn(0);
@@ -2116,7 +2208,7 @@ else {
         playMusic: function(trackURI, duration){
             if(this.playing){
                 this.stop();
-            }    
+            }
 
             if(trackURI == "whitenoise"){
                 this.playWhiteNoise();
@@ -2137,7 +2229,7 @@ else {
         stopSong: function(){
             if(!this.ended){
                 this.catcher.postMessage({type:'stop'});
-            }   
+            }
             bufSource.disconnect();
             bufSource = null;
             this.playQueue = [];
@@ -2177,6 +2269,7 @@ else {
             this.loader = this.el.find('#songLoader');
             this.select = this.el.find("#stimulusSelect");
             this.finalText = this.el.find(".stimulus-final-text");
+                    //this.instructions = config.options.textStimulusInstruction;
             this.instructions = '<div class="song-info">Type in the title of your favorite music above and hit the search button. Narrow down the results by adding the name of the artist/album.</div>';
 
             this.curSong = null;
@@ -2237,7 +2330,7 @@ else {
             if( query === '' ){
                 self.songList.innerHTML = this.instructions;
                 return false;
-            } 
+            }
 
             this.searchBtn.style.display = "none";
             this.loader.style.display = "block";
@@ -2256,7 +2349,7 @@ else {
                         self.songList.innerHTML = '';
                         for(var i = 0; i < tracks.length; i++){
                             $(self.songList).append('<div class="song" data-uri="' +  tracks[i].uri + '"> <div class="song-duration">' + Math.round(tracks[i].duration_ms/1000) + '</div><div class="song-title">' + tracks[i].name + '</div> <div class="song-meta"> <span class="song-artist">' + tracks[i].artists[0].name + '</span>  <span class="song-album">' + tracks[i].album.name + '</span></div></div>');
-                        }                        
+                        }
                     }
                 },
                 error: function(res) {
@@ -2264,7 +2357,7 @@ else {
                     self.searchBtn.style.display = "block";
                     self.songList.innerHTML = '<span class="song-info">There was an error finding songs.</span>';
                 }
-            }); 
+            });
         },
 
         submitSong: function(e){
@@ -2322,15 +2415,15 @@ else {
                     this.circle.animate({
                         "fill-opacity": 0.2,
                         "r": 40
-                    }, 100, "bounce");  
-                    this.selected = false;                      
+                    }, 100, "bounce");
+                    this.selected = false;
                 }
                 else{
                     this.circle.animate({
                         "fill-opacity": 0.6,
                         "r": 60
                     }, 80, "bounce");
-                    this.selected = true;                   
+                    this.selected = true;
                 }
             };
         },
@@ -2346,7 +2439,7 @@ else {
         },
 
         initPaper: function(callback){
-            window.scrollTo( 0, 1 ); 
+            window.scrollTo( 0, 1 );
             this.paper.setSize(window.innerWidth, window.innerHeight);
             this.initialized = true;
             this.el.style.opacity = 1;
@@ -2359,10 +2452,10 @@ else {
             shapes.bubbles[0].y = shapes.bubbles[1].y = window.innerHeight/2;
             shapes.bubbles.selected = function(){
                 return (this[0].selected !== false && this[1].selected !== false);
-            }; 
+            };
             shapes.bubbles.distance = function(){
                 return getDistance(this[0].x, this[0].y, this[1].x, this[1].y);
-            }; 
+            };
 
             shapes.joinLine = this.paper.path('');
             shapes.joinLine.attr('stroke', '#c6003b');
@@ -2371,7 +2464,7 @@ else {
             shapes.joinLine.updatePos = function(){
                 this.attr("path", "M" + this.bubbles[0].x + " " + this.bubbles[0].y + "L" + this.bubbles[1].x + " " + this.bubbles[1].y);
             };
-            shapes.joinLine.updatePos(); 
+            shapes.joinLine.updatePos();
 
             var self = this;
             shapes.bubbles.forEach(function(b){
@@ -2434,7 +2527,7 @@ else {
                     b.selected = touch.id;
                     this.shapes.joinLine.updatePos();
                     break;
-                }                    
+                }
             }
         },
 
@@ -2450,7 +2543,7 @@ else {
                     this.shapes.joinLine.updatePos();
                     break;
                 }
-            } 
+            }
         },
 
         onTouchEnd: function(touch){
@@ -2470,16 +2563,6 @@ else {
     var calibrationPage = DoubleTouchPage.extend({
 
         id: 'calibrationPage',
-
-        trials: [{
-            title: 'Indicate <span class="strong">maximum</span> pleasure.',
-            instr: 'Using two fingers, drag the pink dots as far apart as comfortably possible.',
-            configVar: 'Max'
-        }, {
-            title: 'Indicate <span class="strong">minimum</span> pleasure.',
-            instr: 'Using two fingers, drag the pink dots to whatever spread is most natural, requiring least effort.',
-            configVar: 'Min'
-        }],
 
         init: function(){
             this._super();
@@ -2509,10 +2592,10 @@ else {
             for(var i = 0; i<2*steps; i++){
                 if(i%2 == 0){
                     queue.push(1);
-                } 
+                }
                 else{
                     queue.push(0);
-                } 
+                }
             }
             queue.pop();
             return queue;
@@ -2530,17 +2613,17 @@ else {
             $(this.titlesText).velocity({opacity:0}, 100, function(){
                 $(self.titlesText).hide();
                 self.titleIndex++;
-                
-                if(self.titleIndex == self.titleTexts[self.trialParams.phase][self.titlePhase].length ){                    
+
+                if(self.titleIndex == self.titleTexts[self.trialParams.phase][self.titlePhase].length ){
                     if(self.titlePhase == 'start'){
                         self.beginPre();
-                    }   
+                    }
                     else if(self.titlePhase == 'mid'){
                         self.titleTexts[self.trialParams.phase].afterMid();
                     }
                     else if(self.titlePhase == 'end'){
                         self.titleTexts[self.trialParams.phase].onEnd();
-                    }       
+                    }
                 }
                 else{
                     self.showTitle();
@@ -2560,9 +2643,9 @@ else {
                     $(self.tapText).velocity({opacity: 1}, 300, function(){
                         window.addEventListener('touchstart', self.onTap);
                     });
-                //}, 50);                    
+                //}, 50);
             });
-        }, 
+        },
 
         begin: function(phase){
             var self = this;
@@ -2580,12 +2663,13 @@ else {
             this.titleTexts = {
                 'setup':{
                     start:[
-                        '​This app lets you use your fingers to make pleasure ratings. You indicate how much pleasure you​\'re​ feel​ing​ by how much you spread your fingers. ' + ((config.options.fingers === 0) ? 'Please use your thumb and index fingers.' : 'Please use your first two fingers: index and middle finger.'),
-                        'First, we must calibrate your fingers. When you see the pink dots on the next screen, place and hold your fingertips on the screen. The pink dots will follow your fingertips.',
-                        '​You will <b>indicate maximum pleasure by spreading your fingers as far apart as you can comfortably maintain</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.'
-                    ],
+                                    config.options.textCalibrationSetup1 +
+                                        ((config.options.fingers === 0) ?
+                                         config.options.textFinger0 : config.options.textFinger1),
+                                    config.options.textCalibrationSetup2,
+                                    config.options.textCalibrationSetup3],
                     mid: [
-                        'Next, indicate <b>minimum</b> pleasure by <b>relaxing</b> your two fingers to whatever spread feels <b>most natural and requires least effort</b>. When you’ve achieved that, make your rating by lifting your fingers away from the screen.'
+                                    config.options.textCalibrationSetup4
                     ],
                     end:[],
                     afterMid: function(){
@@ -2598,24 +2682,24 @@ else {
                 },
                 'pre':{
                     start: [
-                        'Next we\'ll practice making ratings. We encourage you to play during practice.',
-                        'In the actual experiment, later, you\'ll be spreading your fingers to continually rate pleasure. You can play now, to get used to it. On the next screen, try spreading and closing your fingers. Once the setting is right, lift your fingers to proceed.'        
+                                    config.options.textCalibrationPre1,
+                                    config.options.textCalibrationPre2
                     ],
                     end: [],
                     onEnd: function(){
                         updateRater(config);
                         if(config.options.musicSelect){
-                            PageController.transition("music");                    
+                            PageController.transition("music");
                         }
                         else{
                             if(config.knockout == 'mood'){
-                                PageController.transition("mood"); 
+                                PageController.transition("mood");
                             }
                             else{
                                 PageController.transition("experiment", function(){
                                     this.begin();
-                                }); 
-                            }                   
+                                });
+                            }
                         }
                     }
                 },
@@ -2630,8 +2714,8 @@ else {
             };
 
             if(phase == 'setup'){
-                config.refValid = config.options.skipRepeat 
-                    && (new Date()).getTime() < config.refValid 
+                config.refValid = config.options.skipRepeat
+                    && (new Date()).getTime() < config.refValid
                     && config.refExperiment === config.experiment
                     && config.refObserver === config.name;
                 rater = (function(){
@@ -2676,31 +2760,41 @@ else {
             }
         },
 
-        beginTrials: function(){  
+        beginTrials: function(){
+
+                        this.trials = [{
+                            title: config.options.textCalibrationTrial1Title,
+                            instr: config.options.textCalibrationTrial1Instr,
+                            configVar: 'Max'
+                        }, {
+                            title: config.options.textCalibrationTrial2Title,
+                            instr: config.options.textCalibrationTrial2Instr,
+                            configVar: 'Min'
+                        }];
 
             if(this.trialParams.phase == 'setup'){
                 config.windowWidth = window.innerWidth;
                 config.windowHeight = window.innerHeight;
-            }       
+            }
 
             this.feedbacks.enable();
             window.addEventListener('touchmove', this.handleTouchMove);
             window.addEventListener('touchend', this.handleTouchEnd);
-            window.addEventListener('touchcancel', this.handleTouchEnd); 
+            window.addEventListener('touchcancel', this.handleTouchEnd);
 
-            this.startTrial(0); 
+            this.startTrial(0);
         },
 
         end: function(){
             this.feedbacks.disableAll();
             window.removeEventListener('touchmove', this.handleTouchMove);
             window.removeEventListener('touchend', this.handleTouchEnd);
-            window.removeEventListener('touchcancel', this.handleTouchEnd);  
+            window.removeEventListener('touchcancel', this.handleTouchEnd);
 
             var self = this;
             $(this.instrText).velocity({opacity: 0}, 50, function(){
                 $(self.titleText).velocity({opacity: 0}, { duration: 200, queue: false });
-                $(self.tracker).velocity({opacity: 0}, { duration: 200, queue: false, 
+                $(self.tracker).velocity({opacity: 0}, { duration: 200, queue: false,
                     complete: function(){
                         self.bubbles.paper.clear();
 
@@ -2713,7 +2807,7 @@ else {
                             window.removeEventListener('touchstart', this.onTap);
                             self.titleTexts[self.trialParams.phase].onEnd();
                         }
-                   
+
                     }
                 });
             });
@@ -2737,8 +2831,8 @@ else {
             this.bubbles.shapes.bubbles.forEach(function(b){
                 b.circle.animate({
                     "fill": "rgb(216, 0, 57)"
-                }, 200);   
-            }); 
+                }, 200);
+            });
             window.addEventListener('touchstart', this.handleTouchStart);
 
             $(this.titleText).velocity({opacity: 1}, 200);
@@ -2754,7 +2848,7 @@ else {
             this.bubbles.shapes.bubbles.forEach(function(b){
                 b.circle.animate({
                     "fill": "#888"
-                }, 200);   
+                }, 200);
             });
 
             var distance = this.bubbles.shapes.bubbles.distance(),
@@ -2765,7 +2859,7 @@ else {
             if(tp.step == tp.maxSteps && tp.maxSteps > 1 && tp.verify){
                 if( Math.abs(distance - config[phaseVar].slice(-1)[0]) > 100 ){
                     tp.queue.push(tp.cur);
-                }             
+                }
             }
             config[phaseVar].push(distance);
             if(tp.phase !== 'setup'){
@@ -2796,7 +2890,7 @@ else {
                     $(self.titleText).velocity({opacity: 0}, 100, function(){
                         self.startTrial(tp.queue.splice(0,1)[0]);
                     });
-                });                
+                });
             }
         },
 
@@ -2825,7 +2919,7 @@ else {
                 $(this.instrText).velocity({opacity:0}, 50, _bind(function(){
                     this.instrText.innerHTML = 'Release both fingers to set.';
                     $(this.instrText).velocity({opacity:1}, 100);
-                }, this));                 
+                }, this));
             }
         },
 
@@ -2843,8 +2937,16 @@ else {
 
     var generateExperimentString = function(){
         var time = config.experimentTime;
-        var subjectParams = [config.experiment + ((config.aborted == true) ? ',ABORTED!' : ''), config.name, time.getFullYear(), time.getMonth() + 1, time.getDate(), time.getHours(), time.getMinutes(), time.getSeconds()];
-        return subjectParams.join('.');        
+        var year = padDigits(time.getFullYear(), 4),
+            month = padDigits(time.getMonth() + 1, 2),
+            date = padDigits(time.getDate(), 2),
+            hour = padDigits(time.getHours(), 2),
+            minute = padDigits(time.getMinutes(), 2),
+            second = padDigits(time.getSeconds(), 2);
+        var subjectParams = [config.experiment +
+            ((config.aborted == true) ? ',ABORTED!' : ''),
+            config.name, year, month, date, hour, minute, second];
+        return subjectParams.join('.');
     }
 
     var generateMailBody = function(){
@@ -2884,7 +2986,7 @@ else {
                     "important": true
                 },
                 "async": false
-        }   
+        }
 
         $.ajax({
             type: "POST",
@@ -2897,25 +2999,25 @@ else {
             error: function(res) {
                 callback(res);
             }
-        });   
+        });
     }
 
     var generateMailLink = function(data){
         var subject = '[Emotion] ' + generateExperimentString(),
             body = data;
-        
+
         body = body.replace(/\n/g, "%0D%0A");
         body = body.replace(/&/g, "%26");
-        
-        return ('mailto:' + config.options.email + '?subject=' + subject + '&body=' + body);    
+
+        return ('mailto:' + config.options.email + '?subject=' + subject + '&body=' + body);
     }
 
     var AuditoryFeedback = (function(){
 
         if(AUDIOCTX == null) return;
         var gainNode = AUDIOCTX.createGain();
-        gainNode.connect(AUDIOCTX.destination); 
-        gainNode.gain.value = .01; 
+        gainNode.connect(AUDIOCTX.destination);
+        gainNode.gain.value = .01;
         var oscillator;
 
         return {
@@ -2929,7 +3031,7 @@ else {
                 oscillator = AUDIOCTX.createOscillator();
                 oscillator.frequency.value = this.getFrequencyFromRating(rating);
                 oscillator.type = 0;
-                oscillator.connect(gainNode); 
+                oscillator.connect(gainNode);
                 oscillator.noteOn(0);
             },
 
@@ -2982,7 +3084,7 @@ else {
 
             onEnd: function(t, rating){
                 this.stop();
-            }            
+            }
         };
 
     })();
@@ -3077,10 +3179,10 @@ else {
                 '#2ecc71',
                 '#27ae60',
                 '#1abc9c',
-                '#16a085',   
-                '#16a085'   
-            ];         
-            this.el.style.opacity = 0;         
+                '#16a085',
+                '#16a085'
+            ];
+            this.el.style.opacity = 0;
             this.el.style.width = window.innerHeight*0.20 + 'px';
         },
 
@@ -3088,11 +3190,11 @@ else {
             return ((config.options.feedback.barVaries) ? this.colors[Math.round(rating)] : '#736baf');
         },
 
-        onStart: function(t, rating){ 
+        onStart: function(t, rating){
             var top = window.innerHeight - (window.innerHeight * (rating/10));
             $(this.el).css('top', top + 'px');
-            $(this.el).css('backgroundColor', this.colorFromRating(rating));   
-            this.el.style.opacity = 0.7;         
+            $(this.el).css('backgroundColor', this.colorFromRating(rating));
+            this.el.style.opacity = 0.7;
         },
 
         onMove: function(t, rating){
@@ -3102,7 +3204,7 @@ else {
         },
 
         onEnd: function(t, rating){
-            this.el.style.opacity = 0; 
+            this.el.style.opacity = 0;
         }
     });
 
@@ -3138,19 +3240,12 @@ else {
         init: function(){
             this._super();
             _bindAll(this, 'begin', 'stop', 'sampleRating', 'onTap', 'close', 'abort', 'showReadyTitle', 'handleContactLoss');
-            
+
             this.titleText = this.el.find('#expTitle');
             this.tapText = this.el.find('#expTap');
             this.contactLoss = this.el.find('#expContactLoss');
             this.bubblesEl = this.el.find('.barbellFeedback');
             this.feedbacks = new Feedbacks({el:this.el.find('.feedbacks')});
-            this.titleTexts = [
-                'Soon, you will continuously rate your pleasure. You\'ll spread your fingers to indicate how much pleasure you are getting from the object at each moment. Try to continuously report what you feel from the whole experience so far.',
-                'While your fingers are on the screen, keep rating pleasure, even after the object goes away, until I say, <b>"Done"</b>.',
-                ''
-                //'<span class="strong">When you\'re ready, place two fingers to begin.</span>'
-            ];
-
         },
 
         render: function(){
@@ -3186,7 +3281,7 @@ else {
             }
             this.timeRes = decimalPlaces(config.ratingInterval);
             this.titleIndex = 0;
-            this.showTitle();    
+            this.showTitle();
         },
 
         abort: function(e){
@@ -3199,7 +3294,7 @@ else {
                 mailDataMandrill(finalData, function(){
                     PageController.pages.start.reset();
                     PageController.transition("start");
-                });                
+                });
             }
         },
 
@@ -3221,40 +3316,47 @@ else {
 
         showReadyTitle: function(){
             if(config.options.musicSelect) {
-                this.titleText.innerHTML = '<span class="strong">When you\'re ready, place two fingers to begin.</span>';
+                this.titleText.innerHTML = config.options.textWaitWithMusic;
             }
             else {
-                this.titleText.innerHTML = '<span style="font-size:1.5em; color:#6e65b0">Wait!</span><br/><span class="strong">When the experimenter tells you, please begin by pressing two fingers on the screen.</span>'
+                this.titleText.innerHTML = config.options.textWaitWithoutMusic;
             }
-            
+
             this.feedbacks.enable();
 
             window.addEventListener('touchstart', this.handleTouchStart);
             window.addEventListener('touchmove', this.handleTouchMove);
             window.addEventListener('touchend', this.handleTouchEnd);
-            window.addEventListener('touchcancel', this.handleTouchEnd);   
+            window.addEventListener('touchcancel', this.handleTouchEnd);
         },
 
         showTitle: function(){
             var self = this;
+                    this.titleTexts = [
+                        config.options.textExperiment1,
+                        config.options.textExperiment2,
+                        ''
+                            //'<span class="strong">When you\'re ready, place two fingers to begin.</span>'
+                    ];
+
             this.titleText.innerHTML = this.titleTexts[this.titleIndex];
             $(this.titleText).show();
             $(this.titleText).velocity({opacity:1}, 150, function(){
-                if(self.titleIndex == self.titleTexts.length - 1){  
+                if(self.titleIndex == self.titleTexts.length - 1){
                     if(config.songUri !== '' && config.songUri !== 'whitenoise'){
                         self.titleText.innerHTML = '<span class="loader-small"></span><span class="light-emph">Buffering your music...</span>';
                         PageController.pages.music.startBuffering(self.showReadyTitle);
-                    } 
+                    }
                     else{
                         self.showReadyTitle();
-                    }            
+                    }
                 }
                 else{
                     //setTimeout(function(){
                         $(self.tapText).velocity({opacity: 1}, 300, function(){
                             window.addEventListener('touchstart', self.onTap);
                         });
-                    //}, 50);                    
+                    //}, 50);
                 }
             });
         },
@@ -3266,13 +3368,13 @@ else {
             var touches = this.touches,
                 rating = rater.getRating(touches).toFixed(1),
                 dist = getDistance(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
-            
+
             if(touches[0].id === false && touches[1].id === false /* && rating !== this.samples[this.samples.length-1]*/){
             }
             else{
                 //this.valid.push(1);
                 this.times.push( (((new Date()) - config.experimentTime) / 1000).toFixed(this.timeRes) );
-                this.samples.push(rating);  
+                this.samples.push(rating);
                 this.samplesPx.push(dist);
             }
 
@@ -3290,7 +3392,7 @@ else {
             window.removeEventListener('touchstart', this.handleTouchStart);
             window.removeEventListener('touchmove', this.handleTouchMove);
             window.removeEventListener('touchend', this.handleTouchEnd);
-            window.removeEventListener('touchcancel', this.handleTouchEnd); 
+            window.removeEventListener('touchcancel', this.handleTouchEnd);
 
             this.sampleRating();
             if(config.knockout == 'name') {
@@ -3323,14 +3425,14 @@ else {
             var self = this;
             $(this.titleText).fadeIn(200).delay(1500).fadeOut(200, function(){
                 self.postStop();
-            }); 
+            });
 
         },
 
         postStop: function(){
             PageController.transition("calibration", function(){
                 this.begin("post");
-            }); 
+            });
         },
 
         conceal: function(){
@@ -3379,7 +3481,7 @@ else {
                     setTimeout(function() {
                         PageController.pages.knockout.playRecordings(0);
                         setTimeout(PageController.pages.knockout.stopRecordings, knockDuration );
-                    }, 
+                    },
                     config.options.knockOnset * 1000);
                 }
                 else if(config.knockout == 'cry') {
@@ -3387,7 +3489,7 @@ else {
                     setTimeout(function() {
                         PageController.pages.knockout.playCries(0);
                         setTimeout(PageController.pages.knockout.stopCries, knockDuration );
-                    }, 
+                    },
                     config.options.knockOnset * 1000);
                 }
                 window.addEventListener('touchstart', this.abort);
@@ -3457,8 +3559,42 @@ else {
             this.statusContainer.className = '';
             this.sendButton.style.top = '-53px';
             this.restartButton.style.bottom = '-53px';
+            $("#surveyQuestion").html(config.options.textSurveyQuestion);
+            $("#pleasureSurvey0").html(config.options.textSurveyOption0);
+            $("#pleasureSurvey1").html(config.options.textSurveyOption1);
+            $("#pleasureSurvey2").html(config.options.textSurveyOption2);
+            $("#pleasureSurvey3").html(config.options.textSurveyOption3);
 
             this.buttons.style.display = 'none';
+
+            // resize the texts on buttons to make them fit one row
+            function resizeSurveyButtons() {
+                var btn = [];
+                var div = '#surveyWrapper';
+                for (var i = 0; i < 4; i++) {
+                    btn.push('#pleasureSurvey' + i);
+                }
+
+                var sum = function (x) {return x.reduce(function(x, y) {return x + y;})};
+                var widthOf = function(x) {return $(x).outerWidth(true);};
+
+                if (widthOf(div) <= 0) {
+                    setTimeout(resizeSurveyButtons, 20);
+                    return;
+                }
+
+                function setFontSize(size) {
+                    return function(x) {$(x).css('font-size', size + 'px');};
+                }
+
+                var size = parseInt($(btn[0]).css('font-size'));
+                var i = 100000;
+                while (--i > 0 && sum(btn.map(widthOf)) > 0.85 * widthOf(div)) {
+                    btn.map(setFontSize(--size));
+                }
+            }
+
+            setTimeout(resizeSurveyButtons, 20);
         },
 
 /*        onSelect: function(e){
@@ -3489,7 +3625,7 @@ else {
                         data: JSON.stringify(config.generateDataObject()),
                         contentType: 'application/json; charset=utf-8',
                         timeout: 10000
-                    });                    
+                    });
                 }
 
                 var finalData = config.generateData();
@@ -3498,9 +3634,9 @@ else {
 
                     $(self.loader).css({display:'none'});
 
-                    if( res[0] == undefined  
-                        || res[0].status === undefined 
-                        || res[0].status === "rejected" 
+                    if( res[0] == undefined
+                        || res[0].status === undefined
+                        || res[0].status === "rejected"
                         || res[0].status === "invalid"){
                         $(self.status).html('Unable to send data.');
                         $(self.status).addClass('error');
@@ -3551,7 +3687,7 @@ else {
         transition: function(pageName, callback){
             var page = this.pages[pageName];
             callback = callback || function(){}
-            
+
             if(page){
                 this.curPage.hide(_bind(function(){
                     this.curPage = page;
@@ -3564,7 +3700,7 @@ else {
 
         handleResize: function(){
 
-            if(this.curPage.limitOrient){ 
+            if(this.curPage.limitOrient){
                 if (window.innerWidth > window.innerHeight) { // Landscape
                     this.orientPage.hide();
                     //this.curPage.el.show();
@@ -3572,13 +3708,13 @@ else {
                 else{ // Portrait
                     //this.curPage.el.hide();
                     this.orientPage.show();
-                }                
+                }
             }
             else {
-            this.orientPage.hide(); 
+            this.orientPage.hide();
             }
 
-            this.curPage.handleResize();           
+            this.curPage.handleResize();
         }
 
     }))();

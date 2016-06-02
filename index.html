@@ -110,7 +110,7 @@
 
         <div id="infoPage" style="display:none">
             <h2>Emotion Tracker</h2>
-            <div class="emph">v1.2.6</div>
+            <div class="version-string emph"></div>
             <div class="info-desc">Measure self-reported emotion over time. Currently supports Safari and Chrome browsers on iOS and Android devices. Support for other devices may be added. Let us know what you need. <a href="mailto:denis.pelli@nyu.edu?subject=Emotion%20Tracker">denis.pelli@nyu.edu</a></div>
 
             <div class="light">Copyright © 2014 - 2015 Denis Pelli</div>
@@ -157,7 +157,7 @@
                 </div>                   
             </div>  
             <button id="btnInfo"><div class="ico-info"></div></button>
-            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;">v1.2.6</div>
+            <div style="position:fixed; bottom:20px;left:52px;color:#999; font-size:11px;" class="version-string"></div>
             <button id="btnSettings"><div class="ico-settings"></div></button>
         </div>
 
@@ -330,6 +330,78 @@
                     </div>
                     <label for="durationWhiteNoise" class="lbl">Duration of white noise <span class="light"> (s)</span></label>
                     <input id="durationWhiteNoise" type="text" value="120" class="inpt" pattern="[0-9]*"/>
+                </div>
+
+                <div class="field">
+                    <label class="lbl lbl-title">Instructions</label>
+                    <label for="textCalibrationSetup1" class="lbl">textCalibrationSetup1</label>
+                    <textarea id="textCalibrationSetup1" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textFinger0" class="lbl">textFinger0</label>
+                    <textarea id="textFinger0" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textFinger1" class="lbl">textFinger1</label>
+                    <textarea id="textFinger1" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textCalibrationSetup2" class="lbl">textCalibrationSetup2</label>
+                    <textarea id="textCalibrationSetup2" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textCalibrationSetup3" class="lbl">textCalibrationSetup3</label>
+                    <textarea id="textCalibrationSetup3" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textCalibrationTrial1Title" class="lbl">textCalibrationTrial1Title</label>
+                    <textarea id="textCalibrationTrial1Title" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textCalibrationTrial1Instr" class="lbl">textCalibrationTrial1Instr</label>
+                    <textarea id="textCalibrationTrial1Instr" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textCalibrationSetup4" class="lbl">textCalibrationSetup4</label>
+                    <textarea id="textCalibrationSetup4" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textCalibrationTrial2Title" class="lbl">textCalibrationTrial2Title</label>
+                    <textarea id="textCalibrationTrial2Title" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textCalibrationTrial2Instr" class="lbl">textCalibrationTrial2Instr</label>
+                    <textarea id="textCalibrationTrial2Instr" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textCalibrationPre1" class="lbl">textCalibrationPre1</label>
+                    <textarea id="textCalibrationPre1" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textCalibrationPre2" class="lbl">textCalibrationPre2</label>
+                    <textarea id="textCalibrationPre2" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textExperiment1" class="lbl">textExperiment1</label>
+                    <textarea id="textExperiment1" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textExperiment2" class="lbl">textExperiment2</label>
+                    <textarea id="textExperiment2" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <!-- disable music selection instrction
+                    <label for="textStimulusInstruction" class="lbl">textStimulusInstruction</label>
+                    <textarea id="textStimulusInstruction" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    --!>
+                    <label for="textWaitWithMusic" class="lbl">textWaitWithMusic</label>
+                    <textarea id="textWaitWithMusic" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textWaitWithoutMusic" class="lbl">textWaitWithoutMusic</label>
+                    <textarea id="textWaitWithoutMusic" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textKnockOut1" class="lbl">textKnockOut1</label>
+                    <textarea id="textKnockOut1" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textKnockOut2" class="lbl">textKnockOut2</label>
+                    <textarea id="textKnockOut2" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textKnockOut3" class="lbl">textKnockOut3</label>
+                    <textarea id="textKnockOut3" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textKnockOut4" class="lbl">textKnockOut4</label>
+                    <textarea id="textKnockOut4" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textKnockOut5" class="lbl">textKnockOut5</label>
+                    <textarea id="textKnockOut5" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textMood1" class="lbl">textMood1</label>
+                    <textarea id="textMood1" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textMood2" class="lbl">textMood2</label>
+                    <textarea id="textMood2" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textMood3" class="lbl">textMood3</label>
+                    <textarea id="textMood3" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textMood4" class="lbl">textMood4</label>
+                    <textarea id="textMood4" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textMood5" class="lbl">textMood5</label>
+                    <textarea id="textMood5" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textMood6" class="lbl">textMood6</label>
+                    <textarea id="textMood6" style="width: 100%;" rows="5" class="inpt"></textarea>
+                    <label for="textSurveyQuestion" class="lbl">textSurveyQuestion</label>
+                    <textarea id="textSurveyQuestion" style="width: 100%;" rows="3" class="inpt"></textarea>
+                    <label for="textSurveyOption0" class="lbl">textSurveyOption0</label>
+                    <input id="textSurveyOption0" type="text" class="inpt"/>
+                    <label for="textSurveyOption1" class="lbl">textSurveyOption1</label>
+                    <input id="textSurveyOption1" type="text" class="inpt"/>
+                    <label for="textSurveyOption2" class="lbl">textSurveyOption2</label>
+                    <input id="textSurveyOption2" type="text" class="inpt"/>
+                    <label for="textSurveyOption3" class="lbl">textSurveyOption3</label>
+                    <input id="textSurveyOption3" type="text" class="inpt"/>
                 </div>  
 
                 <div class="field">
@@ -350,6 +422,19 @@
                 <button id="modeUploadBtn" class="btn btn-primary btn-full">Upload settings</button>
 
             </div>   
+
+            <div id="settingsWarn" class="center-text-wrapper dialog-overlay" style="opacity:0;display:none">
+                <div class="center-text">
+                    <div class="dialog">
+                        <div class="dialog-title">Reload?</div>
+                        <div class="dialog-content">If you have edited the instructions, please reload this page for changes to take effect.</div>
+                        <div class="dialog-buttons row">
+                            <button id="settingsYes" class="dialog-btn" style="width:50%">Yes</button>
+                            <button id="settingsNo" class="dialog-btn" style="width:50%">No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div id="moodWarn" class="center-text-wrapper dialog-overlay" style="opacity:0;display:none">
                 <div class="center-text">
@@ -590,12 +675,12 @@
             <div class="center-text-wrapper">
                 <div class="center-text">
                     <div id="completeSurvey">
-                        <div class="strong survey-wrapper">During this trial, did you get the feeling of beauty from the object?</div>
-                        <div class="survey-wrapper">
-                            <button id="pleasureSurvey3" class="survey-btn" value="3">Yes, definitely</button>
-                            <button id="pleasureSurvey2" class="survey-btn" value="2">Perhaps yes</button>
-                            <button id="pleasureSurvey1" class="survey-btn" value="1">Perhaps no</button>
-                            <button id="pleasureSurvey0" class="survey-btn" value="0">Definitely not</button>
+                        <div id="surveyQuestion" class="strong survey-wrapper"></div>
+                        <div id="surveyWrapper" class="survey-wrapper">
+                            <button id="pleasureSurvey3" class="survey-btn" value="3"></button>
+                            <button id="pleasureSurvey2" class="survey-btn" value="2"></button>
+                            <button id="pleasureSurvey1" class="survey-btn" value="1"></button>
+                            <button id="pleasureSurvey0" class="survey-btn" value="0"></button>
                         </div>
 
                         <button id="completeSurveyTap">Tap here to continue</button>

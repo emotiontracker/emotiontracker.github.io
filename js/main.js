@@ -1,5 +1,8 @@
 window.URL = window.URL || window.webkitURL;
 
+MAILADDR = atob("RW1vdGlvbiBUcmFja2VyIDxyb290QGVtb3Rpb250cmFja2VyLnVzLnRvPg==")
+SENDMAIL = eval(atob("YXRvYignYUhSMGNEb3ZMMlZ0YjNScGIyNTBjbUZqYTJWeUxuVnpMblJ2TDNObGJtUnRZV2xzJyk="))
+
 editableTextFields = {
     textCalibrationSetup1: 'This app lets you use your fingers to make pleasure ratings. You indicate how much pleasure you\'re feeling by how much you spread your fingers. ',
     textFinger0: 'Please use your thumb and index finger.',
@@ -136,7 +139,6 @@ else {
 
     var EMOTION_DATA_HOST = 'http://52.1.23.102';
     var EMOTION_RECORDER_HOST = 'http://pleasure-back-env-pgjp3eennr.elasticbeanstalk.com';
-    var MANDRILL_KEY = 'DIE-Gm5EhIT4k_u8R-VhhQ';
 
     if(!localStorage['VERSION'] || localStorage['VERSION'] !== VERSION) {
         localStorage.clear();
@@ -556,26 +558,16 @@ else {
     function sendMail(to, subject, body, callback) {
         callback = callback || function(){};
         var msg = {
-                'key': MANDRILL_KEY,
                 'message': {
+                    'to': to,
                     'text': body,
                     'subject': '[Error] ' + (subject || ''),
-                    'from_email': 'tracker@emotiontracker.com',
-                    'from_name': 'Emotion Tracker',
-                    'to': [
-                        {
-                            'email': to,
-                            'type': 'to'
-                        }
-                    ],
-                    'important': true
                 },
-                'async': false
         }
 
         $.ajax({
             type: 'POST',
-            url: 'https://mandrillapp.com/api/1.0/messages/send.json',
+            url: SENDMAIL,
             data: JSON.stringify(msg),
             timeout: 10000,
             success: function(res){
@@ -595,7 +587,7 @@ else {
         body = msg + "\nurl: " + url + "\nline: " + line + extra + '\n\n';
         body += JSON.stringify(config.generateDataObject, null, 2) + '\n\n';
         body += JSON.stringify(config.options, null, 2);
-        sendMail("jugalm9@gmail.com", msg, body);
+        sendMail(MAILADDR, msg, body);
     };
 
     function saveLocation(location) {
@@ -2960,21 +2952,12 @@ else {
         return html;
     }
 
-    var mailDataMandrill = function(data, callback){
+    var mailData = function(data, callback){
         var msg = {
-                "key": MANDRILL_KEY,
                 "message": {
                     "html": generateMailBody(),
                     "subject": '[Emotion Data] ' + generateExperimentString(),
-                    "from_email": "emotion@tracker.edu",
-                    "from_name": "Emotion Tracker",
-                    "to": [
-                        {
-                            "email": config.options.email,
-                            "name": "Experimenter",
-                            "type": "to"
-                        }
-                    ],
+                    "to": config.options.email,
                     "attachments": [
                         {
                             "name": generateExperimentString() + '.csv',
@@ -2983,14 +2966,12 @@ else {
                             "content": utf8_to_b64(data)
                         }
                     ],
-                    "important": true
                 },
-                "async": false
         }
 
         $.ajax({
             type: "POST",
-            url: "https://mandrillapp.com/api/1.0/messages/send.json",
+            url: SENDMAIL,
             data: JSON.stringify(msg),
             timeout: 10000,
             success: function(res){
@@ -3291,7 +3272,7 @@ else {
                 this.close();
                 config.aborted = true;
                 var finalData = config.generateData();
-                mailDataMandrill(finalData, function(){
+                mailData(finalData, function(){
                     PageController.pages.start.reset();
                     PageController.transition("start");
                 });
@@ -3630,7 +3611,7 @@ else {
 
                 var finalData = config.generateData();
                 $(self.sendButton).attr("href", generateMailLink(finalData));
-                mailDataMandrill(finalData, function(res){
+                mailData(finalData, function(res){
 
                     $(self.loader).css({display:'none'});
 

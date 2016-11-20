@@ -443,7 +443,7 @@ else {
 
         initOptions: function(){
             this.options = {
-                email: 'lauren.vale@nyu.edu',
+                email: MAILADDR,
                 duration: 30,
                 ratingInterval: 1,
                 minRating: 1,

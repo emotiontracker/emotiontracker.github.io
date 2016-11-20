@@ -134,7 +134,7 @@ else {
 (function(){
 
     var AUDIOCTX = Howler.ctx || window.AudioContext ||window.webkitAudioContext;
-    var VERSION = '1.3.0', STORELOCAL = localStorageTest();
+    var VERSION = '1.3.1', STORELOCAL = localStorageTest();
     $(".version-string").html(VERSION);
 
     var EMOTION_DATA_HOST = 'http://52.1.23.102';
@@ -472,6 +472,8 @@ else {
                 postStimulusDuration: 120,
                 durationWhiteNoise: 0,
                 fingers: 1,
+                sendTrigger: false,
+                triggerHost: '192.168.1.1:8000',
                 storeData: false
             };
 
@@ -759,6 +761,8 @@ else {
 
             this.optionsMode = this.el.find("#optionsMode");
             this.optionsFingers = $(this.el.find('#optionsFingers'));
+            this.sendTrigger = $(this.el.find('#sendTrigger'));
+            this.triggerHost = $(this.el.find('#triggerHost'));
             this.storeData = $(this.el.find('#storeData'));
             this.loadOptions();
 
@@ -1227,6 +1231,8 @@ else {
                 postStimulusDuration: +$(this.postStimulusDuration).val(),
                 durationWhiteNoise: +$(this.durationWhiteNoise).val(),
                 fingers:  +$(this.optionsFingers).find(".btn-selected").first().data('value'),
+                sendTrigger: $(this.sendTrigger).prop('checked'),
+                triggerHost: $(this.triggerHost).val().trim(),
                 storeData: $(this.storeData).prop('checked')
             };
 
@@ -1282,6 +1288,9 @@ else {
 
             $(this.optionsFingers).find("button").removeClass("btn-selected");
             $(this.optionsFingers).find('[data-value='+options.fingers+']').addClass('btn-selected');
+
+            $(this.sendTrigger).prop('checked', options.sendTrigger);
+            $(this.triggerHost).val(options.triggerHost);
 
             this.enableAll();
         },
@@ -3434,6 +3443,14 @@ else {
             if(this.bubbles) this.bubbles.onTouchEnd(touch, this.touches);
         },
 
+        sendTrigger: function(){
+            /* just make a TCP connection here */
+            if(config.options.sendTrigger){
+                var url = 'http://' + config.options.triggerHost + '/trigger';
+                $.ajax(url);
+            }
+        },
+
         handleDoubleTouchStart: function(){
             clearTimeout(this.timers.contact);
             $(this.contactLoss).css({display: 'none', opacity: 0});
@@ -3442,6 +3459,7 @@ else {
 
             if(!this.status.started){
                 this.status.started = true;
+                this.sendTrigger();
                 $(this.titleText).hide();
                 this.bubblesEl.style.opacity = 1;
                 //this.timers.sample = setTimeout(this.sampleRating, config.options.ratingInterval * 1000);

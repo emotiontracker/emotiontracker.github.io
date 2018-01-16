@@ -1,7 +1,7 @@
 window.URL = window.URL || window.webkitURL;
 
-MAILADDR = atob("RW1vdGlvbiBUcmFja2VyIDxyb290QGVtb3Rpb250cmFja2VyLnVzLnRvPg==")
-SENDMAIL = eval(atob("YXRvYignYUhSMGNEb3ZMMlZ0YjNScGIyNTBjbUZqYTJWeUxuVnpMblJ2TDNObGJtUnRZV2xzJyk="))
+MAILADDR = atob("RW1vdGlvbiBUcmFja2VyIDxyb290QG1nLmVtb3Rpb250cmFja2VyLmNvbT4=");
+SENDMAIL = eval(atob("YXRvYignYUhSMGNEb3ZMMlJoZEdFdVpXMXZkR2x2Ym5SeVlXTnJaWEl1WTI5dEwzTmxibVJ0WVdscycp");
 
 editableTextFields = {
     textCalibrationSetup1: 'This app lets you use your fingers to make pleasure ratings. You indicate how much pleasure you\'re feeling by how much you spread your fingers. ',
@@ -137,7 +137,7 @@ else {
     var VERSION = '1.3.1', STORELOCAL = localStorageTest();
     $(".version-string").html(VERSION);
 
-    var EMOTION_DATA_HOST = 'http://52.1.23.102';
+    var EMOTION_DATA_HOST = 'http://data.emotiontracker.com'
     var EMOTION_RECORDER_HOST = 'http://pleasure-back-env-pgjp3eennr.elasticbeanstalk.com';
 
     if(!localStorage['VERSION'] || localStorage['VERSION'] !== VERSION) {

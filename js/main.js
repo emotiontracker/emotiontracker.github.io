@@ -1,7 +1,7 @@
 window.URL = window.URL || window.webkitURL;
 
 MAILADDR = atob("RW1vdGlvbiBUcmFja2VyIDxyb290QG1nLmVtb3Rpb250cmFja2VyLmNvbT4=");
-SENDMAIL = eval(atob("YXRvYignYUhSMGNEb3ZMMlJoZEdFdVpXMXZkR2x2Ym5SeVlXTnJaWEl1WTI5dEwzTmxibVJ0WVdscycp");
+SENDMAIL = eval(atob("YXRvYignYUhSMGNEb3ZMMlJoZEdFdVpXMXZkR2x2Ym5SeVlXTnJaWEl1WTI5dEwzTmxibVJ0WVdscycp"));
 
 editableTextFields = {
     textCalibrationSetup1: 'This app lets you use your fingers to make pleasure ratings. You indicate how much pleasure you\'re feeling by how much you spread your fingers. ',

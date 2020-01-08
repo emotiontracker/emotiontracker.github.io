@@ -40,6 +40,9 @@ editableTextFields = {
     textSurveyOption3: 'Yes, definitely'
 };
 
+function getWidth(px) {return document.documentElement.clientWidth+(px?px:0);}
+function getHeight(px) {return document.documentElement.clientHeight+(px?px:0);}
+
 function decimalPlaces(number) {
   return ((+number).toFixed(20)).replace(/^-?\d*\.?|0+$/g, '').length;
 }
@@ -286,8 +289,8 @@ else {
         handleDoubleTouchEnd: function(){},
         handleDoubleTouchMove: function(){},
         handleResize: function(){
-            this.el.style.width = window.innerWidth + 'px';
-            this.el.style.height = window.innerHeight + 'px';
+            this.el.style.width = getWidth('px');
+            this.el.style.height = getHeight('px');
         },
         render: function(){
             this.el.className = 'doubleTouch';
@@ -370,8 +373,8 @@ else {
         },
         screenWidth: window.screen.width,
         screenHeight: window.screen.height,
-        windowWidth: window.innerWidth,
-        windowHeight: window.innerHeight,
+        windowWidth: getWidth(),
+        windowHeight: getHeight(),
         deviceInfo: DEVICE_INFO,
         os: ua_parser.getOS().name + ' ' + ua_parser.getOS().version,
         browser: ua_parser.getBrowser().name + ' ' + ua_parser.getBrowser().major,
@@ -911,7 +914,7 @@ else {
                 }
                 e.preventDefault();
                 $(document).on("touchmove", self.onDialogScroll);
-                $(self.moodWarn).css({display:'table', width: window.innerWidth + 'px', height: window.innerHeight + 'px'}).velocity({opacity:1}, 100);
+                $(self.moodWarn).css({display:'table', width: getWidth('px'), height: getHeight('px')}).velocity({opacity:1}, 100);
             });
 
                     $("#settingsNo").on('touchstart', function(e){
@@ -956,7 +959,7 @@ else {
                 }
                 e.preventDefault();
                 $(document).on("touchmove", self.onDialogScroll);
-                $(self.storeWarn).css({display:'table', width: window.innerWidth + 'px', height: window.innerHeight + 'px'}).velocity({opacity:1}, 100);
+                $(self.storeWarn).css({display:'table', width: getWidth('px'), height: getHeight('px')}).velocity({opacity:1}, 100);
             });
 
             $("#storeOk").on('touchstart', function(e){
@@ -1174,7 +1177,7 @@ else {
             }
             e.preventDefault();
             $(document).on("touchmove", self.onDialogScroll);
-            $('#audioWarn').css({display:'table', width: window.innerWidth + 'px', height: window.innerHeight + 'px'}).velocity({opacity:1}, 100);
+            $('#audioWarn').css({display:'table', width: getWidth('px'), height: getHeight('px')}).velocity({opacity:1}, 100);
 
         },
 
@@ -1192,7 +1195,7 @@ else {
                 }
                         /*
                         $(document).on("touchmove", self.onDialogScroll);
-                        $(this.settingsWarn).css({display:'table', width: window.innerWidth + 'px', height: window.innerHeight + 'px'}).velocity({opacity:1}, 100);
+                        $(this.settingsWarn).css({display:'table', width: getWidth('px'), height: getHeight('px')}).velocity({opacity:1}, 100);
                     } else {
                         this.showStart(e);
                     }
@@ -1297,10 +1300,10 @@ else {
         },
 
         handleResize: function(){
-            $(this.moodWarn).css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
-                    $(this.settingsWarn).css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
-            $(this.storeWarn).css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
-            $("#audioWarn").css({width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
+            $(this.moodWarn).css({width: getWidth('px'), height: getHeight('px')});
+                    $(this.settingsWarn).css({width: getWidth('px'), height: getHeight('px')});
+            $(this.storeWarn).css({width: getWidth('px'), height: getHeight('px')});
+            $("#audioWarn").css({width: getWidth('px'), height: getHeight('px')});
         },
 
         floatButtons: function(){
@@ -2391,7 +2394,7 @@ else {
 
 
     var getOrientation = function(){
-        if(Math.abs(window.orientation) === 90 || window.innerWidth > window.innerHeight){
+        if(Math.abs(window.orientation) === 90 || getWidth() > getHeight()){
             return 'landscape';
         }
         return "portrait";
@@ -2409,7 +2412,7 @@ else {
             this.update = function(){
                 this.circle.attr("cx", this.x);
                 this.circle.attr("cy", this.y);
-                //this.line.attr("path", "M" + window.innerWidth/2 + " " + window.innerHeight/2 + "L" + this.x + " " + this.y);
+                //this.line.attr("path", "M" + getWidth()/2 + " " + getHeight()/2 + "L" + this.x + " " + this.y);
             };
 
             this.toggleSelected = function(){
@@ -2432,7 +2435,7 @@ else {
 
         init: function(options){
             this._super(options);
-            this.paper = Raphael(this.el, window.innerWidth, window.innerHeight);
+            this.paper = Raphael(this.el, getWidth(), getHeight());
             this.initialized = false;
             this.register('initialized');
             if(getOrientation() == 'landscape'){
@@ -2442,16 +2445,16 @@ else {
 
         initPaper: function(callback){
             window.scrollTo( 0, 1 );
-            this.paper.setSize(window.innerWidth, window.innerHeight);
+            this.paper.setSize(getWidth(), getHeight());
             this.initialized = true;
             this.el.style.opacity = 1;
 
             var shapes = this.shapes = {};
 
             shapes.bubbles = [new this.bubble(), new this.bubble()];
-            shapes.bubbles[0].x = window.innerWidth/2 - 40;
-            shapes.bubbles[1].x = window.innerWidth/2 + 40;
-            shapes.bubbles[0].y = shapes.bubbles[1].y = window.innerHeight/2;
+            shapes.bubbles[0].x = getWidth()/2 - 40;
+            shapes.bubbles[1].x = getWidth()/2 + 40;
+            shapes.bubbles[0].y = shapes.bubbles[1].y = getHeight()/2;
             shapes.bubbles.selected = function(){
                 return (this[0].selected !== false && this[1].selected !== false);
             };
@@ -2581,8 +2584,8 @@ else {
         },
 
         handleResize: function(){
-            this.el.style.width = window.innerWidth + 'px';
-            this.el.style.height = window.innerHeight + 'px';
+            this.el.style.width = getWidth('px');
+            this.el.style.height = getHeight('px');
 
             if(this.bubbles){
                 this.bubbles.handleResize();
@@ -2775,8 +2778,8 @@ else {
                         }];
 
             if(this.trialParams.phase == 'setup'){
-                config.windowWidth = window.innerWidth;
-                config.windowHeight = window.innerHeight;
+                config.windowWidth = getWidth();
+                config.windowHeight = getHeight();
             }
 
             this.feedbacks.enable();
@@ -3141,7 +3144,7 @@ else {
 
         init: function(options){
             this._super(options);
-            this.el.style.width = window.innerHeight*0.20 + 'px';
+            this.el.style.width = getHeight()*0.20 + 'px';
         },
 
         onStart: function(t, rating){
@@ -3174,7 +3177,7 @@ else {
                 '#16a085'
             ];
             this.el.style.opacity = 0;
-            this.el.style.width = window.innerHeight*0.20 + 'px';
+            this.el.style.width = getHeight()*0.20 + 'px';
         },
 
         colorFromRating: function(rating){
@@ -3182,14 +3185,14 @@ else {
         },
 
         onStart: function(t, rating){
-            var top = window.innerHeight - (window.innerHeight * (rating/10));
+            var top = getHeight() - (getHeight() * (rating/10));
             $(this.el).css('top', top + 'px');
             $(this.el).css('backgroundColor', this.colorFromRating(rating));
             this.el.style.opacity = 0.7;
         },
 
         onMove: function(t, rating){
-            var top = window.innerHeight - (window.innerHeight * (rating/10));
+            var top = getHeight() - (getHeight() * (rating/10));
             $(this.el).css('top', top + 'px');
             $(this.el).css('backgroundColor', this.colorFromRating(rating));
         },
@@ -3701,7 +3704,7 @@ else {
         handleResize: function(){
 
             if(this.curPage.limitOrient){
-                if (window.innerWidth > window.innerHeight) { // Landscape
+                if (getWidth() > getHeight()) { // Landscape
                     this.orientPage.hide();
                     //this.curPage.el.show();
                 }

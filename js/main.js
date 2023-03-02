@@ -800,19 +800,14 @@ else {
                     });
                 },
                 'touchstart': function(e) {
-                    e.preventDefault();
                     var that = this;
                     if(experimenterCollection.isEmpty()) {
+                        e.preventDefault();
                         experimenterCollection.fetch([], null, function(){
                             var event = document.createEvent('MouseEvents');
                             event.initMouseEvent('mousedown', true, true, window);
                             $(that)[0].dispatchEvent(event);
                         });
-                    }
-                    else {
-                        var event = document.createEvent('MouseEvents');
-                        event.initMouseEvent('mousedown', true, true, window);
-                        $(that)[0].dispatchEvent(event);
                     }
                 }
             });
@@ -824,19 +819,14 @@ else {
                     downloadOptions($(this).val());
                 },
                 'touchstart': function(e) {
-                    e.preventDefault();
                     var that = this;
                     if(experimentCollection.isEmpty()) {
+                        e.preventDefault();
                         experimentCollection.fetch(['id='+config.experimenterId], null, function(){
                             var event = document.createEvent('MouseEvents');
                             event.initMouseEvent('mousedown', true, true, window);
                             $(that)[0].dispatchEvent(event);
                         });
-                    }
-                    else {
-                        var event = document.createEvent('MouseEvents');
-                        event.initMouseEvent('mousedown', true, true, window);
-                        $(that)[0].dispatchEvent(event);
                     }
                 }
             });
@@ -1388,19 +1378,14 @@ else {
                     experimentCollection.fetch(['id='+$(this).val()]);
                 },
                 'touchstart': function(e) {
-                    e.preventDefault();
                     var self = this;
                     if(experimenterCollection.isEmpty()) {
+                        e.preventDefault();
                         experimenterCollection.fetch([], null, function(){
                             var event = document.createEvent('MouseEvents');
                             event.initMouseEvent('mousedown', true, true, window);
                             $(self)[0].dispatchEvent(event);
                         });
-                    }
-                    else {
-                        var event = document.createEvent('MouseEvents');
-                        event.initMouseEvent('mousedown', true, true, window);
-                        $(self)[0].dispatchEvent(event);
                     }
                 }
             });
@@ -1411,19 +1396,14 @@ else {
                     downloadOptions($(this).val());
                 },
                 'touchstart': function(e) {
-                    e.preventDefault();
                     var self = this;
                     if(experimentCollection.isEmpty()) {
+                        e.preventDefault();
                         experimentCollection.fetch(['id='+config.experimenterId], null, function(){
                             var event = document.createEvent('MouseEvents');
                             event.initMouseEvent('mousedown', true, true, window);
                             $(self)[0].dispatchEvent(event);
                         });
-                    }
-                    else {
-                        var event = document.createEvent('MouseEvents');
-                        event.initMouseEvent('mousedown', true, true, window);
-                        $(self)[0].dispatchEvent(event);
                     }
                 }
             });
